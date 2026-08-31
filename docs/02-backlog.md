@@ -37,11 +37,11 @@ tarifs réduits et catégories de prix (#15),
 filtrer l'affiche par ville, date et genre (#16),  
 courriel de confirmation avec le billet(#17),  
 export CSV des ventes d'une séance (#18). 
- `could`  
+  `could`  
 suggestion automatique des
 meilleures places libres pour *n* spectateurs (#19),  
 éditeur de plan de salle par glisser-déposer (#20).  
-`won't`   
+  `won't`   
 paiement réel par carte (#21, on simule l'étape de
 paiement),  
 application mobile native (#22),  
