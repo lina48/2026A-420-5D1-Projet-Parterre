@@ -31,10 +31,19 @@ pour qu'un échec technique reste rattrapable).
 | #13 | Suivre le remplissage d'une séance en direct | Exploitation | 5 | 3 |
 | #14 | Confier le rôle de gestionnaire à un membre du personnel | Comptes et rôles | 3 | 3 | 
 
-Le reste du backlog, pour situer : `should` — tarifs réduits et catégories de prix (#15),
-filtrer l'affiche par ville, date et genre (#16), courriel de confirmation avec le billet
-(#17), export CSV des ventes d'une séance (#18). `could` — suggestion automatique des
-meilleures places libres pour *n* spectateurs (#19), éditeur de plan de salle par
-glisser-déposer (#20). `won't` — paiement réel par carte (#21, on simule l'étape de
-paiement), application mobile native (#22), salles à placement libre non numéroté (#23,
+Le reste du backlog, pour situer : 
+ `should`  
+tarifs réduits et catégories de prix (#15),
+filtrer l'affiche par ville, date et genre (#16),  
+courriel de confirmation avec le billet(#17),  
+export CSV des ventes d'une séance (#18). 
+ `could`  
+suggestion automatique des
+meilleures places libres pour *n* spectateurs (#19),  
+éditeur de plan de salle par glisser-déposer (#20).  
+`won't`   
+paiement réel par carte (#21, on simule l'étape de
+paiement),  
+application mobile native (#22),  
+salles à placement libre non numéroté (#23,
 elles n'ont aucun besoin d'un plan de salle et videraient le projet de son intérêt).
