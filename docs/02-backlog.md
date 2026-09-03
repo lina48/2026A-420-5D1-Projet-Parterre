@@ -5,9 +5,7 @@
 | **Sélection en direct** | Consulter le plan d'une séance, voir l'état des places évoluer en direct, retenir un fauteuil le temps de finaliser. |
 | **Réservation et billets** | Confirmer un achat, obtenir un billet vérifiable, retrouver et annuler ses réservations. |
 | **Exploitation** | Ce qui se passe le soir de la séance et autour : contrôle des billets à l'entrée, suivi du remplissage. |
-| **Sélection en direct** | En tant que spectateur, je veux voir si d'autres personnes consultent le même siège afin de savoir si je risque de le perdre. |
-| **Assistance** | En tant que spectateur, je veux qu'une aide apparaisse si j'hésite trop longtemps afin d'être accompagné dans mon choix |
-| **Interopérabilité** | En tant que service externe, je veux consulter les séances dans un format structuré afin de répondre à des recherches d'utilisateurs. |
+
   
 
   ## Les récits `must` dans l'ordre
