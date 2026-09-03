@@ -1,8 +1,6 @@
 [03-conception.md](https://github.com/user-attachments/files/31762367/03-conception.md)
 # Conception technique
 
-> Précis pour ce qui touche le sprint 1 (rétention et vente de places en direct), esquissé pour le reste. Ce fichier vivra avec le projet : à chaque sprint, on le corrige.
-
 ## Modèle de données initial
 
 Hypothèse de travail. Les entités touchées par le sprint 1 (`PLACE_SEANCE`, `SEANCE`, `RESERVATION`) sont détaillées; `FILM` n'est qu'esquissée — elle sera précisée quand les récits `should` (filtrer par ville/genre, #16) arriveront.
