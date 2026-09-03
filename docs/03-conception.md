@@ -107,7 +107,7 @@ Le client n'émet aucun événement : les actions (retenir, confirmer) passent p
 
 ## Maquettes
 
-`maquettes/` — 4 à 5 écrans clés, dont obligatoirement `/seances/:id` (l'écran temps réel) :
+`maquettes/` — 4 écrans clés, dont obligatoirement `/seances/:id` (l'écran temps réel) :
 
 1. Liste des séances à venir
    <img width="1823" height="957" alt="Screenshot 2026-09-02 200926" src="https://github.com/user-attachments/assets/37da220f-1b3b-4731-b55b-51a99a3779b3" />
