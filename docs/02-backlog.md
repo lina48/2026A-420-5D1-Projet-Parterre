@@ -1,7 +1,7 @@
 | Épique | Ce qu'elle couvre |
 |---|---|
 | **Comptes et rôles** | S'inscrire, se connecter, distinguer spectateurs et personnel de salle, gérer qui a le droit de programmer. |
-| **Programmation** | Décrire une salle et son plan de places, créer des séances, les ouvrir à la vente, les modifier ou les annuler. |
+| **Programmation de salles et séances ** | Décrire une salle et son plan de places, créer des séances, les ouvrir à la vente, les modifier ou les annuler. |
 | **Sélection en direct** | Consulter le plan d'une séance, voir l'état des places évoluer en direct, retenir un fauteuil le temps de finaliser. |
 | **Réservation et billets** | Confirmer un achat, obtenir un billet vérifiable, retrouver et annuler ses réservations. |
 | **Exploitation** | Ce qui se passe le soir de la séance et autour : contrôle des billets à l'entrée, suivi du remplissage. |
