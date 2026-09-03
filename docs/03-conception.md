@@ -7,116 +7,69 @@ Modèle de données initial
 
 Hypothèse de travail. Les entités touchées par le sprint 1 (PLACE_SEANCE, SEANCE, RESERVATION) sont détaillées; FILM n'est qu'esquissée — elle sera précisée quand les récits should (filtrer par ville/genre, #16) arriveront.
 
-contient
-accueille
-est projete a
-a un etat pour
-definit l'etat de
-effectue
-contient
-est reservee via
-UTILISATEUR
-int
-id
-PK
-string
-nom
-string
-courriel
-UK
-string
-mot_de_passe_hash
-string
-role
-spectateur | gestionnaire
-SALLE
-int
-id
-PK
-string
-nom
-PLACE
-int
-id
-PK
-int
-salle_id
-FK
-string
-rangee
-int
-numero
-string
-type
-standard | accessible
-FILM
-int
-id
-PK
-string
-titre
-int
-duree_minutes
-SEANCE
-int
-id
-PK
-int
-salle_id
-FK
-int
-film_id
-FK
-datetime
-date_heure
-string
-statut
-ouverte | fermee | annulee
-PLACE_SEANCE
-int
-id
-PK
-int
-place_id
-FK
-int
-seance_id
-FK
-string
-etat
-libre | retenue | vendue
-int
-retenue_par_utilisateur_id
-FK
-nul si non retenue
-datetime
-retenue_expire_a
-nul si non retenue
-RESERVATION
-int
-id
-PK
-int
-utilisateur_id
-FK
-int
-seance_id
-FK
-string
-code_billet
-UK
-datetime
-creee_le
-string
-statut
-confirmee | annulee
-RESERVATION_PLACE
-int
-reservation_id
-FK
-int
-place_seance_id
-FK
+```mermaid
+
+erDiagram
+    UTILISATEUR {
+        int id PK
+        string nom
+        string courriel UK
+        string mot_de_passe_hash
+        string role "spectateur | gestionnaire"
+    }
+    SALLE {
+        int id PK
+        string nom
+    }
+    PLACE {
+        int id PK
+        int salle_id FK
+        string rangee
+        int numero
+        string type "standard | accessible"
+    }
+    FILM {
+        int id PK
+        string titre
+        int duree_minutes
+    }
+    SEANCE {
+        int id PK
+        int salle_id FK
+        int film_id FK
+        datetime date_heure
+        string statut "ouverte | fermee | annulee"
+    }
+    PLACE_SEANCE {
+        int id PK
+        int place_id FK
+        int seance_id FK
+        string etat "libre | retenue | vendue"
+        int retenue_par_utilisateur_id FK "nul si non retenue"
+        datetime retenue_expire_a "nul si non retenue"
+    }
+    RESERVATION {
+        int id PK
+        int utilisateur_id FK
+        int seance_id FK
+        string code_billet UK
+        datetime creee_le
+        string statut "confirmee | annulee"
+    }
+    RESERVATION_PLACE {
+        int reservation_id FK
+        int place_seance_id FK
+    }
+    SALLE ||--o{ PLACE : contient
+    SALLE ||--o{ SEANCE : accueille
+    FILM ||--o{ SEANCE : "est projete a"
+    PLACE ||--o{ PLACE_SEANCE : "a un etat pour"
+    SEANCE ||--o{ PLACE_SEANCE : "definit l'etat de"
+    UTILISATEUR ||--o{ RESERVATION : effectue
+    RESERVATION ||--o{ RESERVATION_PLACE : contient
+    PLACE_SEANCE ||--o| RESERVATION_PLACE : "est reservee via"
+
+```
 
 PLACE_SEANCE est l'entité pivot du projet : c'est elle qui porte l'état d'une place pour une séance précise (une même place physique est libre pour une séance et vendue pour une autre). C'est aussi elle que touche le point de concurrence (#5, #6) — voir décision D1.
 ## Principales routes et événements temps réel
