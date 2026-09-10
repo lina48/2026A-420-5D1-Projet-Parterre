@@ -26,7 +26,6 @@ Un récit est terminé quand :
 
 - le code est fusionné dans `main` par une demande de tirage revue par un
   coéquipier;
-- l'intégration continue est verte;
 - des tests automatisés couvrent le comportement ajouté, cas d'erreur inclus;
 - tous les critères d'acceptation du récit sont satisfaits;
 - l'application démarre à partir d'un clone neuf;
@@ -34,12 +33,9 @@ Un récit est terminé quand :
 
 ## Conventions
 
-- **Branches** : `<numéro-du-ticket>-<description-courte>`, ex. `3-recherche-artiste-titre`.
-- **Commits** : impératif présent, première ligne ≤ 72 caractères; la demande
-  de tirage qui termine un récit le référence (`Closes #3`).
-- **Revue de code** : au moins une approbation avant fusion; on relit les
-  demandes de tirage en attente au début de chaque bloc, avant d'écrire du
-  code.
+- **Branches** : 
+- **Commits** : 
+- **Revue de code** : 
 
 ## Journal de sprint 0
 
@@ -47,9 +43,6 @@ Le journal est tenu dans [journal.md](journal.md), une entrée par bloc de cours
 
 ## Contributions individuelles
 
-> [!NOTE]
-> Une ligne d'exemple; votre tableau couvre chaque membre, avec des liens vers
-> les tickets et les commits.
 
 | Membre | Contributions à la soumission |
 |---|---|
