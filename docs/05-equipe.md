@@ -6,9 +6,11 @@ Le rôle de *Scrum Master* tourne à chaque sprint :
 
 | Sprint | Scrum Master |
 |---|---|
-| 1 | Lina |
-| 2 | Alexander |
-| 3 | Karel |
+| 0 | Lina |
+| 1 | Alexander |
+| 2 | Karel |
+| 3 | Hsiao Shan |
+
 
 
 ## Rituels
