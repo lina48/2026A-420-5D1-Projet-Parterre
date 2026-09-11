@@ -1,11 +1,10 @@
 | Épique | Ce qu'elle couvre |
 |---|---|
 | **Comptes et rôles** | S'inscrire, se connecter, distinguer spectateurs et personnel de salle, gérer qui a le droit de programmer. |
-| **Programmation de salles et séances ** | Décrire une salle et son plan de places, créer des séances, les ouvrir à la vente, les modifier ou les annuler. |
+| **Programmation de salles et séances** | Décrire une salle et son plan de places, créer des séances, les ouvrir à la vente, les modifier ou les annuler. |
 | **Sélection en direct** | Consulter le plan d'une séance, voir l'état des places évoluer en direct, retenir un fauteuil le temps de finaliser. |
 | **Réservation et billets** | Confirmer un achat, obtenir un billet vérifiable, retrouver et annuler ses réservations. |
 | **Exploitation** | Ce qui se passe le soir de la séance et autour : contrôle des billets à l'entrée, suivi du remplissage. |
-
   
 
   ## Les récits `must` dans l'ordre
@@ -47,4 +46,8 @@ paiement réel par carte (#21, on simule l'étape de
 paiement),  
 application mobile native (#22),  
 salles à placement libre non numéroté (#23,
-elles n'ont aucun besoin d'un plan de salle et videraient le projet de son intérêt).
+elles n'ont aucun besoin d'un plan de salle et videraient le projet de son intérêt). 
+
+## Notre démarche d'estimation : 
+
+Nous avons estimé en points de récit sur une échelle de Fibonacci tronquée (1, 2, 3, 5, 8), 13 servant de signal qu'un récit était mal découpé. Les points mesurent un effort relatif (volume, complexité, incertitude), pas des heures. Notre récit de référence est le #2, « Consulter l'affiche des séances à venir », à 2 points : le plus simple du backlog, une lecture en base et un affichage de liste, sans concurrence ni état partagé. Chaque autre récit a été estimé en se demandant « combien de fois #2 ? », d'où #7 à 3 points et #5 et #6 à 8, puisqu'ils introduisent des mécanismes inconnus de l'équipe. Le vote se faisait en planning poker, à l'aveugle, pour éviter l'alignement sur le plus expérimenté. En cas de désaccord, pas de moyenne : les votes extrêmes justifiaient leur chiffre, puis nous revotions. L'écart révélait presque toujours une hypothèse non partagée, comme sur #5 où certains ne comptaient que la pose du verrou, sans l'expiration ni la libération du fauteuil abandonné. Si deux tours ne suffisaient pas, nous retenions la valeur haute et notions l'incertitude comme risque à lever tôt.
