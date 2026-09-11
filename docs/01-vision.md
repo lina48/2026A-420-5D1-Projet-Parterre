@@ -59,3 +59,16 @@ Le système doit également empêcher que deux réservations soient confirmées 
 ## 5. Objectif
 
 L'objectif du projet est de rendre la réservation de sièges plus simple, claire et fiable pour les spectateurs tout en fournissant au gérant les outils nécessaires pour gérer les séances, les salles et leur occupation.
+
+## 6. Respect des exigences techniques
+
+| # | Exigence | Technologie retenue | Comment le projet la satisfait |
+|---|---|---|---|
+| 1 | Cadriciel full stack, rendu serveur + client | Node.js + React (React Router v7 en mode framework) | Les routes comme `/seances/:id` sont rendues côté serveur au premier chargement, puis la navigation devient côté client |
+| 2 | Base de données transactionnelle, écritures simultanées | PostgreSQL | Transactions ACID; `SELECT ... FOR UPDATE` garantit qu'une écriture concurrente sur `PLACE_SEANCE` reste correcte (voir D1 dans `03-conception.md`) |
+| 3 | Installation/démarrage via Docker | Docker + Docker Compose | L'application démarre à partir d'un clone neuf, sans dépendance à installer sur la machine du correcteur |
+| 4 | Au moins deux rôles avec permissions différentes | Authentification par compte, rôle `spectateur` / `gestionnaire` sur `UTILISATEUR` | Ex. `POST /api/seances` est réservé au gestionnaire |
+| 5 | Fonctionnalité temps réel multi-utilisateurs | Socket.IO | Le client rejoint une *room* Socket.IO propre à chaque séance (`/seances/:id`). Dès qu'une place change d'état, le serveur émet `place:etat_change` à toute la room — la carte se met à jour sans rechargement. `place:retenue_expiree` libère automatiquement une place dont la rétention expire. Le client n'émet jamais d'événement lui-même : les actions passent par l'API REST, Socket.IO ne sert qu'à diffuser |
+| 6 | Point de concurrence réel | Verrouillage pessimiste PostgreSQL | Deux spectateurs peuvent viser la même place au même instant. Le projet verrouille la ligne `PLACE_SEANCE` en base (`SELECT ... FOR UPDATE`) le temps de la transaction de rétention/confirmation — une seule transaction SQL garantit qu'une place n'est jamais retenue ou vendue deux fois. En cas de forte affluence sur une même place, les utilisateurs attendent en file plutôt qu'en parallèle |
+| 7 | Tests automatisés à chaque poussée | GitHub Actions | Chaîne CI exécutée à chaque push, verte avant chaque revue de sprint |
+| 8 | Déployé sur un serveur | À déterminer selon les modalités précisées en cours de session | Accessible autrement que depuis nos portables |
