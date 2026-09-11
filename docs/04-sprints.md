@@ -54,8 +54,11 @@ ajusterons les sprints 2 et 3 sur la vélocité mesurée.
 
 Si nous prenons du retard, nous coupons dans cet ordre :
 
-1. #2	Consulter l'affiche des séances à venir
-2. #8	Consulter ses billets à venir et passés
+1. `#20` — Éditeur de plan de salle par glisser-déposer (`could`)
+2. `#19` — Suggestion automatique des meilleures places libres (`could`)
+3. `#18` — Export CSV des ventes d'une séance (`should`)
+4. `#17` — Courriel de confirmation avec le billet (`should`)
 
-
-
+Les récits `must` du sprint 1 (#1 à #7) ne sont pas négociables : sans eux, le
+cœur du projet — la réservation en temps réel avec gestion des conflits —
+n'existe pas.
