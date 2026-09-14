@@ -17,12 +17,12 @@ pour qu'un échec technique reste rattrapable).
 | # | Récit | Épique | Points | Sprint |
 |---|---|---|---|---|
 | #1 | Créer un compte et se connecter | Comptes et rôles | 5 | 1 |
-| #2 | Consulter l'affiche des séances à venir | Programmation | 2 | 1 |
+| #2 | Consulter l'affiche des séances à venir | Programmation | 3 | 1 |
 | #3 | Créer une séance sur un plan de salle | Programmation | 8 | 1 |
 | #4 | Voir le plan de salle et l'état des places | Sélection en direct | 5 | 1 |
 | #5 | Retenir une place le temps de finaliser | Sélection en direct | 8 | 1 |
-| #6 | Voir les places changer d'état en direct | Sélection en direct | 8 | 1 |
-| #7 | Confirmer sa réservation et obtenir son billet | Réservation et billets | 3 | 1 |
+| #6 | Voir les places changer d'état en direct | Sélection en direct | 8 |   2 | 
+| #7 | Confirmer sa réservation et obtenir son billet | Réservation et billets | 5 | 1 |
 | #8 | Consulter ses billets à venir et passés | Réservation et billets | 2 | 2 |
 | #9 | Annuler sa réservation avant la séance | Réservation et billets | 3 | 2 |
 | #10 | Bloquer des places pour raison technique ou d'accessibilité | Programmation | 3 | 2 |
