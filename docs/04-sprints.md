@@ -11,7 +11,7 @@
 | #3 | Créer une séance sur un plan de salle | Programmation | 8 |
 | #4 | Voir le plan de salle et l'état des places | Sélection en direct | 5 |
 | #5 | Retenir une place le temps de finaliser | Sélection en direct | 8 |
-| #6 | Confirmer sa réservation et obtenir son billet | Réservation et billets | 5 |
+| #7 | Confirmer sa réservation et obtenir son billet | Réservation et billets | 5 |
 | | **Total** | | **34** |
 
 **Incrément démontrable.** À partir d'un clone neuf avec Docker, deux navigateurs ouverts côte à côte sur la même séance permettent de voir un siège retenu par l'un passer immédiatement en état retenu chez l'autre via Socket.IO. Le verrouillage pessimiste SQL empêche tout conflit de double réservation, et le parcours se termine par la confirmation et l'émission du billet. Chaîne CI verte.
@@ -27,7 +27,9 @@
 | #9 | Annuler sa réservation avant la séance | Réservation et billets | 3 |
 | #10 | Bloquer des places pour raison technique ou d'accessibilité | Programmation | 3 |
 | #11 | Valider un billet à l'entrée de la salle | Exploitation | 5 |
-| | **Total** | | **13** |
+| #16 | Filtrer l'affiche par ville, date et genre | Programmation | 3 |
+| #17 | Courriel de confirmation avec le billet | Réservation et billets | 3 |
+| | **Total** | | **19** |
 
 **Incrément démontrable.** Un spectateur peut consulter son historique, annuler sa réservation et libérer sa place. Le gérant peut bloquer manuellement des sièges, par exemple réservés PMR ou défectueux, et valider les billets des spectateurs à l'entrée.
 
@@ -40,9 +42,11 @@
 | #12 | Modifier ou annuler une séance déjà vendue | Programmation | 8 |
 | #13 | Suivre le remplissage d'une séance en direct | Exploitation | 5 |
 | #14 | Confier le rôle de gestionnaire à un membre du personnel | Comptes et rôles | 3 |
-| | **Total** | | **16** |
+| #15 | Tarifs réduits et catégories de prix | Réservation et billets | 5 |
+| #18 | Export CSV des ventes d'une séance | Exploitation | 3 |
+| | **Total** | | **24** |
 
-**Incrément démontrable.** Application complète déployée en ligne. Le gérant modifie une séance existante, suit le taux d'occupation en temps réel, délègue le rôle de gestionnaire .
+**Incrément démontrable.** Application complète déployée en ligne. Le gérant modifie une séance existante, suit le taux d'occupation en temps réel, délègue le rôle de gestionnaire et exporte les rapports de ventes au format CSV.
 
 ## Capacité
 
@@ -55,7 +59,7 @@
 | Équipe de 4 | 108 h-personne | 108 h-personne | 180 h-personne |
 | Moins rituels, coordination, revues (20 %) | **86 h** | **86 h** | **144 h** |
 
-Nous ne connaissons pas encore notre vélocité. Les 86 heures de développement du sprint 1 rapportées aux 34 points engagés impliquent une productivité d'environ 2,2 heures par point, ce que nous considérons comme optimiste pour un premier sprint sur une pile que l'équipe découvre. Après application du correctif de prudence de 30 % recommandé dans les notes de cours, notre capacité réaliste se situe plutôt autour de **21 points**. Nous conservons néanmoins les 34 points au sprint 1, parce que les récits #3 à #6 forment un bloc indissociable : livrer la rétention sans la diffusion temps réel ne démontre rien. Nous absorbons l'écart par l'ordre d'abandon ci dessous plutôt qu'en repoussant le risque technique au sprint 2. La vélocité réellement mesurée au sprint 1 servira à réviser les engagements des sprints suivants.
+Nous ne connaissons pas encore notre vélocité. Les 86 heures de développement du sprint 1 rapportées aux 34 points engagés impliquent une productivité d'environ 2,2 heures par point, ce que nous considérons comme optimiste pour un premier sprint sur une pile que l'équipe découvre. Après application du correctif de prudence de 30 % recommandé dans les notes de cours, notre capacité réaliste se situe plutôt autour de **27 points**. Nous conservons néanmoins les 34 points au sprint 1, parce que les récits #3 à #6 forment un bloc indissociable : livrer la rétention sans la diffusion temps réel ne démontre rien. Nous absorbons l'écart par l'ordre d'abandon ci dessous plutôt qu'en repoussant le risque technique au sprint 2. La vélocité réellement mesurée au sprint 1 servira à réviser les engagements des sprints suivants.
 
 ## Ordre d'abandon
 
