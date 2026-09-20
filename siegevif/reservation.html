@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Réservation</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="nav-left">
+          <div class="brand">
+            <span class="brand-mark">▣</span>
+            <span>SiègeVif</span>
+          </div>
+          <span class="nav-link active"><span class="icon">▣</span> Mes billets</span>
+        </div>
+
+        <div class="nav-right">
+          <div class="user-pill">
+            <span class="user-avatar">SM</span>
+            <span class="user-name">Sophie Martin</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="page">
+        <div class="reservation-wrap">
+          <section class="reservation-panel">
+            <div class="session-header">
+              <h1>Dune: Awakening</h1>
+              <div class="session-meta">2026-09-15 • 20:30 • Cinéma Le Grand Rex</div>
+            </div>
+
+            <div class="cinema-stage"></div>
+
+            <div class="seat-map" aria-label="Plan de salle">
+              <div class="row"><span class="row-label">A</span>
+                <button class="seat available">1</button>
+                <button class="seat available">2</button>
+                <button class="seat available">3</button>
+                <button class="seat selected">4</button>
+                <button class="seat available">5</button>
+                <button class="seat available">6</button>
+                <button class="seat available">7</button>
+                <button class="seat available">8</button>
+                <button class="seat available">9</button>
+                <button class="seat available">10</button>
+                <button class="seat available">11</button>
+                <button class="seat available">12</button>
+                <button class="seat available">13</button>
+                <button class="seat available">14</button>
+                <button class="seat available">15</button>
+                <button class="seat vip">16</button>
+              </div>
+
+              <div class="row"><span class="row-label">B</span>
+                <button class="seat available">1</button>
+                <button class="seat available">2</button>
+                <button class="seat available">3</button>
+                <button class="seat available">4</button>
+                <button class="seat available">5</button>
+                <button class="seat unavailable">6</button>
+                <button class="seat reserved">7</button>
+                <button class="seat available">8</button>
+                <button class="seat available">9</button>
+                <button class="seat available">10</button>
+                <button class="seat available">11</button>
+                <button class="seat available">12</button>
+                <button class="seat available">13</button>
+                <button class="seat available">14</button>
+                <button class="seat available">15</button>
+                <button class="seat vip">16</button>
+              </div>
+
+              <div class="row"><span class="row-label">C</span>
+                <button class="seat available">1</button>
+                <button class="seat available">2</button>
+                <button class="seat available">3</button>
+                <button class="seat available">4</button>
+                <button class="seat available">5</button>
+                <button class="seat available">6</button>
+                <button class="seat available">7</button>
+                <button class="seat available">8</button>
+                <button class="seat available">9</button>
+                <button class="seat unavailable">10</button>
+                <button class="seat available">11</button>
+                <button class="seat available">12</button>
+                <button class="seat available">13</button>
+                <button class="seat reserved">14</button>
+                <button class="seat available">15</button>
+                <button class="seat vip">16</button>
+              </div>
+
+              <div class="row"><span class="row-label">D</span>
+                <button class="seat available">1</button>
+                <button class="seat available">2</button>
+                <button class="seat available">3</button>
+                <button class="seat selected">4</button>
+                <button class="seat available">5</button>
+                <button class="seat available">6</button>
+                <button class="seat reserved">7</button>
+                <button class="seat available">8</button>
+                <button class="seat available">9</button>
+                <button class="seat vip">10</button>
+                <button class="seat available">11</button>
+                <button class="seat available">12</button>
+                <button class="seat available">13</button>
+                <button class="seat available">14</button>
+                <button class="seat available">15</button>
+                <button class="seat vip">16</button>
+              </div>
+
+              <div class="row"><span class="row-label">E</span>
+                <button class="seat available">1</button>
+                <button class="seat available">2</button>
+                <button class="seat available">3</button>
+                <button class="seat available">4</button>
+                <button class="seat available">5</button>
+                <button class="seat available">6</button>
+                <button class="seat available">7</button>
+                <button class="seat available">8</button>
+                <button class="seat available">9</button>
+                <button class="seat available">10</button>
+                <button class="seat available">11</button>
+                <button class="seat available">12</button>
+                <button class="seat available">13</button>
+                <button class="seat available">14</button>
+                <button class="seat available">15</button>
+                <button class="seat vip">16</button>
+              </div>
+
+              <div class="row"><span class="row-label">F</span>
+                <button class="seat available">1</button>
+                <button class="seat available">2</button>
+                <button class="seat available">3</button>
+                <button class="seat available">4</button>
+                <button class="seat available">5</button>
+                <button class="seat unavailable">6</button>
+                <button class="seat reserved">7</button>
+                <button class="seat available">8</button>
+                <button class="seat available">9</button>
+                <button class="seat available">10</button>
+                <button class="seat available">11</button>
+                <button class="seat available">12</button>
+                <button class="seat available">13</button>
+                <button class="seat available">14</button>
+                <button class="seat reserved">15</button>
+                <button class="seat vip">16</button>
+              </div>
+
+              <div class="row"><span class="row-label">G</span>
+                <button class="seat available">1</button>
+                <button class="seat available">2</button>
+                <button class="seat reserved">3</button>
+                <button class="seat available">4</button>
+                <button class="seat available">5</button>
+                <button class="seat available">6</button>
+                <button class="seat available">7</button>
+                <button class="seat available">8</button>
+                <button class="seat available">9</button>
+                <button class="seat available">10</button>
+                <button class="seat available">11</button>
+                <button class="seat available">12</button>
+                <button class="seat available">13</button>
+                <button class="seat available">14</button>
+                <button class="seat available">15</button>
+                <button class="seat vip">16</button>
+              </div>
+
+              <div class="row"><span class="row-label">H</span>
+                <button class="seat available">1</button>
+                <button class="seat available">2</button>
+                <button class="seat available">3</button>
+                <button class="seat available">4</button>
+                <button class="seat available">5</button>
+                <button class="seat available">6</button>
+                <button class="seat available">7</button>
+                <button class="seat available">8</button>
+                <button class="seat available">9</button>
+                <button class="seat available">10</button>
+                <button class="seat available">11</button>
+                <button class="seat available">12</button>
+                <button class="seat available">13</button>
+                <button class="seat unavailable">14</button>
+                <button class="seat available">15</button>
+                <button class="seat vip">16</button>
+              </div>
+            </div>
+
+            <div class="legend">
+              <span class="legend-item"><span class="legend-box" style="background: rgba(52,75,96,.8);"></span>Disponible</span>
+              <span class="legend-item"><span class="legend-box" style="background: rgba(198, 158, 88, 0.9);"></span>VIP (45$)</span>
+              <span class="legend-item"><span class="legend-box" style="background: linear-gradient(180deg, #f1c66b, #d59f49);"></span>Sélectionnée</span>
+              <span class="legend-item"><span class="legend-box" style="background: rgba(66,72,79,0.8);"></span>En cours d'achat</span>
+              <span class="legend-item"><span class="legend-box" style="background: rgba(226, 92, 92, 0.9);"></span>Réservé</span>
+            </div>
+          </section>
+
+          <aside class="side-panel">
+            <h3>Tarifs</h3>
+            <div class="price-list">
+              <div class="price-row"><span>VIP (rangs A-B)</span><strong class="amount">45 $</strong></div>
+              <div class="price-row"><span>Standard (C-I)</span><strong class="amount">22 $</strong></div>
+              <div class="price-row"><span>Économique (J-L)</span><strong class="amount">12 $</strong></div>
+            </div>
+
+            <div class="selection-summary">
+              <span>Sélection</span>
+              <strong>0 siège</strong>
+            </div>
+            <div class="selection-empty">Cliquez sur un siège disponible</div>
+            <button class="primary-button">Passer à la caisse</button>
+
+            <div class="stats">
+              <div class="stat-row"><span>Activité en temps réel</span><strong class="good">En ligne</strong></div>
+              <div class="stat-row"><span>Places disponibles</span><strong>99</strong></div>
+              <div class="stat-row"><span>En cours d'achat</span><strong class="warn">13</strong></div>
+              <div class="stat-row"><span>Réservés</span><strong class="bad">80</strong></div>
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
