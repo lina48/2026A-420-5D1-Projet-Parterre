@@ -52,7 +52,16 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - **Blocage** : Aucun noté.
 - **Décisions** : Engagement du sprint 1 fixé à 15 points, après correction du biais d'optimisme (-30 % sur une première estimation de 20 points). Rôle de Scrum Master fixé en rotation — Alexander au sprint 1,  Karel au sprint 2, Lina au sprint 3.
 
----
+--- 
+
+## 17 septembre 2026
+
+- **Présences** : Alexander, Lina, Hsiao Shan, Karel
+- **Avancement** : 
+- **Blocage** : Aucun noté.
+- **Décisions** : 
+
+
 
 ## 21 septembre 2026
 
@@ -65,15 +74,6 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
   - Ajout de la cohérence salle/place/séance via les clés composites et les contraintes de relation.
   - Vérification stricte du statut de retenue avec `CHECK` pour empêcher les états incohérents.
   - Revue de la structure finale de la base avec PostgreSQL pour aligner le design avec les exigences de concurrence, d’annulation et de temps réel.
-
----
-
-## 17 septembre 2026
-
-- **Présences** : Alexander, Lina, Hsiao Shan, Karel
-- **Avancement** : 
-- **Blocage** : Aucun noté.
-- **Décisions** : 
 
 
 *Ce journal continue d'être tenu à chaque bloc de cours pour le reste de la session.*
