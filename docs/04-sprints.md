@@ -7,13 +7,12 @@
 | # | Récit | Épique | Points |
 |---|---|---|---|
 | #1 | Créer un compte et se connecter | Comptes et rôles | 5 |
-| #2 | Consulter l'affiche des séances à venir | Programmation | 2 |
+| #2 | Consulter l'affiche des séances à venir | Programmation | 3 |
 | #3 | Créer une séance sur un plan de salle | Programmation | 8 |
 | #4 | Voir le plan de salle et l'état des places | Sélection en direct | 5 |
 | #5 | Retenir une place le temps de finaliser | Sélection en direct | 8 |
-| #6 | Voir les places changer d'état en direct | Sélection en direct | 8 |
-| #7 | Confirmer sa réservation et obtenir son billet | Réservation et billets | 3 |
-| | **Total** | | **39** |
+| #7 | Confirmer sa réservation et obtenir son billet | Réservation et billets | 5 |
+| | **Total** | | **34** |
 
 **Incrément démontrable.** À partir d'un clone neuf avec Docker, deux navigateurs ouverts côte à côte sur la même séance permettent de voir un siège retenu par l'un passer immédiatement en état retenu chez l'autre via Socket.IO. Le verrouillage pessimiste SQL empêche tout conflit de double réservation, et le parcours se termine par la confirmation et l'émission du billet. Chaîne CI verte.
 
@@ -23,6 +22,7 @@
 
 | # | Récit | Épique | Points |
 |---|---|---|---|
+| #6 | Voir les places changer d'état en direct | Sélection en direct | 8 |
 | #8 | Consulter ses billets à venir et passés | Réservation et billets | 2 |
 | #9 | Annuler sa réservation avant la séance | Réservation et billets | 3 |
 | #10 | Bloquer des places pour raison technique ou d'accessibilité | Programmation | 3 |
@@ -59,7 +59,7 @@
 | Équipe de 4 | 108 h-personne | 108 h-personne | 180 h-personne |
 | Moins rituels, coordination, revues (20 %) | **86 h** | **86 h** | **144 h** |
 
-Nous ne connaissons pas encore notre vélocité. Les 86 heures de développement du sprint 1 rapportées aux 39 points engagés impliquent une productivité d'environ 2,2 heures par point, ce que nous considérons comme optimiste pour un premier sprint sur une pile que l'équipe découvre. Après application du correctif de prudence de 30 % recommandé dans les notes de cours, notre capacité réaliste se situe plutôt autour de **27 points**. Nous conservons néanmoins les 39 points au sprint 1, parce que les récits #3 à #6 forment un bloc indissociable : livrer la rétention sans la diffusion temps réel ne démontre rien. Nous absorbons l'écart par l'ordre d'abandon ci dessous plutôt qu'en repoussant le risque technique au sprint 2. La vélocité réellement mesurée au sprint 1 servira à réviser les engagements des sprints suivants.
+Nous ne connaissons pas encore notre vélocité. Les 86 heures de développement du sprint 1 rapportées aux 34 points engagés impliquent une productivité d'environ 2,2 heures par point, ce que nous considérons comme optimiste pour un premier sprint sur une pile que l'équipe découvre. Après application du correctif de prudence de 30 % recommandé dans les notes de cours, notre capacité réaliste se situe plutôt autour de **27 points**. Nous conservons néanmoins les 34 points au sprint 1, parce que les récits #3 à #6 forment un bloc indissociable : livrer la rétention sans la diffusion temps réel ne démontre rien. Nous absorbons l'écart par l'ordre d'abandon ci dessous plutôt qu'en repoussant le risque technique au sprint 2. La vélocité réellement mesurée au sprint 1 servira à réviser les engagements des sprints suivants.
 
 ## Ordre d'abandon
 
