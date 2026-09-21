@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Nouvelle séance — SiègeVif</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+</head>
+
+
+<body>
+
+
+<header class="navbar">
+
+    <a href="index.html" class="brand">
+        <span class="brand-icon">▦</span>
+        SiègeVif
+    </a>
+
+    <nav>
+        <a href="index.html">▥ Dashboard</a>
+        <a href="index.html#seances">▣ Séances</a>
+        <a href="#">⌗ Contrôle</a>
+    </nav>
+
+    <div class="profile">
+
+        <div class="avatar">ID</div>
+
+        <div>
+            <strong>Isabelle Dupont</strong>
+            <small>Gestionnaire</small>
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="container creation-container">
+
+    <a href="index.html" class="back">
+        ← Retour au dashboard
+    </a>
+
+
+    <!-- STEPPER -->
+
+    <div class="stepper">
+
+        <div class="step active" data-step="1">
+            <span>1</span>
+            Informations
+        </div>
+
+        <div class="step-line"></div>
+
+        <div class="step" data-step="2">
+            <span>2</span>
+            Plan de salle
+        </div>
+
+        <div class="step-line"></div>
+
+        <div class="step" data-step="3">
+            <span>3</span>
+            Récapitulatif
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================
+         ÉTAPE 1
+    =========================================== -->
+
+    <section class="creation-step active" id="step1">
+
+        <div class="form-layout">
+
+            <div class="panel form-panel">
+
+                <h1>Informations générales</h1>
+
+                <div class="field full">
+
+                    <label>TITRE *</label>
+
+                    <input
+                        id="title"
+                        type="text"
+                        placeholder="Ex: Dune: Awakening"
+                    >
+
+                </div>
+
+
+                <div class="field full">
+
+                    <label>SOUS-TITRE</label>
+
+                    <input
+                        id="subtitle"
+                        type="text"
+                        placeholder="Ex: Director's Cut"
+                    >
+
+                </div>
+
+
+                <div class="form-grid">
+
+                    <div class="field">
+
+                        <label>TYPE *</label>
+
+                        <div class="type-selector">
+
+                            <button
+                                type="button"
+                                class="type-btn selected"
+                                data-type="Cinéma"
+                            >
+                                ▦ Cinéma
+                            </button>
+
+                            <button
+                                type="button"
+                                class="type-btn"
+                                data-type="Théâtre"
+                            >
+                                ♜ Théâtre
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>GENRE</label>
+
+                        <input
+                            id="genre"
+                            type="text"
+                            placeholder="Ex: Sci-Fi, Opéra..."
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>DATE *</label>
+
+                        <input
+                            id="date"
+                            type="date"
+                            value="2026-10-01"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>HEURE *</label>
+
+                        <input
+                            id="time"
+                            type="time"
+                            value="20:30"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>DURÉE</label>
+
+                        <input
+                            id="duration"
+                            type="text"
+                            value="2h 00m"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>SALLE</label>
+
+                        <input
+                            id="room"
+                            type="text"
+                            value="Grande Salle"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="field full">
+
+                    <label>LIEU *</label>
+
+                    <input
+                        id="location"
+                        type="text"
+                        placeholder="Ex: Cinéma Le Grand Rex, Paris"
+                    >
+
+                </div>
+
+
+                <div class="field full">
+
+                    <label>URL DE L'AFFICHE</label>
+
+                    <input
+                        id="poster"
+                        type="url"
+                        placeholder="https://..."
+                    >
+
+                </div>
+
+
+                <div class="form-actions">
+
+                    <a
+                        href="index.html"
+                        class="btn-secondary form-button"
+                    >
+                        Annuler
+                    </a>
+
+                    <button
+                        class="btn-primary"
+                        id="goStep2"
+                    >
+                        Continuer →
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- PREVIEW -->
+
+            <aside class="preview-card">
+
+                <div class="poster-preview">
+                    AFFICHE
+                </div>
+
+                <div class="preview-content">
+
+                    <span
+                        class="type cinema"
+                        id="previewType"
+                    >
+                        CINÉMA
+                    </span>
+
+                    <h2 id="previewTitle">
+                        Titre de la séance
+                    </h2>
+
+                    <p id="previewSubtitle">
+                        Sous-titre
+                    </p>
+
+                    <div class="preview-info">
+
+                        <span id="previewDate">
+                            ▣ 2026-10-01 · 20:30
+                        </span>
+
+                        <span id="previewLocation">
+                            ◉ Lieu
+                        </span>
+
+                        <span id="previewDuration">
+                            ◷ 2h 00m
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         ÉTAPE 2
+    =========================================== -->
+
+    <section
+        class="creation-step"
+        id="step2"
+    >
+
+        <div class="panel seat-panel">
+
+            <h1>Configuration du plan de salle</h1>
+
+            <p class="description">
+                Cliquez ou glissez pour peindre les zones.
+                Cliquez sur une lettre de rang pour colorier tout le rang.
+            </p>
+
+
+            <div class="seat-config">
+
+                <div>
+
+                    <label>RANGS (A–J)</label>
+
+                    <div class="counter">
+
+                        <button id="removeRow">−</button>
+
+                        <strong id="rowCount">10</strong>
+
+                        <button id="addRow">+</button>
+
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <label>SIÈGES PAR RANG</label>
+
+                    <div class="counter">
+
+                        <button id="removeSeat">−</button>
+
+                        <strong id="seatCount">
+                            16
+                        </strong>
+
+                        <button id="addSeat">
+                            +
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <strong
+                    class="capacity"
+                    id="activeCapacity"
+                >
+                    160 places actives
+                </strong>
+
+            </div>
+
+
+            <!-- ZONES -->
+
+            <div class="paint-options">
+
+                <span>Peindre :</span>
+
+                <button
+                    class="paint selected"
+                    data-zone="standard"
+                >
+                    ● Standard 22€
+                </button>
+
+                <button
+                    class="paint"
+                    data-zone="vip"
+                >
+                    ● VIP 45€
+                </button>
+
+                <button
+                    class="paint"
+                    data-zone="economy"
+                >
+                    ● Économique 12€
+                </button>
+
+                <button
+                    class="paint"
+                    data-zone="blocked"
+                >
+                    ○ Bloqué
+                </button>
+
+            </div>
+
+
+            <div class="stage">
+                ÉCRAN / SCÈNE
+            </div>
+
+
+            <div
+                id="seatMap"
+                class="seat-map"
+            ></div>
+
+
+            <!-- PRIX -->
+
+            <div class="zone-prices">
+
+                <h2>Tarifs par zone</h2>
+
+                <div>
+                    <span class="zone-dot vip-dot"></span>
+                    VIP
+
+                    <input
+                        id="vipPrice"
+                        type="number"
+                        value="45"
+                    >
+
+                    €
+                </div>
+
+
+                <div>
+                    <span class="zone-dot standard-dot"></span>
+                    Standard
+
+                    <input
+                        id="standardPrice"
+                        type="number"
+                        value="22"
+                    >
+
+                    €
+                </div>
+
+
+                <div>
+                    <span class="zone-dot economy-dot"></span>
+                    Économique
+
+                    <input
+                        id="economyPrice"
+                        type="number"
+                        value="12"
+                    >
+
+                    €
+                </div>
+
+            </div>
+
+
+            <div class="zone-summary">
+
+                <h2>Résumé des zones</h2>
+
+                <p>
+                    VIP
+                    <strong id="vipCount">0 siège</strong>
+                </p>
+
+                <p>
+                    Standard
+                    <strong id="standardCount">
+                        160 sièges
+                    </strong>
+                </p>
+
+                <p>
+                    Économique
+                    <strong id="economyCount">
+                        0 siège
+                    </strong>
+                </p>
+
+                <p>
+                    Bloqué
+                    <strong id="blockedCount">
+                        0 siège
+                    </strong>
+                </p>
+
+
+                <div class="summary-total">
+
+                    <span>
+                        Capacité totale
+                        <strong id="totalCapacity">
+                            160 places
+                        </strong>
+                    </span>
+
+                    <span>
+                        Recette max. estimée
+                        <strong id="maxRevenue">
+                            3 520 €
+                        </strong>
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <button
+                    class="btn-secondary"
+                    id="backStep1"
+                >
+                    ← Étape précédente
+                </button>
+
+                <button
+                    class="btn-primary"
+                    id="goStep3"
+                >
+                    Continuer →
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         ÉTAPE 3
+    =========================================== -->
+
+    <section
+        class="creation-step"
+        id="step3"
+    >
+
+        <div class="summary-layout">
+
+            <div class="summary-show">
+
+                <span
+                    class="type cinema"
+                    id="summaryType"
+                >
+                    CINÉMA
+                </span>
+
+                <h1 id="summaryTitle">
+                    Titre de la séance
+                </h1>
+
+                <p id="summarySubtitle"></p>
+
+                <div class="summary-details">
+
+                    <span id="summaryDate"></span>
+                    <span id="summaryDuration"></span>
+                    <span id="summaryLocation"></span>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel final-room">
+
+                <h2>Plan de salle</h2>
+
+                <div class="final-main">
+
+                    <div>
+                        <strong id="finalCapacity">
+                            160
+                        </strong>
+
+                        <span>
+                            places actives
+                        </span>
+                    </div>
+
+                    <div>
+                        <strong id="finalRevenue">
+                            3 520 €
+                        </strong>
+
+                        <span>
+                            recette maximale
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="final-zones">
+
+                    <div>
+                        <strong id="finalVip">
+                            0
+                        </strong>
+
+                        <span>
+                            VIP<br>45 €
+                        </span>
+                    </div>
+
+
+                    <div>
+                        <strong id="finalStandard">
+                            160
+                        </strong>
+
+                        <span>
+                            Standard<br>22 €
+                        </span>
+                    </div>
+
+
+                    <div>
+                        <strong id="finalEconomy">
+                            0
+                        </strong>
+
+                        <span>
+                            Économique<br>12 €
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="publish-message">
+                ✓ La séance sera publiée immédiatement
+                et visible aux spectateurs.
+            </div>
+
+
+            <div class="publish-actions">
+
+                <button
+                    class="btn-secondary"
+                    id="backStep2"
+                >
+                    ← Étape précédente
+                </button>
+
+                <button
+                    class="btn-primary"
+                    id="publish"
+                >
+                    ⚡ Publier la séance
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script src="js/nouvelle-seance.js"></script>
+
+</body>
+
+</html>

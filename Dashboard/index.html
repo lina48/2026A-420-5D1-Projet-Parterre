@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiègeVif — Dashboard</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<header class="navbar">
+    <a href="index.html" class="brand">
+        <span class="brand-icon">▦</span>
+        <span>SiègeVif</span>
+    </a>
+
+    <nav>
+        <a class="active" href="index.html">▥ Dashboard</a>
+        <a href="#seances">▣ Séances</a>
+        <a href="#">⌗ Contrôle</a>
+    </nav>
+
+    <div class="profile">
+        <div class="avatar">ID</div>
+        <div>
+            <strong>Isabelle Dupont</strong>
+            <small>Gestionnaire</small>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+
+    <section class="page-header">
+        <div>
+            <h1>Dashboard</h1>
+            <p>Semaine du 8–14 septembre 2026</p>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn-secondary" id="refreshBtn">↻ Actualiser</button>
+
+            <a href="nouvelle-seance.html" class="btn-primary">
+                + Nouvelle séance
+            </a>
+        </div>
+    </section>
+
+
+    <!-- STATISTIQUES -->
+    <section class="stats-grid">
+
+        <article class="stat-card">
+            <div class="stat-top">
+                <span>REVENUS 7J</span>
+                <span class="stat-icon">↗</span>
+            </div>
+
+            <strong>33 090 €</strong>
+            <small class="positive">↗ +12.4% vs hier</small>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-top">
+                <span>BILLETS VENDUS</span>
+                <span class="stat-icon">▣</span>
+            </div>
+
+            <strong>921</strong>
+            <small class="positive">↗ +8.1% vs hier</small>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-top">
+                <span>TAUX REMPLISSAGE</span>
+                <span class="stat-icon green-icon">◉</span>
+            </div>
+
+            <strong>66%</strong>
+            <small class="positive">↗ +3.2% vs hier</small>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-top">
+                <span>SÉANCES ACTIVES</span>
+                <span class="stat-icon orange-icon">▤</span>
+            </div>
+
+            <strong>5</strong>
+            <small>0 annulée</small>
+        </article>
+
+    </section>
+
+
+    <!-- GRAPHIQUE PRINCIPAL -->
+    <section class="panel chart-panel">
+
+        <div class="panel-heading">
+            <div>
+                <h2>Revenus & Billets</h2>
+                <p>7 derniers jours</p>
+            </div>
+
+            <span class="badge-gold">CETTE SEMAINE</span>
+        </div>
+
+        <div class="chart">
+
+            <div class="y-labels">
+                <span>8000</span>
+                <span>6000</span>
+                <span>4000</span>
+                <span>2000</span>
+                <span>0</span>
+            </div>
+
+            <div class="chart-area">
+
+                <div class="grid-line line1"></div>
+                <div class="grid-line line2"></div>
+                <div class="grid-line line3"></div>
+                <div class="grid-line line4"></div>
+
+                <svg
+                    class="revenue-line"
+                    viewBox="0 0 1000 250"
+                    preserveAspectRatio="none"
+                >
+                    <path
+                        d="
+                        M0 190
+                        C100 180 120 170 180 150
+                        S300 105 370 120
+                        S500 145 560 90
+                        S680 20 760 35
+                        S880 70 1000 95
+                        "
+                        fill="none"
+                        stroke="#e8b84b"
+                        stroke-width="5"
+                        stroke-linecap="round"
+                    />
+
+                    <path
+                        d="
+                        M0 190
+                        C100 180 120 170 180 150
+                        S300 105 370 120
+                        S500 145 560 90
+                        S680 20 760 35
+                        S880 70 1000 95
+                        L1000 250
+                        L0 250 Z
+                        "
+                        fill="rgba(232,184,75,.08)"
+                    />
+                </svg>
+
+                <div class="x-labels">
+                    <span>Lun</span>
+                    <span>Mar</span>
+                    <span>Mer</span>
+                    <span>Jeu</span>
+                    <span>Ven</span>
+                    <span>Sam</span>
+                    <span>Dim</span>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- RÉSERVATIONS -->
+    <section class="panel reservations">
+
+        <div class="panel-heading">
+            <h2>Réservations récentes</h2>
+            <span class="total">3 TOTAL</span>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>CLIENT · SPECTACLE</th>
+                    <th>PLACES</th>
+                    <th>MONTANT</th>
+                    <th>STATUT</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <tr>
+                    <td>
+                        <strong>Sophie Martin</strong>
+                        <small>Dune: Awakening</small>
+                    </td>
+                    <td>C4, C5</td>
+                    <td class="price">36 €</td>
+                    <td><span class="status confirmed">CONF.</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <strong>Sophie Martin</strong>
+                        <small>Hamlet</small>
+                    </td>
+                    <td>A12</td>
+                    <td class="price">45 €</td>
+                    <td><span class="status confirmed">CONF.</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <strong>Lucas Bernard</strong>
+                        <small>La Traviata</small>
+                    </td>
+                    <td>VIP-B3, VIP-B4</td>
+                    <td class="price">120 €</td>
+                    <td><span class="status entered">ENTRÉ</span></td>
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+
+    <!-- SÉANCES -->
+    <section class="panel sessions" id="seances">
+
+        <div class="panel-heading">
+            <h2>Toutes les séances</h2>
+
+            <a href="nouvelle-seance.html" class="small-new">
+                + Nouvelle séance
+            </a>
+        </div>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                <tr>
+                    <th>TITRE</th>
+                    <th>TYPE</th>
+                    <th>DATE</th>
+                    <th>SALLE</th>
+                    <th>PLACES</th>
+                    <th>DISPO</th>
+                    <th>REMPLISSAGE</th>
+                    <th>ACTIONS</th>
+                </tr>
+                </thead>
+
+                <tbody id="sessionTable">
+
+                <tr>
+                    <td>
+                        <strong>Dune: Awakening</strong>
+                        <small>Cinéma Le Grand Rex</small>
+                    </td>
+
+                    <td><span class="type cinema">CINÉ</span></td>
+
+                    <td class="mono">2026-09-15 20:30</td>
+                    <td>Grande Salle</td>
+                    <td class="mono">180</td>
+                    <td class="green mono">60</td>
+
+                    <td>
+                        <div class="progress-row">
+                            <div class="progress">
+                                <span style="width:62%"></span>
+                            </div>
+                            <b>62%</b>
+                        </div>
+                    </td>
+
+                    <td>✎ &nbsp; ♲</td>
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        <strong>La Traviata</strong>
+                        <small>Opéra Bastille</small>
+                    </td>
+
+                    <td><span class="type theatre">THÉÂTRE</span></td>
+
+                    <td class="mono">2026-09-16 19:00</td>
+                    <td>Grande Salle</td>
+                    <td class="mono">240</td>
+                    <td class="gold mono">30</td>
+
+                    <td>
+                        <div class="progress-row">
+                            <div class="progress">
+                                <span class="gold-progress" style="width:83%"></span>
+                            </div>
+                            <b>83%</b>
+                        </div>
+                    </td>
+
+                    <td>✎ &nbsp; ♲</td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        <strong>Alien: Romulus</strong>
+                        <small>UGC Ciné Cité Les Halles</small>
+                    </td>
+
+                    <td><span class="type cinema">CINÉ</span></td>
+
+                    <td class="mono">2026-09-17 22:00</td>
+                    <td>Salle 3</td>
+                    <td class="mono">120</td>
+                    <td class="green mono">83</td>
+
+                    <td>
+                        <div class="progress-row">
+                            <div class="progress">
+                                <span style="width:28%"></span>
+                            </div>
+                            <b>28%</b>
+                        </div>
+                    </td>
+
+                    <td>✎ &nbsp; ♲</td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script src="js/dashboard.js"></script>
+
+</body>
+</html>
