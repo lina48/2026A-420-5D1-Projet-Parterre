@@ -1,77 +1,210 @@
 [03-conception.md](https://github.com/user-attachments/files/31762367/03-conception.md)
 # Conception technique
 
-## Modèle de données initial
+## Modèle de données cohérent
 
-Modèle de données initial
+Le modèle initial contient l'idée juste, mais il manque des contraintes de cohérence indispensables pour un système de réservation à forte concurrence. Les points corrigés sont les suivants :
 
-Hypothèse de travail. Les entités touchées par le sprint 1 (PLACE_SEANCE, SEANCE, RESERVATION) sont détaillées; FILM n'est qu'esquissée — elle sera précisée quand les récits should (filtrer par ville/genre, #16) arriveront.
+- une place ne peut apparaître qu'une seule fois pour une séance donnée;
+- une réservation ne peut pas contenir deux fois la même place;
+- une place retenue doit avoir un utilisateur propriétaire;
+- une place `vendue` ne peut plus être retenue ni vendue une seconde fois;
+- le plan de salle doit être cohérent avec la salle de la séance.
+
+### Diagramme ER corrigé
 
 ```mermaid
 
 erDiagram
     UTILISATEUR {
-        int id PK
+        bigint id PK
         string nom
         string courriel UK
         string mot_de_passe_hash
-        string role "spectateur | gestionnaire"
+        utilisateur_role role
+        datetime cree_le
     }
     SALLE {
-        int id PK
+        bigint id PK
         string nom
+        int capacite
     }
     PLACE {
-        int id PK
-        int salle_id FK
+        bigint id PK
+        bigint salle_id FK
         string rangee
         int numero
-        string type "standard | accessible"
+        place_type type
     }
     FILM {
-        int id PK
+        bigint id PK
         string titre
         int duree_minutes
+        string genre
     }
     SEANCE {
-        int id PK
-        int salle_id FK
-        int film_id FK
+        bigint id PK
+        bigint salle_id FK
+        bigint film_id FK
         datetime date_heure
-        string statut "ouverte | fermee | annulee"
+        seance_statut statut
+        datetime creee_le
     }
     PLACE_SEANCE {
-        int id PK
-        int place_id FK
-        int seance_id FK
-        string etat "libre | retenue | vendue"
-        int retenue_par_utilisateur_id FK "nul si non retenue"
-        datetime retenue_expire_a "nul si non retenue"
+        bigint id PK
+        bigint place_id FK
+        bigint seance_id FK
+        bigint salle_id FK
+        place_seance_etat etat
+        bigint retenue_par_utilisateur_id FK "nullable"
+        datetime retenue_expire_a "nullable"
     }
     RESERVATION {
-        int id PK
-        int utilisateur_id FK
-        int seance_id FK
+        bigint id PK
+        bigint utilisateur_id FK
+        bigint seance_id FK
         string code_billet UK
         datetime creee_le
-        string statut "confirmee | annulee"
+        reservation_statut statut
+        decimal montant_total
     }
     RESERVATION_PLACE {
-        int reservation_id FK
-        int place_seance_id FK
+        bigint reservation_id PK, FK
+        bigint place_seance_id PK, FK
+        bigint seance_id PK, FK
+        boolean active
     }
+
     SALLE ||--o{ PLACE : contient
     SALLE ||--o{ SEANCE : accueille
-    FILM ||--o{ SEANCE : "est projete a"
-    PLACE ||--o{ PLACE_SEANCE : "a un etat pour"
+    FILM ||--o{ SEANCE : "propose"
+    PLACE ||--o{ PLACE_SEANCE : "est affectee a"
     SEANCE ||--o{ PLACE_SEANCE : "definit l'etat de"
+    SEANCE ||--o{ RESERVATION : concerne
     UTILISATEUR ||--o{ RESERVATION : effectue
     RESERVATION ||--o{ RESERVATION_PLACE : contient
-    PLACE_SEANCE ||--o| RESERVATION_PLACE : "est reservee via"
-
+    PLACE_SEANCE ||--o{ RESERVATION_PLACE : "est reservee dans"
+    UTILISATEUR ||--o{ PLACE_SEANCE : "retient la place"
 ```
 
-PLACE_SEANCE est l'entité pivot du projet : c'est elle qui porte l'état d'une place pour une séance précise (une même place physique est libre pour une séance et vendue pour une autre). C'est aussi elle que touche le point de concurrence (#5, #6) — voir décision D1.
+### Erreurs corrigées dans le modèle
+
+1. `PLACE_SEANCE` doit avoir une contrainte `UNIQUE (place_id, seance_id)` pour éviter une duplication d'état pour la même place et la même séance.
+2. `RESERVATION_PLACE` devient une table de jointure fiable avec clé composite `(reservation_id, place_seance_id)` et un indice unique partiel sur `place_seance_id` lorsque `active = true`, ce qui permet l'annulation sans verrouiller définitivement la place.
+3. `SEANCE` est rattachée à une `SALLE` précise ; la relation `place_seance` conserve aussi `salle_id` pour garantir qu’une place d’une salle ne peut pas être associée à une séance d’une autre salle.
+4. Le statut et le propriétaire de la retenue doivent être cohérents : si `etat = 'retenue'`, alors `retenue_par_utilisateur_id` est non nul et `retenue_expire_a` est non nul; sinon les deux doivent être nuls.
+5. Une place vendue ne doit pas pouvoir être réutilisée par une autre réservation ; la logique de validation passe par un verrou pessimiste sur `PLACE_SEANCE` et par un index unique partiel `WHERE active` pour empêcher toute réattribution active d’une place déjà vendue.
+6. `reservation_place` contient aussi `seance_id` pour garantir que les places réservées correspondent bien à la séance de la réservation.
+
+### Table de référence PostgreSQL
+
+```sql
+CREATE TYPE utilisateur_role AS ENUM ('spectateur', 'gestionnaire');
+CREATE TYPE seance_statut AS ENUM ('ouverte', 'fermee', 'annulee');
+CREATE TYPE place_type AS ENUM ('standard', 'accessible');
+CREATE TYPE place_seance_etat AS ENUM ('libre', 'retenue', 'vendue');
+CREATE TYPE reservation_statut AS ENUM ('confirmee', 'annulee');
+
+CREATE TABLE utilisateur (
+    id BIGSERIAL PRIMARY KEY,
+    nom VARCHAR(120) NOT NULL,
+    courriel VARCHAR(255) NOT NULL UNIQUE,
+    mot_de_passe_hash VARCHAR(255) NOT NULL,
+    role utilisateur_role NOT NULL DEFAULT 'spectateur',
+    cree_le TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE salle (
+    id BIGSERIAL PRIMARY KEY,
+    nom VARCHAR(150) NOT NULL,
+    capacite INTEGER NOT NULL CHECK (capacite > 0)
+);
+
+CREATE TABLE film (
+    id BIGSERIAL PRIMARY KEY,
+    titre VARCHAR(255) NOT NULL,
+    duree_minutes INTEGER NOT NULL CHECK (duree_minutes > 0),
+    genre VARCHAR(100)
+);
+
+CREATE TABLE place (
+    id BIGSERIAL,
+    salle_id BIGINT NOT NULL,
+    rangee VARCHAR(20) NOT NULL,
+    numero INTEGER NOT NULL,
+    type place_type NOT NULL DEFAULT 'standard',
+    PRIMARY KEY (id, salle_id),
+    UNIQUE (salle_id, rangee, numero),
+    FOREIGN KEY (salle_id) REFERENCES salle(id) ON DELETE RESTRICT
+);
+
+CREATE TABLE seance (
+    id BIGSERIAL,
+    salle_id BIGINT NOT NULL,
+    film_id BIGINT NOT NULL,
+    date_heure TIMESTAMPTZ NOT NULL,
+    statut seance_statut NOT NULL DEFAULT 'ouverte',
+    creee_le TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (id, salle_id),
+    FOREIGN KEY (salle_id) REFERENCES salle(id) ON DELETE RESTRICT,
+    FOREIGN KEY (film_id) REFERENCES film(id) ON DELETE RESTRICT,
+    UNIQUE (id, salle_id)
+);
+
+CREATE TABLE place_seance (
+    id BIGSERIAL PRIMARY KEY,
+    place_id BIGINT NOT NULL,
+    salle_id BIGINT NOT NULL,
+    seance_id BIGINT NOT NULL,
+    etat place_seance_etat NOT NULL DEFAULT 'libre',
+    retenue_par_utilisateur_id BIGINT,
+    retenue_expire_a TIMESTAMPTZ,
+    UNIQUE (place_id, seance_id),
+    FOREIGN KEY (place_id, salle_id) REFERENCES place(id, salle_id) ON DELETE RESTRICT,
+    FOREIGN KEY (seance_id, salle_id) REFERENCES seance(id, salle_id) ON DELETE CASCADE,
+    CHECK (
+        (etat = 'retenue' AND retenue_par_utilisateur_id IS NOT NULL AND retenue_expire_a IS NOT NULL)
+        OR
+        (etat <> 'retenue' AND retenue_par_utilisateur_id IS NULL AND retenue_expire_a IS NULL)
+    )
+);
+
+CREATE TABLE reservation (
+    id BIGSERIAL PRIMARY KEY,
+    utilisateur_id BIGINT NOT NULL REFERENCES utilisateur(id) ON DELETE RESTRICT,
+    seance_id BIGINT NOT NULL,
+    code_billet VARCHAR(50) NOT NULL UNIQUE,
+    creee_le TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    statut reservation_statut NOT NULL DEFAULT 'confirmee',
+    montant_total NUMERIC(10,2) NOT NULL CHECK (montant_total >= 0),
+    UNIQUE (id, seance_id),
+    FOREIGN KEY (seance_id) REFERENCES seance(id) ON DELETE RESTRICT
+);
+
+CREATE TABLE reservation_place (
+    reservation_id BIGINT NOT NULL,
+    place_seance_id BIGINT NOT NULL,
+    seance_id BIGINT NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (reservation_id, place_seance_id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation(id) ON DELETE CASCADE,
+    FOREIGN KEY (place_seance_id, seance_id) REFERENCES place_seance(id, seance_id) ON DELETE RESTRICT,
+    FOREIGN KEY (reservation_id, seance_id) REFERENCES reservation(id, seance_id) ON DELETE CASCADE,
+    CHECK (seance_id IS NOT NULL)
+);
+
+CREATE UNIQUE INDEX uq_place_vendue_une_fois
+    ON reservation_place (place_seance_id)
+    WHERE active;
+
+CREATE INDEX idx_place_seance_etat ON place_seance (seance_id, etat);
+CREATE INDEX idx_place_seance_retenue ON place_seance (retenue_par_utilisateur_id, retenue_expire_a);
+CREATE INDEX idx_reservation_utilisateur ON reservation (utilisateur_id, creee_le DESC);
+CREATE INDEX idx_reservation_seance ON reservation (seance_id);
+```
+
+Cette version reste compatible avec le besoin de concurrence SQL décrit dans le projet : la réservation et la rétention passent par un verrou pessimiste sur `PLACE_SEANCE` (`SELECT ... FOR UPDATE`) puis la confirmation écrit dans `RESERVATION` et `RESERVATION_PLACE` dans une seule transaction. La logique d’annulation est également compatible avec le sprint 2 : on passe `active = false` sur les lignes de `reservation_place` et on remet la place à `libre` sans casser l’intégrité de la base.
+
 ## Principales routes et événements temps réel
 
 ### Pages (sprint 1)

@@ -14,22 +14,22 @@ fauteuil avant qu'une séance existe) et le **risque** (la rétention concurrent
 diffusion temps réel sont les deux inconnues du projet, elles passent tôt (au sprint 1 )
 pour qu'un échec technique reste rattrapable).
 
-| # | Récit | Épique | Points | Sprint |
-|---|---|---|---|---|
-| #1 | Créer un compte et se connecter | Comptes et rôles | 5 | 1 |
-| #2 | Consulter l'affiche des séances à venir | Programmation | 3 | 1 |
-| #3 | Créer une séance sur un plan de salle | Programmation | 8 | 1 |
-| #4 | Voir le plan de salle et l'état des places | Sélection en direct | 5 | 1 |
-| #5 | Retenir une place le temps de finaliser | Sélection en direct | 8 | 1 |
-| #6 | Voir les places changer d'état en direct | Sélection en direct | 8 |   2 | 
-| #7 | Confirmer sa réservation et obtenir son billet | Réservation et billets | 5 | 1 |
-| #8 | Consulter ses billets à venir et passés | Réservation et billets | 2 | 2 |
-| #9 | Annuler sa réservation avant la séance | Réservation et billets | 3 | 2 |
-| #10 | Bloquer des places pour raison technique ou d'accessibilité | Programmation | 3 | 2 |
-| #11 | Valider un billet à l'entrée de la salle | Exploitation | 5 | 2 |
-| #12 | Modifier ou annuler une séance déjà vendue | Programmation | 8 | 3 |
-| #13 | Suivre le remplissage d'une séance en direct | Exploitation | 5 | 3 |
-| #14 | Confier le rôle de gestionnaire à un membre du personnel | Comptes et rôles | 3 | 3 | 
+| # | Récit | Épique | Points | Sprint | Responsable |
+|---|---|---|---|---|---|
+| #1 | Créer un compte et se connecter | Comptes et rôles | 5 | 1 | Lina |
+| #2 | Consulter l'affiche des séances à venir | Programmation | 3 | 1 | Alexander |
+| #3 | Créer une séance sur un plan de salle | Programmation | 8 | 1 | Karel |
+| #4 | Voir le plan de salle et l'état des places | Sélection en direct | 5 | 1 | Hsiao Shan |
+| #5 | Retenir une place le temps de finaliser | Sélection en direct | 8 | 1 | Alexander |
+| #6 | Voir les places changer d'état en direct | Sélection en direct | 8 | 2 | Lina |
+| #7 | Confirmer sa réservation et obtenir son billet | Réservation et billets | 5 | 1 | Karel |
+| #8 | Consulter ses billets à venir et passés | Réservation et billets | 2 | 2 | Hsiao Shan |
+| #9 | Annuler sa réservation avant la séance | Réservation et billets | 3 | 2 | Lina |
+| #10 | Bloquer des places pour raison technique ou d'accessibilité | Programmation | 3 | 2 | Alexander |
+| #11 | Valider un billet à l'entrée de la salle | Exploitation | 5 | 2 | Karel |
+| #12 | Modifier ou annuler une séance déjà vendue | Programmation | 8 | 3 | Hsiao Shan |
+| #13 | Suivre le remplissage d'une séance en direct | Exploitation | 5 | 3 | Lina |
+| #14 | Confier le rôle de gestionnaire à un membre du personnel | Comptes et rôles | 3 | 3 | Alexander |
 
 Le reste du backlog, pour situer : 
  `should`  
