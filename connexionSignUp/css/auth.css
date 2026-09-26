@@ -1,0 +1,305 @@
+/* ============================================================
+   auth.css — Pages Connexion / Inscription (récit #1)
+   Basé sur la maquette Figma "Plateforme de réservation de sièges".
+   Les tokens ci-dessous sont une interprétation des captures :
+   à ajuster si l'équipe a des valeurs exactes (ex. export Figma).
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Couleurs */
+  --color-bg: #0f1117;
+  --color-surface: #171a23;
+  --color-surface-alt: #1b1f2a;
+  --color-border: #272b38;
+  --color-text: #f2f1ec;
+  --color-text-muted: #8b93a7;
+  --color-accent: #d7a94f;
+  --color-accent-hover: #c69a44;
+  --color-accent-contrast: #241a08;
+  --color-avatar-alt: #4d6c8c;
+  --color-error: #e0705f;
+
+  /* Typographie */
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Rayons */
+  --radius-card: 20px;
+  --radius-input: 10px;
+  --radius-pill: 999px;
+}
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: var(--color-bg);
+  font-family: var(--font-body);
+  color: var(--color-text);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 32px 32px 28px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-sizing: border-box;
+}
+
+/* --- En-tête (icône, titre, sous-titre) --- */
+
+.auth-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid var(--color-accent);
+  background: rgba(215, 169, 79, 0.1);
+  color: var(--color-accent);
+}
+
+.auth-title {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 400;
+}
+
+.auth-subtitle {
+  margin: 4px 0 24px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+/* --- Bascule Connexion / Inscription --- */
+
+.auth-tabs {
+  display: flex;
+  padding: 4px;
+  margin-bottom: 24px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 10px 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.auth-tab.is-active {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+/* --- Champs de formulaire --- */
+
+.auth-field {
+  margin-bottom: 16px;
+}
+
+.auth-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.auth-field-control {
+  position: relative;
+}
+
+.auth-field input {
+  width: 100%;
+  padding: 11px 14px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  box-sizing: border-box;
+}
+
+.auth-field input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.auth-field input:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.auth-field input[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+.auth-field-error {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--color-error);
+}
+
+.auth-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+}
+
+/* --- Type de compte (inscription) --- */
+
+.auth-role {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.auth-role-option {
+  flex: 1;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+}
+
+.auth-role-option.is-selected {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: rgba(215, 169, 79, 0.08);
+}
+
+/* --- Bouton principal --- */
+
+.auth-submit {
+  width: 100%;
+  padding: 13px 0;
+  margin-top: 4px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-accent-contrast);
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-input);
+  cursor: pointer;
+}
+
+.auth-submit:hover {
+  background: var(--color-accent-hover);
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-form-error {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--color-error);
+  background: rgba(224, 112, 95, 0.1);
+  border: 1px solid rgba(224, 112, 95, 0.3);
+  border-radius: var(--radius-input);
+}
+
+/* --- Accès rapide démo --- */
+
+.auth-demo {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.auth-demo-title {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.auth-demo-list {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.auth-demo-button {
+  flex: 1;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  cursor: pointer;
+}
+
+.auth-demo-button:hover {
+  border-color: var(--color-accent);
+}
+
+.auth-demo-avatar {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-accent-contrast);
+  background: var(--color-accent);
+  border-radius: 999px;
+}
+
+.auth-demo-avatar.is-alt {
+  color: var(--color-text);
+  background: var(--color-avatar-alt);
+}
+
+.auth-demo-name {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
