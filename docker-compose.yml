@@ -1,0 +1,42 @@
+# À placer à la RACINE du dépôt (pas dans backend/) — voir les
+# instructions de dépôt à la fin de la conversation.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: siegevif
+    volumes:
+      # PostgreSQL exécute automatiquement, une seule fois à la toute
+      # première création du volume, tous les .sql de ce dossier, par
+      # ordre alphabétique : schema.sql avant seed.sql.
+      - ./database:/docker-entrypoint-initdb.d
+      # Volume nommé : les données survivent à un `docker compose down`
+      # (mais pas à `docker compose down -v`) — exigence du sprint 1 :
+      # « les données survivent à un redémarrage des conteneurs ».
+      - donnees_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/siegevif
+      SESSION_SECRET: change-moi-pour-une-vraie-valeur-aleatoire
+      PORT: 3000
+    ports:
+      - "3000:3000"
+
+volumes:
+  donnees_postgres:
