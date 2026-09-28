@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inscription — SiègeVif</title>
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body class="auth-page">
+  <div class="auth-card">
+    <div class="auth-icon" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6" />
+        <path d="M3 9h18M3 15h18M8 5v4M8 15v4M16 5v4M16 15v4" stroke="currentColor" stroke-width="1.6" />
+      </svg>
+    </div>
+    <h1 class="auth-title">SiègeVif</h1>
+    <p class="auth-subtitle">Réservation de places en temps réel</p>
+
+    <nav class="auth-tabs">
+      <a class="auth-tab" href="connexion.html">Connexion</a>
+      <span class="auth-tab is-active">Inscription</span>
+    </nav>
+
+    <p id="erreur-formulaire" class="auth-form-error" hidden></p>
+
+    <!--
+      Pas de sélecteur "Type de compte" ici, volontairement : tout
+      compte créé depuis ce formulaire est spectateur (voir role
+      codé en dur dans le script plus bas). Le rôle gestionnaire
+      s'attribue autrement (récit #14, sprint 3).
+    -->
+    <form id="form-inscription" novalidate>
+      <div class="auth-field">
+        <label for="nom-complet">Nom complet</label>
+        <div class="auth-field-control">
+          <input id="nom-complet" type="text" autocomplete="name" placeholder="Prénom Nom" />
+        </div>
+        <p id="erreur-nom" class="auth-field-error"></p>
+      </div>
+
+      <div class="auth-field">
+        <label for="email">Email</label>
+        <div class="auth-field-control">
+          <input id="email" type="email" autocomplete="email" placeholder="email@exemple.fr" />
+        </div>
+        <p id="erreur-email" class="auth-field-error"></p>
+      </div>
+
+      <div class="auth-field">
+        <label for="mot-de-passe">Mot de passe</label>
+        <div class="auth-field-control">
+          <input id="mot-de-passe" type="password" autocomplete="new-password" placeholder="••••••••" />
+        </div>
+        <p id="erreur-mdp" class="auth-field-error"></p>
+      </div>
+
+      <button type="submit" id="bouton-inscription" class="auth-submit">Créer le compte</button>
+    </form>
+
+    <div class="auth-demo">
+      <p class="auth-demo-title">Accès rapide démo</p>
+      <div class="auth-demo-list" id="demo-access"></div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script>
+    const ROLE_PAR_DEFAUT = "spectateur";
+
+    // Un clic sur un compte démo ici sert à se CONNECTER (le compte
+    // existe déjà) : on redirige donc vers connexion.html avec les
+    // identifiants en paramètres d'URL plutôt que de recréer le compte.
+    afficherAccesDemo((compte) => {
+      const params = new URLSearchParams({ email: compte.email, mdp: compte.motDePasse });
+      location.href = `connexion.html?${params.toString()}`;
+    });
+
+    document.getElementById("form-inscription").addEventListener("submit", async (evenement) => {
+      evenement.preventDefault();
+      afficherErreurFormulaire("");
+
+      const nomComplet = document.getElementById("nom-complet").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const motDePasse = document.getElementById("mot-de-passe").value;
+      let valide = true;
+
+      if (!nomComplet) {
+        afficherErreurChamp("nom-complet", "erreur-nom", "Le nom complet est requis.");
+        valide = false;
+      } else {
+        afficherErreurChamp("nom-complet", "erreur-nom", "");
+      }
+
+      if (!email || !estCourrielValide(email)) {
+        afficherErreurChamp("email", "erreur-email", "L'adresse courriel n'est pas valide.");
+        valide = false;
+      } else {
+        afficherErreurChamp("email", "erreur-email", "");
+      }
+
+      if (!motDePasse || motDePasse.length < 8) {
+        afficherErreurChamp("mot-de-passe", "erreur-mdp", "Le mot de passe doit contenir au moins 8 caractères.");
+        valide = false;
+      } else {
+        afficherErreurChamp("mot-de-passe", "erreur-mdp", "");
+      }
+
+      if (!valide) return;
+
+      const bouton = document.getElementById("bouton-inscription");
+      bouton.disabled = true;
+      bouton.textContent = "Création…";
+
+      try {
+        const reponse = await fetch("/api/auth/inscription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nomComplet, email, motDePasse, role: ROLE_PAR_DEFAUT }),
+        });
+
+        if (!reponse.ok) {
+          const corps = await reponse.json().catch(() => null);
+          afficherErreurFormulaire(corps?.message ?? "Impossible de créer le compte.");
+          return;
+        }
+
+        location.href = "/seances";
+      } catch {
+        afficherErreurFormulaire("Impossible de joindre le serveur. Réessayez.");
+      } finally {
+        bouton.disabled = false;
+        bouton.textContent = "Créer le compte";
+      }
+    });
+  </script>
+</body>
+</html>
