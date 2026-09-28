@@ -50,8 +50,30 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - **Présences** : Alexander
 - **Avancement** : Depuis le dernier bloc — rédaction de `04-sprints.md` (objectifs et capacité des 3 sprints, récits détaillés, ordre d'abandon) et finalisation de `05-equipe.md` (rituels, définition de « terminé », conventions de branches et de commits) par Hsiao Shan. Rédaction du journal de bord et finalisation de la soumission.
 - **Blocage** : Aucun noté.
-- **Décisions** : Engagement du sprint 1 fixé à 15 points, après correction du biais d'optimisme (-30 % sur une première estimation de 20 points). Rôle de Scrum Master fixé en rotation — Lina au sprint 1, Alexander au sprint 2, Karel au sprint 3.
+- **Décisions** : Engagement du sprint 1 fixé à 15 points, après correction du biais d'optimisme (-30 % sur une première estimation de 20 points). Rôle de Scrum Master fixé en rotation — Alexander au sprint 1,  Karel au sprint 2, Lina au sprint 3.
 
----
+--- 
+
+## 17 septembre 2026
+
+- **Présences** : Alexander, Lina, Hsiao Shan, Karel
+- **Avancement** : 
+- **Blocage** : Aucun noté.
+- **Décisions** : 
+
+
+
+## 21 septembre 2026
+
+- **Présences** : Lina, Alexander, Karel, Hsiao Shan
+- **Avancement** : Mêlée de 10 minutes sur l’état du projet. Chaque membre a fait le point sur ses tâches et sur les récits qu’il doit mener. La base de données a été revue et les règles d’intégrité ont été renforcées.
+- **Blocage** : Incohérence de la conception de la base de données, notamment sur l’unicité des places par séance, les tables de jointure de réservation, la cohérence salle/place/séance et la gestion de l’annulation sans perdre une place définitivement.
+- **Décisions** :
+  - Correction de la table `place_seance` avec `UNIQUE (place_id, seance_id)` pour éviter les doublons.
+  - Correction de `reservation_place` avec une clé composite et un index unique partiel `WHERE active` pour permettre l’annulation sans bloquer définitivement la place.
+  - Ajout de la cohérence salle/place/séance via les clés composites et les contraintes de relation.
+  - Vérification stricte du statut de retenue avec `CHECK` pour empêcher les états incohérents.
+  - Revue de la structure finale de la base avec PostgreSQL pour aligner le design avec les exigences de concurrence, d’annulation et de temps réel.
+
 
 *Ce journal continue d'être tenu à chaque bloc de cours pour le reste de la session.*
