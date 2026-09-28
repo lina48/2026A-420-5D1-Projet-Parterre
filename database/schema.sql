@@ -1,6 +1,5 @@
 -- Schéma PostgreSQL cohérent avec le projet de réservation de places
--- Version corrigée : contraintes métier, unicité, verrouillage pessimiste compatible avec SELECT ... FOR UPDATE,
--- annulation possible et cohérence salle/place/séance.
+-- Schéma de base : comptes, séances, places, réservations et annulations.
 
 CREATE TYPE utilisateur_role AS ENUM ('spectateur', 'gestionnaire');
 CREATE TYPE seance_statut AS ENUM ('ouverte', 'fermee', 'annulee');
@@ -94,10 +93,6 @@ CREATE TABLE reservation_place (
     FOREIGN KEY (reservation_id, seance_id) REFERENCES reservation(id, seance_id) ON DELETE CASCADE,
     CHECK (seance_id IS NOT NULL)
 );
-
-CREATE UNIQUE INDEX uq_place_vendue_une_fois
-    ON reservation_place (place_seance_id)
-    WHERE active;
 
 -- Vérifie que chaque place d'une séance appartient bien à la même salle que la séance
 CREATE OR REPLACE FUNCTION verifier_place_seance_salle()

@@ -127,48 +127,34 @@ app.get('/api/seances/:id/plan', asyncRoute(async (request, response) => {
 }));
 
 app.post('/api/seances/:id/places/:placeId/retenir', requireAuth, asyncRoute(async (request, response) => {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    const { rows } = await client.query('SELECT * FROM place_seance WHERE seance_id = $1 AND id = $2 FOR UPDATE', [request.params.id, request.params.placeId]);
-    const seat = rows[0];
-    if (!seat) { await client.query('ROLLBACK'); return response.status(404).json({ error: 'Place introuvable.' }); }
-    if (seat.etat === 'vendue' || (seat.etat === 'retenue' && seat.retenue_expire_a > new Date() && seat.retenue_par_utilisateur_id !== request.user!.id)) {
-      await client.query('ROLLBACK');
-      return response.status(409).json({ error: 'Cette place vient d’être prise. Choisissez-en une autre.' });
-    }
-    const expires = new Date(Date.now() + 8 * 60 * 1000);
-    await client.query("UPDATE place_seance SET etat = 'retenue', retenue_par_utilisateur_id = $1, retenue_expire_a = $2 WHERE id = $3", [request.user!.id, expires, seat.id]);
-    await client.query('COMMIT');
-    const change = { id: seat.id, etat: 'retenue', expireA: expires.toISOString() };
-    io.to(`seance:${request.params.id}`).emit('place:etat_change', change);
-    response.json({ place: change });
-  } catch (error) { await client.query('ROLLBACK'); throw error; }
-  finally { client.release(); }
+  const { rows } = await pool.query('SELECT * FROM place_seance WHERE seance_id = $1 AND id = $2', [request.params.id, request.params.placeId]);
+  const seat = rows[0];
+  if (!seat) return response.status(404).json({ error: 'Place introuvable.' });
+  if (seat.etat === 'vendue' || (seat.etat === 'retenue' && seat.retenue_expire_a > new Date() && seat.retenue_par_utilisateur_id !== request.user!.id)) {
+    return response.status(409).json({ error: 'Cette place vient d’être prise. Choisissez-en une autre.' });
+  }
+  const expires = new Date(Date.now() + 8 * 60 * 1000);
+  await pool.query("UPDATE place_seance SET etat = 'retenue', retenue_par_utilisateur_id = $1, retenue_expire_a = $2 WHERE id = $3", [request.user!.id, expires, seat.id]);
+  const change = { id: seat.id, etat: 'retenue', expireA: expires.toISOString() };
+  io.to(`seance:${request.params.id}`).emit('place:etat_change', change);
+  response.json({ place: change });
 }));
 
 app.post('/api/reservations', requireAuth, asyncRoute(async (request, response) => {
   const { seanceId, placeIds } = request.body as { seanceId?: number; placeIds?: number[] };
   const ids = [...new Set(placeIds ?? [])];
   if (!seanceId || !ids.length || ids.length > 8) return response.status(400).json({ error: 'Sélectionnez de 1 à 8 places.' });
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    const { rows: seats } = await client.query('SELECT * FROM place_seance WHERE seance_id = $1 AND id = ANY($2::bigint[]) ORDER BY id FOR UPDATE', [seanceId, ids]);
-    if (seats.length !== ids.length || seats.some((seat) => seat.etat !== 'retenue' || seat.retenue_par_utilisateur_id !== request.user!.id || seat.retenue_expire_a <= new Date())) {
-      await client.query('ROLLBACK');
-      return response.status(409).json({ error: 'Une ou plusieurs rétentions ont expiré. Sélectionnez vos places à nouveau.' });
-    }
-    const code = `PT-${randomUUID().slice(0, 8).toUpperCase()}`;
-    const booking = await client.query('INSERT INTO reservation (utilisateur_id, seance_id, code_billet, montant_total) VALUES ($1, $2, $3, $4) RETURNING id, code_billet, montant_total, creee_le', [request.user!.id, seanceId, code, ids.length * 14.5]);
-    const reservation = booking.rows[0];
-    for (const seat of seats) await client.query('INSERT INTO reservation_place (reservation_id, place_seance_id, seance_id) VALUES ($1, $2, $3)', [reservation.id, seat.id, seanceId]);
-    await client.query("UPDATE place_seance SET etat = 'vendue', retenue_par_utilisateur_id = NULL, retenue_expire_a = NULL WHERE id = ANY($1::bigint[])", [ids]);
-    await client.query('COMMIT');
-    ids.forEach((id) => io.to(`seance:${seanceId}`).emit('place:etat_change', { id, etat: 'vendue' }));
-    response.status(201).json({ reservation: { ...reservation, places: seats.map(({ id, rangee, numero }) => ({ id, rangee, numero })) } });
-  } catch (error) { await client.query('ROLLBACK'); throw error; }
-  finally { client.release(); }
+  const { rows: seats } = await pool.query('SELECT * FROM place_seance WHERE seance_id = $1 AND id = ANY($2::bigint[]) ORDER BY id', [seanceId, ids]);
+  if (seats.length !== ids.length || seats.some((seat) => seat.etat !== 'retenue' || seat.retenue_par_utilisateur_id !== request.user!.id || seat.retenue_expire_a <= new Date())) {
+    return response.status(409).json({ error: 'Une ou plusieurs rétentions ont expiré. Sélectionnez vos places à nouveau.' });
+  }
+  const code = `PT-${randomUUID().slice(0, 8).toUpperCase()}`;
+  const booking = await pool.query('INSERT INTO reservation (utilisateur_id, seance_id, code_billet, montant_total) VALUES ($1, $2, $3, $4) RETURNING id, code_billet, montant_total, creee_le', [request.user!.id, seanceId, code, ids.length * 14.5]);
+  const reservation = booking.rows[0];
+  for (const seat of seats) await pool.query('INSERT INTO reservation_place (reservation_id, place_seance_id, seance_id) VALUES ($1, $2, $3)', [reservation.id, seat.id, seanceId]);
+  await pool.query("UPDATE place_seance SET etat = 'vendue', retenue_par_utilisateur_id = NULL, retenue_expire_a = NULL WHERE id = ANY($1::bigint[])", [ids]);
+  ids.forEach((id) => io.to(`seance:${seanceId}`).emit('place:etat_change', { id, etat: 'vendue' }));
+  response.status(201).json({ reservation: { ...reservation, places: seats.map(({ id, rangee, numero }) => ({ id, rangee, numero })) } });
 }));
 
 app.get('/api/reservations', requireAuth, asyncRoute(async (request, response) => {
@@ -185,20 +171,14 @@ app.get('/api/reservations', requireAuth, asyncRoute(async (request, response) =
 }));
 
 app.delete('/api/reservations/:id', requireAuth, asyncRoute(async (request, response) => {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    const { rows } = await client.query('SELECT r.*, s.date_heure FROM reservation r JOIN seance s ON s.id = r.seance_id WHERE r.id = $1 AND r.utilisateur_id = $2 FOR UPDATE OF r', [request.params.id, request.user!.id]);
-    if (!rows.length || rows[0].statut !== 'confirmee' || rows[0].date_heure <= new Date()) { await client.query('ROLLBACK'); return response.status(404).json({ error: 'Réservation introuvable ou non annulable.' }); }
-    const { rows: seats } = await client.query('SELECT place_seance_id FROM reservation_place WHERE reservation_id = $1 AND active = TRUE', [request.params.id]);
-    await client.query("UPDATE reservation SET statut = 'annulee' WHERE id = $1", [request.params.id]);
-    await client.query('UPDATE reservation_place SET active = FALSE WHERE reservation_id = $1', [request.params.id]);
-    await client.query("UPDATE place_seance SET etat = 'libre' WHERE id = ANY($1::bigint[])", [seats.map((seat) => seat.place_seance_id)]);
-    await client.query('COMMIT');
-    seats.forEach(({ place_seance_id }) => io.to(`seance:${rows[0].seance_id}`).emit('place:etat_change', { id: place_seance_id, etat: 'libre' }));
-    response.json({ success: true });
-  } catch (error) { await client.query('ROLLBACK'); throw error; }
-  finally { client.release(); }
+  const { rows } = await pool.query('SELECT r.*, s.date_heure FROM reservation r JOIN seance s ON s.id = r.seance_id WHERE r.id = $1 AND r.utilisateur_id = $2', [request.params.id, request.user!.id]);
+  if (!rows.length || rows[0].statut !== 'confirmee' || rows[0].date_heure <= new Date()) return response.status(404).json({ error: 'Réservation introuvable ou non annulable.' });
+  const { rows: seats } = await pool.query('SELECT place_seance_id FROM reservation_place WHERE reservation_id = $1 AND active = TRUE', [request.params.id]);
+  await pool.query("UPDATE reservation SET statut = 'annulee' WHERE id = $1", [request.params.id]);
+  await pool.query('UPDATE reservation_place SET active = FALSE WHERE reservation_id = $1', [request.params.id]);
+  await pool.query("UPDATE place_seance SET etat = 'libre' WHERE id = ANY($1::bigint[])", [seats.map((seat) => seat.place_seance_id)]);
+  seats.forEach(({ place_seance_id }) => io.to(`seance:${rows[0].seance_id}`).emit('place:etat_change', { id: place_seance_id, etat: 'libre' }));
+  response.json({ success: true });
 }));
 
 app.post('/api/seances', requireAuth, requireManager, asyncRoute(async (request, response) => {

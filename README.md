@@ -51,7 +51,7 @@ Le client est servi sur http://localhost:5173 et l’API sur http://localhost:40
 | `DELETE` | `/api/reservations/:id` | Propriétaire |
 | `POST` | `/api/seances` | Gestionnaire |
 
-L’API utilise un verrou `SELECT ... FOR UPDATE` dans les transactions PostgreSQL pour éviter la double réservation. Socket.IO diffuse `place:etat_change` et `place:retenue_expiree` par salle. Les actions de modification restent exclusivement sur l’API REST.
+Socket.IO diffuse `place:etat_change` et `place:retenue_expiree` par salle. Les actions de modification restent exclusivement sur l’API REST. La gestion des conflits entre réservations simultanées n’est pas encore implémentée.
 
 La documentation détaillée du projet et les décisions techniques restent disponibles dans `docs/`.
  
