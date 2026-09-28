@@ -91,32 +91,8 @@ CREATE TABLE reservation_place (
     active BOOLEAN NOT NULL DEFAULT TRUE,
     PRIMARY KEY (reservation_id, place_seance_id),
     FOREIGN KEY (place_seance_id, seance_id) REFERENCES place_seance(id, seance_id) ON DELETE RESTRICT,
-    FOREIGN KEY (reservation_id, seance_id) REFERENCES reservation(id, seance_id) ON DELETE CASCADE,
-    CHECK (seance_id IS NOT NULL)
+    FOREIGN KEY (reservation_id, seance_id) REFERENCES reservation(id, seance_id) ON DELETE CASCADE
 );
-
--- Vérifie que chaque place d'une séance appartient bien à la même salle que la séance
-CREATE OR REPLACE FUNCTION verifier_place_seance_salle()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM place p
-        JOIN seance s ON s.id = NEW.seance_id
-        WHERE p.id = NEW.place_id
-          AND p.salle_id <> s.salle_id
-    ) THEN
-        RAISE EXCEPTION 'La place % ne correspond pas à la salle de la séance %', NEW.place_id, NEW.seance_id;
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_verifier_place_seance_salle
-BEFORE INSERT OR UPDATE ON place_seance
-FOR EACH ROW
-EXECUTE FUNCTION verifier_place_seance_salle();
 
 CREATE INDEX idx_place_seance_etat ON place_seance (seance_id, etat);
 CREATE INDEX idx_place_seance_retenue ON place_seance (retenue_par_utilisateur_id, retenue_expire_a);
