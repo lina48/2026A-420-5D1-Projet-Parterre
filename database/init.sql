@@ -70,6 +70,8 @@ CREATE TABLE IF NOT EXISTS reservation_place (
   FOREIGN KEY (reservation_id, seance_id) REFERENCES reservation(id, seance_id) ON DELETE CASCADE,
   FOREIGN KEY (place_seance_id, seance_id) REFERENCES place_seance(id, seance_id) ON DELETE RESTRICT
 );
+DROP TRIGGER IF EXISTS trg_verifier_place_seance_salle ON place_seance;
+DROP FUNCTION IF EXISTS verifier_place_seance_salle();
 DROP INDEX IF EXISTS uq_place_vendue_une_fois;
 CREATE INDEX IF NOT EXISTS idx_place_seance_etat ON place_seance (seance_id, etat);
 CREATE INDEX IF NOT EXISTS idx_reservation_utilisateur ON reservation (utilisateur_id, creee_le DESC);
