@@ -9,10 +9,10 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: siegevif
     volumes:
-      # PostgreSQL exécute automatiquement, une seule fois à la toute
-      # première création du volume, tous les .sql de ce dossier, par
-      # ordre alphabétique : schema.sql avant seed.sql.
-      - ./database:/docker-entrypoint-initdb.d
+      # N'exécuter que le schéma utilisé par server/index.ts et ses données
+      # de démonstration. schema.sql est la référence documentaire du projet.
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
       # Volume nommé : les données survivent à un `docker compose down`
       # (mais pas à `docker compose down -v`) — exigence du sprint 1 :
       # « les données survivent à un redémarrage des conteneurs ».
@@ -33,7 +33,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/siegevif
-      SESSION_SECRET: change-moi-pour-une-vraie-valeur-aleatoire
+      JWT_SECRET: change-moi-pour-une-vraie-valeur-aleatoire
       PORT: 3000
     ports:
       - "3000:3000"

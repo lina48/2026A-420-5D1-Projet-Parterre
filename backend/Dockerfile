@@ -1,18 +1,16 @@
-# Construit depuis la RACINE du dépôt (voir docker-compose.yml :
-# build.context = ".", build.dockerfile = "backend/Dockerfile"), pour
-# que la même structure de dossiers existe en local et dans l'image
-# — backend/src/app.js retrouve connexionSignUp/ au même endroit
-# relatif (../../connexionSignUp) qu'en développement.
 FROM node:22-alpine
 
 WORKDIR /app
 
-COPY backend/package.json backend/package-lock.json* ./backend/
-RUN cd backend && npm install --omit=dev
+COPY package.json package-lock.json ./
+RUN npm ci
 
-COPY backend/src ./backend/src
-COPY connexionSignUp ./connexionSignUp
+COPY index.html vite.config.ts tsconfig.json ./
+COPY src ./src
+COPY server ./server
+COPY database ./database
+RUN npm run build
 
-WORKDIR /app/backend
+ENV NODE_ENV=production
 EXPOSE 3000
-CMD ["node", "src/server.js"]
+CMD ["npm", "run", "start"]

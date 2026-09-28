@@ -4,13 +4,13 @@ Plateforme de réservation de places numérotées pour cinéma et théâtre. App
 
 ## Lancement avec Docker
 
-Docker Compose démarre PostgreSQL, crée les tables, prépare une programmation de démonstration et sert l’application sur le port 4000 :
+Docker Compose démarre PostgreSQL, crée les tables, prépare une programmation de démonstration et sert l’application sur le port 3000 :
 
 ```sh
 docker compose up --build
 ```
 
-Ouvrir http://localhost:4000. Pour arrêter : `docker compose down`. Les données sont conservées dans le volume Docker `parterre-data`.
+Ouvrir http://localhost:3000. Pour arrêter : `docker compose down`. Les données sont conservées dans le volume Docker `donnees_postgres`.
 
 Les pages et endpoints de connexion et d’inscription seront ajoutés dans une autre branche. Les opérations protégées nécessitent un jeton fourni par cette future intégration.
 
