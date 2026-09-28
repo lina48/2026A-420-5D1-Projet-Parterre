@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { Armchair, ArrowLeft, ArrowRight, Check, Clapperboard, Clock3, Film, LockKeyhole, LogOut, MapPin, Plus, Ticket, UserRound, X } from 'lucide-react';
+import { Armchair, ArrowLeft, ArrowRight, Check, Clapperboard, Clock3, Film, LockKeyhole, LogOut, MapPin, Plus, Ticket, X } from 'lucide-react';
 
 type User = { id: number; nom: string; courriel: string; role: 'spectateur' | 'gestionnaire' };
 type Session = { id: number; date_heure: string; statut: string; salle: string; titre: string; genre: string; duree_minutes: number; image_url: string; description: string; capacite: number; places_disponibles: number };
@@ -33,12 +33,6 @@ function App() {
     return () => window.clearTimeout(timeout);
   }, [toast]);
 
-  function authenticate(token: string, nextUser: User) {
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem('parterre-user', JSON.stringify(nextUser));
-    setUser(nextUser);
-  }
-
   function signOut() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem('parterre-user');
@@ -55,15 +49,13 @@ function App() {
           {user?.role === 'gestionnaire' && <NavLink to="/gestion/seances/nouvelle">Gestion</NavLink>}
         </nav>
         <div className="account-area">
-          {user ? <><span className="account-name"><span className="online-dot" />{user.nom.split(' ')[0]}</span><button className="icon-button" title="Déconnexion" onClick={signOut}><LogOut size={17} /></button></> : <Link className="account-link" to="/connexion"><UserRound size={16} /><span>Connexion</span></Link>}
+          {user && <><span className="account-name"><span className="online-dot" />{user.nom.split(' ')[0]}</span><button className="icon-button" title="Déconnexion" onClick={signOut}><LogOut size={17} /></button></>}
         </div>
       </header>
       <main className="page-shell">
         <Routes>
           <Route path="/" element={<Programme />} />
           <Route path="/seances/:id" element={<Selection user={user} notify={setToast} />} />
-          <Route path="/connexion" element={<Auth mode="connexion" onAuth={authenticate} />} />
-          <Route path="/inscription" element={<Auth mode="inscription" onAuth={authenticate} />} />
           <Route path="/mes-reservations" element={<MyTickets user={user} notify={setToast} />} />
           <Route path="/gestion/seances/nouvelle" element={<CreateSession user={user} notify={setToast} />} />
           <Route path="*" element={<NotFound />} />
@@ -151,7 +143,7 @@ function Selection({ user, notify }: { user: User | null; notify: (message: stri
   async function chooseSeat(seat: Seat) {
     if (seat.etat === 'vendue' || (seat.etat === 'retenue' && !selected.includes(seat.id))) return;
     if (selected.includes(seat.id)) { setSelected((current) => current.filter((seatId) => seatId !== seat.id)); return; }
-    if (!user) { navigate('/connexion'); return; }
+    if (!user) { notify('La connexion sera disponible dans une prochaine branche.'); return; }
     setBusy(true);
     try {
       await api(`/api/seances/${id}/places/${seat.id}/retenir`, { method: 'POST' });
@@ -189,42 +181,24 @@ function Selection({ user, notify }: { user: User | null; notify: (message: stri
   </section>;
 }
 
-function Auth({ mode, onAuth }: { mode: 'connexion' | 'inscription'; onAuth: (token: string, user: User) => void }) {
-  const navigate = useNavigate();
-  const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
-  const registering = mode === 'inscription';
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusy(true); setError('');
-    const data = new FormData(event.currentTarget);
-    try {
-      const result = await api<{ token: string; user: User }>(`/api/auth/${registering ? 'inscription' : 'connexion'}`, { method: 'POST', body: JSON.stringify({ nom: data.get('nom'), courriel: data.get('courriel'), motDePasse: data.get('motDePasse') }) });
-      onAuth(result.token, result.user); navigate('/');
-    } catch (reason) { setError((reason as Error).message); }
-    finally { setBusy(false); }
-  }
-  return <section className="auth-layout"><div className="auth-image" style={{ backgroundImage: 'linear-gradient(0deg, rgba(8,11,20,.86), rgba(8,11,20,.1)), url(https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=85)' }}><span className="tag tag-violet">VOTRE PROCHAIN FILM</span><p>Le plaisir d’être<br /><em>à la bonne place.</em></p><span className="auth-image-caption">PAR TERRE · CINÉMA DE QUARTIER</span></div><div className="auth-form-side"><div className="eyebrow"><span className="eyebrow-line" />{registering ? 'BIENVENUE' : 'RAVI DE VOUS REVOIR'}</div><h1>{registering ? 'On garde une place ?' : 'Entrez, c’est par ici.'}</h1><p className="auth-intro">{registering ? 'Créez votre compte et vos soirées commencent ici.' : 'Connectez-vous pour retrouver vos places réservées.'}</p><form className="form-stack" onSubmit={submit}>{registering && <label>Votre nom<input name="nom" autoComplete="name" placeholder="Camille Martin" required /></label>}<label>Adresse courriel<input name="courriel" type="email" autoComplete="email" placeholder="vous@exemple.com" required /></label><label>Mot de passe<input name="motDePasse" type="password" minLength={registering ? 8 : undefined} autoComplete={registering ? 'new-password' : 'current-password'} placeholder="••••••••" required /></label>{error && <p className="form-error"><X size={15} />{error}</p>}<button className="button button-gold button-wide" disabled={busy}>{busy ? 'Connexion…' : registering ? 'Créer mon compte' : 'Me connecter'}<ArrowRight size={16} /></button></form><p className="auth-switch">{registering ? 'Déjà parmi nous ?' : 'Première fois ici ?'} <Link to={registering ? '/connexion' : '/inscription'}>{registering ? 'Se connecter' : 'Créer un compte'}</Link></p><div className="demo-credentials"><span className="demo-lock"><LockKeyhole size={14} /></span><span><strong>Équipe de salle ?</strong><br />gestion@parterre.local <span className="mono-separator">/</span> Parterre2026!</span></div></div></section>;
-}
-
 function MyTickets({ user, notify }: { user: User | null; notify: (message: string) => void }) {
   const navigate = useNavigate();
   const [tickets, setTickets] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   async function load() { return api<{ reservations: Reservation[] }>('/api/reservations').then(({ reservations }) => setTickets(reservations)); }
-  useEffect(() => { if (!user) { navigate('/connexion'); return; } load().catch((error: Error) => notify(error.message)).finally(() => setLoading(false)); }, [user]);
+  useEffect(() => { if (!user) { setLoading(false); return; } load().catch((error: Error) => notify(error.message)).finally(() => setLoading(false)); }, [user]);
   async function cancel(id: number) {
     try { await api(`/api/reservations/${id}`, { method: 'DELETE' }); notify('Votre réservation a été annulée.'); await load(); }
     catch (error) { notify((error as Error).message); }
   }
-  return <section className="tickets-page"><div className="eyebrow"><span className="eyebrow-line" />VOTRE CARNET</div><div className="section-heading"><h1>Mes billets</h1><Link to="/" className="text-link">Voir le programme <ArrowRight size={15} /></Link></div>{loading ? <div className="loading-line">Recherche de vos billets…</div> : tickets.length ? <div className="ticket-list">{tickets.map((ticket) => <article className={`ticket-card ${ticket.statut === 'annulee' ? 'cancelled' : ''}`} key={ticket.id}><div className="ticket-art" style={{ backgroundImage: `linear-gradient(0deg, rgba(8,11,20,.45), transparent), url("${ticket.image_url}")` }}><Ticket size={19} /></div><div className="ticket-details"><div className="ticket-title-row"><h2>{ticket.titre}</h2><span className={`tag ${ticket.statut === 'confirmee' ? 'tag-green' : 'tag-red'}`}>{ticket.statut === 'confirmee' ? 'CONFIRMÉ' : 'ANNULÉ'}</span></div><p>{new Date(ticket.date_heure).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' })} · {new Date(ticket.date_heure).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}</p><div className="ticket-bottom"><span className="seat-code">{ticket.places.map(({ rangee, numero }) => `${rangee}${numero}`).join('  ·  ')}</span><span className="ticket-ref">{ticket.code_billet}</span></div></div><div className="ticket-price"><strong>{Number(ticket.montant_total).toFixed(2).replace('.', ',')} $</strong>{ticket.statut === 'confirmee' && new Date(ticket.date_heure) > new Date() && <button onClick={() => cancel(ticket.id)}>Annuler</button>}</div></article>)}</div> : <div className="empty-state"><Ticket /><p>Pas encore de billet dans votre carnet.</p><Link to="/">Trouver une séance <ArrowRight size={15} /></Link></div>}</section>;
+  return <section className="tickets-page"><div className="eyebrow"><span className="eyebrow-line" />VOTRE CARNET</div><div className="section-heading"><h1>Mes billets</h1><Link to="/" className="text-link">Voir le programme <ArrowRight size={15} /></Link></div>{loading ? <div className="loading-line">Recherche de vos billets…</div> : !user ? <div className="empty-state"><Ticket /><p>La connexion sera disponible dans une prochaine branche.</p></div> : tickets.length ? <div className="ticket-list">{tickets.map((ticket) => <article className={`ticket-card ${ticket.statut === 'annulee' ? 'cancelled' : ''}`} key={ticket.id}><div className="ticket-art" style={{ backgroundImage: `linear-gradient(0deg, rgba(8,11,20,.45), transparent), url("${ticket.image_url}")` }}><Ticket size={19} /></div><div className="ticket-details"><div className="ticket-title-row"><h2>{ticket.titre}</h2><span className={`tag ${ticket.statut === 'confirmee' ? 'tag-green' : 'tag-red'}`}>{ticket.statut === 'confirmee' ? 'CONFIRMÉ' : 'ANNULÉ'}</span></div><p>{new Date(ticket.date_heure).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' })} · {new Date(ticket.date_heure).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}</p><div className="ticket-bottom"><span className="seat-code">{ticket.places.map(({ rangee, numero }) => `${rangee}${numero}`).join('  ·  ')}</span><span className="ticket-ref">{ticket.code_billet}</span></div></div><div className="ticket-price"><strong>{Number(ticket.montant_total).toFixed(2).replace('.', ',')} $</strong>{ticket.statut === 'confirmee' && new Date(ticket.date_heure) > new Date() && <button onClick={() => cancel(ticket.id)}>Annuler</button>}</div></article>)}</div> : <div className="empty-state"><Ticket /><p>Pas encore de billet dans votre carnet.</p><Link to="/">Trouver une séance <ArrowRight size={15} /></Link></div>}</section>;
 }
 
 function CreateSession({ user, notify }: { user: User | null; notify: (message: string) => void }) {
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  useEffect(() => { if (!user) navigate('/connexion'); else if (user.role !== 'gestionnaire') navigate('/'); }, [user]);
+  useEffect(() => { if (!user || user.role !== 'gestionnaire') navigate('/'); }, [user]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setError('');
     const values = new FormData(event.currentTarget);

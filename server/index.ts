@@ -5,7 +5,6 @@ import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pg from 'pg';
 import { Server } from 'socket.io';
@@ -53,7 +52,6 @@ async function seed() {
     for (const row of 'ABCDEFGH') for (let number = 1; number <= 9; number += 1) {
       await client.query('INSERT INTO place (salle_id, rangee, numero, type) VALUES ($1, $2, $3, $4)', [room.rows[0].id, row, number, row === 'H' && number <= 2 ? 'accessible' : 'standard']);
     }
-    await client.query('INSERT INTO utilisateur (nom, courriel, mot_de_passe_hash, role) VALUES ($1, $2, $3, $4)', ['Équipe Parterre', 'gestion@parterre.local', await bcrypt.hash('Parterre2026!', 12), 'gestionnaire']);
     const movieRows = await client.query(
       `INSERT INTO film (titre, duree_minutes, genre, image_url, description) VALUES
        ('Les heures bleues', 118, 'Drame', 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=85', 'Une nuit suffit parfois à changer le cours d’une vie.'),
@@ -83,25 +81,6 @@ async function seed() {
     client.release();
   }
 }
-
-app.post('/api/auth/inscription', asyncRoute(async (request, response) => {
-  const { nom, courriel, motDePasse } = request.body;
-  if (!nom?.trim() || !courriel?.trim() || !motDePasse || motDePasse.length < 8) return response.status(400).json({ error: 'Nom, courriel et mot de passe de 8 caractères minimum requis.' });
-  const hash = await bcrypt.hash(motDePasse, 12);
-  const result = await pool.query('INSERT INTO utilisateur (nom, courriel, mot_de_passe_hash) VALUES ($1, $2, $3) RETURNING id, nom, courriel, role', [nom.trim(), courriel.trim().toLowerCase(), hash]);
-  const user = result.rows[0] as User;
-  response.status(201).json({ token: jwt.sign(user, secret, { expiresIn: '7d' }), user });
-}));
-
-app.post('/api/auth/connexion', asyncRoute(async (request, response) => {
-  const { courriel, motDePasse } = request.body;
-  const result = await pool.query('SELECT id, nom, courriel, role, mot_de_passe_hash FROM utilisateur WHERE courriel = $1', [String(courriel ?? '').trim().toLowerCase()]);
-  if (!result.rowCount || !(await bcrypt.compare(motDePasse ?? '', result.rows[0].mot_de_passe_hash))) return response.status(401).json({ error: 'Courriel ou mot de passe invalide.' });
-  const { mot_de_passe_hash: _, ...user } = result.rows[0] as User & { mot_de_passe_hash: string };
-  response.json({ token: jwt.sign(user, secret, { expiresIn: '7d' }), user });
-}));
-
-app.get('/api/auth/moi', requireAuth, (request: AuthRequest, response) => response.json({ user: request.user }));
 
 app.get('/api/seances', asyncRoute(async (_request, response) => {
   const { rows } = await pool.query(

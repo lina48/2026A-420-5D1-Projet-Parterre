@@ -12,7 +12,7 @@ docker compose up --build
 
 Ouvrir http://localhost:4000. Pour arrêter : `docker compose down`. Les données sont conservées dans le volume Docker `parterre-data`.
 
-Compte gestionnaire de démonstration : `gestion@parterre.local` / `Parterre2026!`. En production, définissez un `JWT_SECRET` privé et supprimez le compte de démonstration.
+Les pages et endpoints de connexion et d’inscription seront ajoutés dans une autre branche. Les opérations protégées nécessitent un jeton fourni par cette future intégration.
 
 ## Lancement de développement
 
@@ -31,8 +31,6 @@ Le client est servi sur http://localhost:5173 et l’API sur http://localhost:40
 |---|---|
 | `/` | Programmation et filtres par genre |
 | `/seances/:id` | Plan de salle, places en direct et confirmation |
-| `/connexion` | Connexion spectateur ou gestionnaire |
-| `/inscription` | Création d’un compte spectateur |
 | `/mes-reservations` | Billets et annulation |
 | `/gestion/seances/nouvelle` | Programmation d’une séance, gestionnaire uniquement |
 
@@ -40,9 +38,6 @@ Le client est servi sur http://localhost:5173 et l’API sur http://localhost:40
 
 | Méthode | Endpoint | Accès |
 |---|---|---|
-| `POST` | `/api/auth/inscription` | Public |
-| `POST` | `/api/auth/connexion` | Public |
-| `GET` | `/api/auth/moi` | Connecté |
 | `GET` | `/api/seances` | Public |
 | `GET` | `/api/seances/:id/plan` | Public |
 | `POST` | `/api/seances/:id/places/:placeId/retenir` | Connecté |
