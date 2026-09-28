@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: parterre
+      POSTGRES_USER: parterre
+      POSTGRES_PASSWORD: parterre
+    volumes:
+      - parterre-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parterre -d parterre"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgres://parterre:parterre@db:5432/parterre
+      JWT_SECRET: ${JWT_SECRET:-local-dev-secret-change-before-deploy}
+      PORT: 4000
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+
+volumes:
+  parterre-data:

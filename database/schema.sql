@@ -31,24 +31,23 @@ CREATE TABLE film (
 );
 
 CREATE TABLE place (
-    id BIGSERIAL,
+    id BIGSERIAL PRIMARY KEY,
     salle_id BIGINT NOT NULL,
     rangee VARCHAR(20) NOT NULL,
     numero INTEGER NOT NULL,
     type place_type NOT NULL DEFAULT 'standard',
-    PRIMARY KEY (id, salle_id),
     UNIQUE (salle_id, rangee, numero),
+    UNIQUE (id, salle_id),
     FOREIGN KEY (salle_id) REFERENCES salle(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE seance (
-    id BIGSERIAL,
+    id BIGSERIAL PRIMARY KEY,
     salle_id BIGINT NOT NULL,
     film_id BIGINT NOT NULL,
     date_heure TIMESTAMPTZ NOT NULL,
     statut seance_statut NOT NULL DEFAULT 'ouverte',
     creee_le TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (id, salle_id),
     FOREIGN KEY (salle_id) REFERENCES salle(id) ON DELETE RESTRICT,
     FOREIGN KEY (film_id) REFERENCES film(id) ON DELETE RESTRICT,
     UNIQUE (id, salle_id)
@@ -65,6 +64,7 @@ CREATE TABLE place_seance (
     UNIQUE (place_id, seance_id),
     FOREIGN KEY (place_id, salle_id) REFERENCES place(id, salle_id) ON DELETE RESTRICT,
     FOREIGN KEY (seance_id, salle_id) REFERENCES seance(id, salle_id) ON DELETE CASCADE,
+    UNIQUE (id, seance_id),
     CHECK (
         (etat = 'retenue' AND retenue_par_utilisateur_id IS NOT NULL AND retenue_expire_a IS NOT NULL)
         OR
@@ -90,7 +90,6 @@ CREATE TABLE reservation_place (
     seance_id BIGINT NOT NULL,
     active BOOLEAN NOT NULL DEFAULT TRUE,
     PRIMARY KEY (reservation_id, place_seance_id),
-    FOREIGN KEY (reservation_id) REFERENCES reservation(id) ON DELETE CASCADE,
     FOREIGN KEY (place_seance_id, seance_id) REFERENCES place_seance(id, seance_id) ON DELETE RESTRICT,
     FOREIGN KEY (reservation_id, seance_id) REFERENCES reservation(id, seance_id) ON DELETE CASCADE,
     CHECK (seance_id IS NOT NULL)
