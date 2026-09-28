@@ -61,6 +61,7 @@ CREATE TABLE place_seance (
     retenue_par_utilisateur_id BIGINT,
     retenue_expire_a TIMESTAMPTZ,
     UNIQUE (place_id, seance_id),
+    UNIQUE (id, seance_id),
     FOREIGN KEY (place_id, salle_id) REFERENCES place(id, salle_id) ON DELETE RESTRICT,
     FOREIGN KEY (seance_id, salle_id) REFERENCES seance(id, salle_id) ON DELETE CASCADE,
     UNIQUE (id, seance_id),
