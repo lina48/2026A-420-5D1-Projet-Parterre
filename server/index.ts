@@ -5,42 +5,17 @@ import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import jwt from 'jsonwebtoken';
-import pg from 'pg';
 import { Server } from 'socket.io';
+import { pool } from './db/pool';
+import { asyncRoute, requireAuth, requireManager, type AuthRequest } from './middleware/auth';
 
-const { Pool } = pg;
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173' } });
-const pool = new Pool({ connectionString: process.env.DATABASE_URL ?? 'postgres://parterre:parterre@localhost:5432/parterre' });
 const port = Number(process.env.PORT ?? 4000);
-const secret = process.env.JWT_SECRET ?? 'dev-secret-change-me';
 const here = path.dirname(fileURLToPath(import.meta.url));
-type User = { id: number; nom: string; courriel: string; role: 'spectateur' | 'gestionnaire' };
-type AuthRequest = Request & { user?: User };
 
 app.use(express.json());
-
-function requireAuth(request: AuthRequest, response: Response, next: NextFunction) {
-  const token = request.headers.authorization?.replace(/^Bearer\s+/i, '');
-  if (!token) return response.status(401).json({ error: 'Connectez-vous pour continuer.' });
-  try {
-    request.user = jwt.verify(token, secret) as User;
-    next();
-  } catch {
-    response.status(401).json({ error: 'Votre session a expiré. Reconnectez-vous.' });
-  }
-}
-
-function requireManager(request: AuthRequest, response: Response, next: NextFunction) {
-  if (request.user?.role !== 'gestionnaire') return response.status(403).json({ error: 'Accès réservé au personnel.' });
-  next();
-}
-
-function asyncRoute(handler: (request: AuthRequest, response: Response) => Promise<unknown>) {
-  return (request: AuthRequest, response: Response, next: NextFunction) => handler(request, response).catch(next);
-}
 
 async function seed() {
   const { rows: films } = await pool.query('SELECT id FROM film LIMIT 1');

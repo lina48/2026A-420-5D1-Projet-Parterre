@@ -25,6 +25,23 @@ npm run dev
 
 Le client est servi sur http://localhost:5173 et l’API sur http://localhost:4000. `npm run build` produit le client de production. Au premier démarrage, l’API crée le schéma et quelques séances d’exemple.
 
+## Organisation du code
+
+```text
+src/
+	pages/          # Écrans React
+	components/     # Composants partagés
+	services/       # Appels API
+	types.ts        # Types utilisés par le client
+	App.tsx         # Cadre et routes React
+server/
+	db/             # Connexion PostgreSQL
+	middleware/     # Authentification et gestion des erreurs asynchrones
+	index.ts        # Routes API, Socket.IO et démarrage
+database/         # Schéma et initialisation SQL
+docs/             # Conception et organisation de l’équipe
+```
+
 ## Routes de l’application
 
 | Route | Description |
