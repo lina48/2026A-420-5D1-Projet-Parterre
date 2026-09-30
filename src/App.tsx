@@ -117,6 +117,8 @@ function Selection({ user, notify }: { user: User | null; notify: (message: stri
   const [selected, setSelected] = useState<number[]>([]);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [holdEndsAt, setHoldEndsAt] = useState<number | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState(0);
 
   async function refreshSeats() {
     const result = await api<{ places: Seat[] }>(`/api/seances/${id}/plan`);
@@ -140,14 +142,42 @@ function Selection({ user, notify }: { user: User | null; notify: (message: stri
     return () => { socket.emit('seance:quitter', id); socket.disconnect(); };
   }, [id]);
 
+  useEffect(() => {
+    if (!holdEndsAt) {
+      setSecondsLeft(0);
+      return;
+    }
+    const updateTimer = () => setSecondsLeft(Math.max(0, Math.ceil((holdEndsAt - Date.now()) / 1000)));
+    updateTimer();
+    const timer = window.setInterval(updateTimer, 1000);
+    return () => window.clearInterval(timer);
+  }, [holdEndsAt]);
+
+  useEffect(() => {
+    if (holdEndsAt && secondsLeft === 0) {
+      setHoldEndsAt(null);
+      setSelected([]);
+      notify('Votre retenue de 5 minutes est expirée. Les places sont de nouveau disponibles.');
+      refreshSeats().catch(() => undefined);
+    }
+  }, [holdEndsAt, secondsLeft]);
+
   async function chooseSeat(seat: Seat) {
     if (seat.etat === 'vendue' || (seat.etat === 'retenue' && !selected.includes(seat.id))) return;
-    if (selected.includes(seat.id)) { setSelected((current) => current.filter((seatId) => seatId !== seat.id)); return; }
+    if (selected.includes(seat.id)) {
+      setSelected((current) => {
+        const next = current.filter((seatId) => seatId !== seat.id);
+        if (!next.length) setHoldEndsAt(null);
+        return next;
+      });
+      return;
+    }
     if (!user) { notify('La connexion sera disponible dans une prochaine branche.'); return; }
     setBusy(true);
     try {
       await api(`/api/seances/${id}/places/${seat.id}/retenir`, { method: 'POST' });
       setSelected((current) => [...current, seat.id]);
+      if (!selected.length) setHoldEndsAt(Date.now() + 5 * 60 * 1000);
       setSeats((current) => current.map((item) => item.id === seat.id ? { ...item, etat: 'retenue' } : item));
     } catch (error) { notify((error as Error).message); await refreshSeats(); }
     finally { setBusy(false); }
@@ -172,10 +202,10 @@ function Selection({ user, notify }: { user: User | null; notify: (message: stri
 
   return <section className="booking-page">
     <Link className="back-link" to="/"><ArrowLeft size={16} />Retour au programme</Link>
-    <div className="booking-heading"><div><div className="eyebrow"><span className="eyebrow-line" />VOTRE SOIRÉE</div><h1>{session.titre}</h1><p>{date.toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' })} <span>·</span> {date.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })} <span>·</span> {session.salle}</p></div><span className="live-label"><span className="live-pulse" />PLAN EN DIRECT</span></div>
+    <div className="booking-heading"><div><div className="eyebrow"><span className="eyebrow-line" />VOTRE SOIRÉE</div><h1>{session.titre}</h1><p>{date.toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' })} <span>·</span> {date.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })} <span>·</span> {session.salle}</p></div><div className="booking-status"><span className="live-label"><span className="live-pulse" />PLAN EN DIRECT</span>{secondsLeft > 0 && <span className={`hold-timer ${secondsLeft <= 60 ? 'urgent' : ''}`}><Clock3 size={14} />{String(Math.floor(secondsLeft / 60)).padStart(2, '0')}:{String(secondsLeft % 60).padStart(2, '0')} <small>retenue</small></span>}</div></div>
     <div className="booking-layout"><div className="seat-panel"><div className="screen-wrap"><div className="screen-glow" /><div className="screen-line" /><span>ÉCRAN</span></div><div className="seat-grid" aria-label="Plan des places">
       {grouped.map(({ row, seats: rowSeats }) => <div className="seat-row" key={row}><span className="row-label">{row}</span>{rowSeats.map((seat) => <button key={seat.id} disabled={busy || seat.etat === 'vendue' || (seat.etat === 'retenue' && !selected.includes(seat.id))} onClick={() => chooseSeat(seat)} className={`seat ${seat.etat} ${selected.includes(seat.id) ? 'selected' : ''} ${seat.type === 'accessible' ? 'accessible' : ''}`} title={`${row}${seat.numero} · ${seat.etat}`} aria-label={`Place ${row}${seat.numero}, ${seat.etat}`}>{seat.type === 'accessible' ? <Armchair size={12} /> : seat.numero}</button>)}</div>)}
-    </div><div className="seat-legend"><span><i className="legend-seat free" />Disponible</span><span><i className="legend-seat chosen" />Votre choix</span><span><i className="legend-seat held" />En cours</span><span><i className="legend-seat sold" />Réservé</span></div><p className="seat-help"><LockKeyhole size={14} />Votre sélection est gardée pendant 8 minutes.</p></div>
+    </div><div className="seat-legend"><span><i className="legend-seat free" />Disponible</span><span><i className="legend-seat chosen" />Votre choix</span><span><i className="legend-seat held" />En cours</span><span><i className="legend-seat sold" />Réservé</span></div><p className="seat-help"><LockKeyhole size={14} />Votre sélection est gardée pendant 5 minutes.</p></div>
       <aside className="summary-panel"><span className="summary-kicker">RÉCAPITULATIF</span><div className="summary-title"><span className="summary-poster" style={{ backgroundImage: `url("${session.image_url}")` }} /><div><strong>{session.titre}</strong><span>{date.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long' })} · {date.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}</span></div></div><div className="summary-divider" /><div className="selection-label"><span>Vos places</span><span>{selected.length} / 8</span></div><div className="chosen-seats">{chosenSeats.length ? chosenSeats.map((seat) => <span className="chosen-pill" key={seat.id}>{seat.rangee}{seat.numero}</span>) : <span className="muted-copy">Choisissez vos sièges dans le plan</span>}</div><div className="summary-divider" /><div className="total-line"><span>Total <small>· paiement sur place</small></span><strong>{(selected.length * 14.5).toFixed(2).replace('.', ',')} $</strong></div><button className="button button-gold button-wide" disabled={!selected.length || busy} onClick={book}>{busy ? 'Un instant…' : <>Confirmer les places <ArrowRight size={16} /></>}</button><p className="secure-note"><LockKeyhole size={12} />Réservation sécurisée, sans paiement en ligne</p></aside>
     </div>
   </section>;

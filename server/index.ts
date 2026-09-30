@@ -112,7 +112,7 @@ app.post('/api/seances/:id/places/:placeId/retenir', requireAuth, asyncRoute(asy
   if (seat.etat === 'vendue' || (seat.etat === 'retenue' && seat.retenue_expire_a > new Date() && seat.retenue_par_utilisateur_id !== request.user!.id)) {
     return response.status(409).json({ error: 'Cette place vient d’être prise. Choisissez-en une autre.' });
   }
-  const expires = new Date(Date.now() + 8 * 60 * 1000);
+  const expires = new Date(Date.now() + 5 * 60 * 1000);
   await pool.query("UPDATE place_seance SET etat = 'retenue', retenue_par_utilisateur_id = $1, retenue_expire_a = $2 WHERE id = $3", [request.user!.id, expires, seat.id]);
   const change = { id: seat.id, etat: 'retenue', expireA: expires.toISOString() };
   io.to(`seance:${request.params.id}`).emit('place:etat_change', change);
