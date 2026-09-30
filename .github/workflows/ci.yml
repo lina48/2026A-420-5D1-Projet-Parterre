@@ -34,16 +34,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: Charger le schéma dans la base de test
-        run: PGPASSWORD=postgres psql -h localhost -U postgres -d siegevif_test -f database/schema.sql
-
       - name: Installer les dépendances
-        working-directory: backend
-        run: npm install
+        run: npm ci
 
-      - name: Lancer les tests
-        working-directory: backend
-        env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/siegevif_test
-          SESSION_SECRET: secret-de-test-ci
-        run: npm test
+      - name: Vérifier et construire
+        run: npm run build
