@@ -1,6 +1,3 @@
-# À placer dans .github/workflows/ci.yml À LA RACINE DU DÉPÔT
-# (le dossier .github doit être à côté de docs/ et database/, pas
-# dans backend/ — GitHub ne regarde qu'à cet endroit précis).
 name: CI
 
 on:
