@@ -57,6 +57,8 @@ docs/             # Conception et organisation de l’équipe
 
 | Méthode | Endpoint | Accès |
 |---|---|---|
+| `POST` | `/api/auth/inscription` | Public |
+| `POST` | `/api/auth/connexion` | Public |
 | `GET` | `/api/seances` | Public |
 | `GET` | `/api/seances/:id/plan` | Public |
 | `POST` | `/api/seances/:id/places/:placeId/retenir` | Connecté |
@@ -69,6 +71,14 @@ Socket.IO diffuse `place:etat_change` et `place:retenue_expiree` par salle. Les 
 
 La documentation détaillée du projet et les décisions techniques restent disponibles dans `docs/`.
  
+## Ce qui est simulé dans l'alpha
+
+| Élément | Ce qui est simulé | Ce qui le remplacera | Sprint |
+|---|---|---|---|
+| Paiement | Aucun paiement en ligne : le total affiché est indicatif (« paiement sur place ») et la réservation est confirmée sans carte | Rien, le paiement réel est hors portée du projet (#21) | — |
+| Tarif | Prix fixe de 14,50 $ par place, écrit dans le code du serveur et de l'écran | Tarifs réduits et catégories de prix (#15) | 3 |
+| Films et séances | 3 films de démonstration et des séances de démo recréées au démarrage de l'application, seulement s'il n'en reste aucune à venir | Séances créées par le gestionnaire (#3) | 1 |
+| Affiches | Images chargées depuis Unsplash (site externe) | Images hébergées dans le projet | À décider (aucun récit au backlog) |
 
 ## Documentation
 
