@@ -12,7 +12,9 @@ docker compose up --build
 
 Ouvrir http://localhost:3000. Pour arrêter : `docker compose down`. Les données sont conservées dans le volume Docker `donnees_postgres` : `docker compose down` les garde, mais `docker compose down -v` les **efface**.
 
-L'inscription et la connexion sont disponibles (`/inscription`, `/connexion`). Les opérations protégées nécessitent le jeton renvoyé à la connexion.
+L’inscription et la connexion sont disponibles sur `/inscription` et `/connexion`. Les opérations protégées utilisent le jeton JWT renvoyé après l’authentification.
+
+Pour créer le premier compte gestionnaire, définissez `INITIAL_ADMIN_NAME`, `INITIAL_ADMIN_EMAIL` et `INITIAL_ADMIN_PASSWORD` dans l’environnement avant le démarrage du serveur. Le mot de passe doit contenir au moins 12 caractères. Le compte est créé uniquement si son adresse courriel n’existe pas déjà. En production, configurez ces valeurs dans les secrets de l’hébergeur; ne réutilisez pas les identifiants de test locaux.
 
 ## Lancement de développement
 

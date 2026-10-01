@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes } from 'react-router-dom';
-import { Check, Clapperboard, LogOut } from 'lucide-react';
+import { Check, Clapperboard, LogIn, LogOut } from 'lucide-react';
 import CreateSessionPage from './pages/CreateSessionPage';
+import LoginPage from './pages/LoginPage';
 import MyTicketsPage from './pages/MyTicketsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProgrammePage from './pages/ProgrammePage';
 import SeatSelectionPage from './pages/SeatSelectionPage';
 import type { User } from './types';
-import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 
 const savedUser = localStorage.getItem('parterre-user');
@@ -45,16 +45,16 @@ export default function App() {
           {user?.role === 'gestionnaire' && <NavLink to="/gestion/seances/nouvelle">Gestion</NavLink>}
         </nav>
         <div className="account-area">
-          {user ? <><span className="account-name"><span className="online-dot" />{user.nom.split(' ')[0]}</span><button className="icon-button" title="Déconnexion" onClick={signOut}><LogOut size={17} /></button></> : <Link className="text-link" to="/connexion">Se connecter</Link>}
+          {user ? <><span className="account-name"><span className="online-dot" />{user.nom.split(' ')[0]}</span><button className="icon-button" title="Déconnexion" onClick={signOut}><LogOut size={17} /></button></> : <Link className="account-link" to="/connexion"><LogIn size={15} />Se connecter</Link>}
         </div>
       </header>
       <main className="page-shell">
         <Routes>
           <Route path="/" element={<ProgrammePage />} />
+          <Route path="/connexion" element={<LoginPage onAuth={handleAuth} notify={setToast} />} />
           <Route path="/seances/:id" element={<SeatSelectionPage user={user} notify={setToast} />} />
           <Route path="/mes-reservations" element={<MyTicketsPage user={user} notify={setToast} />} />
           <Route path="/gestion/seances/nouvelle" element={<CreateSessionPage user={user} notify={setToast} />} />
-                    <Route path="/connexion" element={<LoginPage onAuth={handleAuth} notify={setToast} />} />
           <Route path="/inscription" element={<RegisterPage onAuth={handleAuth} notify={setToast} />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

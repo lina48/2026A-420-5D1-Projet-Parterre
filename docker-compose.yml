@@ -7,12 +7,9 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: siegevif
     volumes:
-      # Volume nommé : les données survivent à un `docker compose down`
-      # (mais pas à `docker compose down -v`) — exigence du sprint 1 :
-      # « les données survivent à un redémarrage des conteneurs ».
       - donnees_postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d siegevif"]
       interval: 3s
       timeout: 3s
       retries: 10
@@ -27,7 +24,10 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/siegevif
-      JWT_SECRET: change-moi-pour-une-vraie-valeur-aleatoire
+      JWT_SECRET: ${JWT_SECRET:-local-dev-secret-change-before-deploy}
+      INITIAL_ADMIN_NAME: ${INITIAL_ADMIN_NAME:-}
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
       PORT: 3000
     ports:
       - "3000:3000"

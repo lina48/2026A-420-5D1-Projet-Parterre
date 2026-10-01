@@ -7,9 +7,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Server } from 'socket.io';
 import { pool } from './db/pool';
-import { asyncRoute, requireAuth, requireManager, type AuthRequest, type User } from './middleware/auth';
+import { asyncRoute, createToken, requireAuth, requireManager, type AuthRequest, type User } from './middleware/auth';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 
 const app = express();
 const httpServer = createServer(app);
@@ -18,6 +17,21 @@ const port = Number(process.env.PORT ?? 4000);
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 app.use(express.json());
+
+app.post('/api/auth/connexion', asyncRoute(async (request, response) => {
+  const { courriel, motDePasse } = request.body as { courriel?: string; motDePasse?: string };
+  if (!courriel?.trim() || !motDePasse) return response.status(400).json({ error: 'Courriel et mot de passe requis.' });
+  const { rows } = await pool.query(
+    'SELECT id, nom, courriel, role, mot_de_passe_hash FROM utilisateur WHERE courriel = $1',
+    [courriel.trim().toLowerCase()]
+  );
+  const row = rows[0];
+  if (!row || !(await bcrypt.compare(motDePasse, row.mot_de_passe_hash))) {
+    return response.status(401).json({ error: 'Courriel ou mot de passe invalide.' });
+  }
+  const user = { id: row.id, nom: row.nom, courriel: row.courriel, role: row.role };
+  response.json({ token: createToken(user), user });
+}));
 
 async function seed() {
   const { rows: films } = await pool.query('SELECT id FROM film LIMIT 1');
@@ -59,8 +73,6 @@ async function seed() {
   }
 }
 
-const secret = process.env.JWT_SECRET ?? 'dev-secret-change-me';
-
 app.post('/api/auth/inscription', asyncRoute(async (request, response) => {
   const { nom, courriel, motDePasse } = request.body as { nom?: string; courriel?: string; motDePasse?: string };
   if (!nom?.trim() || !courriel?.trim() || !motDePasse || motDePasse.length < 8) {
@@ -72,22 +84,30 @@ app.post('/api/auth/inscription', asyncRoute(async (request, response) => {
     [nom.trim(), courriel.trim().toLowerCase(), hash]
   );
   const user = rows[0] as User;
-  const token = jwt.sign(user, secret, { expiresIn: '7d' });
+  const token = createToken(user);
   response.status(201).json({ token, user });
 }));
 
-app.post('/api/auth/connexion', asyncRoute(async (request, response) => {
-  const { courriel, motDePasse } = request.body as { courriel?: string; motDePasse?: string };
-  if (!courriel?.trim() || !motDePasse) return response.status(400).json({ error: 'Courriel et mot de passe requis.' });
-  const { rows } = await pool.query('SELECT * FROM utilisateur WHERE courriel = $1', [courriel.trim().toLowerCase()]);
-  const row = rows[0];
-  if (!row || !(await bcrypt.compare(motDePasse, row.mot_de_passe_hash))) {
-    return response.status(401).json({ error: 'Courriel ou mot de passe invalide.' });
+async function seedInitialManager() {
+  const name = process.env.INITIAL_ADMIN_NAME?.trim();
+  const email = process.env.INITIAL_ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.INITIAL_ADMIN_PASSWORD;
+  const configuredValues = [name, email, password].filter(Boolean).length;
+  if (configuredValues === 0) return;
+  if (!name || !email || !password) {
+    throw new Error('INITIAL_ADMIN_NAME, INITIAL_ADMIN_EMAIL et INITIAL_ADMIN_PASSWORD doivent être configurés ensemble.');
   }
-  const user: User = { id: row.id, nom: row.nom, courriel: row.courriel, role: row.role };
-  const token = jwt.sign(user, secret, { expiresIn: '7d' });
-  response.json({ token, user });
-}));
+  if (password.length < 12) throw new Error('INITIAL_ADMIN_PASSWORD doit contenir au moins 12 caractères.');
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  const { rowCount } = await pool.query(
+    `INSERT INTO utilisateur (nom, courriel, mot_de_passe_hash, role)
+     VALUES ($1, $2, $3, 'gestionnaire')
+     ON CONFLICT (courriel) DO NOTHING`,
+    [name, email, passwordHash]
+  );
+  if (rowCount) console.log(`Compte gestionnaire initial créé pour ${email}.`);
+}
 
 app.get('/api/seances', asyncRoute(async (_request, response) => {
   const { rows } = await pool.query(
@@ -203,6 +223,7 @@ async function start() {
   const sql = await readFile(path.resolve(here, '../database/init.sql'), 'utf8');
   await pool.query(sql);
   await seed();
+  await seedInitialManager();
   setInterval(async () => {
     try {
       const { rows } = await pool.query(
