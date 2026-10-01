@@ -43,7 +43,7 @@ export default function SeatSelectionPage({ user, notify }: Props) {
   async function chooseSeat(seat: Seat) {
     if (seat.etat === 'vendue' || (seat.etat === 'retenue' && !selected.includes(seat.id))) return;
     if (selected.includes(seat.id)) { setSelected((current) => current.filter((seatId) => seatId !== seat.id)); return; }
-    if (!user) { notify('La connexion sera disponible dans une prochaine branche.'); return; }
+    if (!user) { navigate('/connexion'); return; }
     setBusy(true);
     try {
       await api(`/api/seances/${id}/places/${seat.id}/retenir`, { method: 'POST' });
