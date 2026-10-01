@@ -1,24 +1,18 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, X } from 'lucide-react';
 import { api } from '../services/api';
 import type { User } from '../types';
 
-type Props = {
-  onAuth: (result: { token: string; user: User }) => void;
-  notify: (message: string) => void;
-};
+type Props = { onAuth: (result: { token: string; user: User }) => void; notify: (message: string) => void };
 
 export default function LoginPage({ onAuth, notify }: Props) {
   const navigate = useNavigate();
-  const location = useLocation();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusy(true);
-    setError('');
+    event.preventDefault(); setBusy(true); setError('');
     const values = new FormData(event.currentTarget);
     try {
       const result = await api<{ token: string; user: User }>('/api/auth/connexion', {
@@ -27,13 +21,9 @@ export default function LoginPage({ onAuth, notify }: Props) {
       });
       onAuth(result);
       notify(`Bon retour, ${result.user.nom.split(' ')[0]} !`);
-      const returnTo = (location.state as { from?: string } | null)?.from;
-      navigate(result.user.role === 'gestionnaire' ? '/gestion/seances/nouvelle' : returnTo ?? '/');
-    } catch (reason) {
-      setError((reason as Error).message);
-    } finally {
-      setBusy(false);
-    }
+      navigate('/');
+    } catch (reason) { setError((reason as Error).message); }
+    finally { setBusy(false); }
   }
 
   return (
