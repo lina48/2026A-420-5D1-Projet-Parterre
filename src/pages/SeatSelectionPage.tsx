@@ -17,6 +17,10 @@ export default function SeatSelectionPage({ user, notify }: Props) {
   const [remaining, setRemaining] = useState<number>(0);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [cardNumber, setCardNumber] = useState('4242 4242 4242 4242');
+  const [cardExpiry, setCardExpiry] = useState('12/28');
+  const [cardCvv, setCardCvv] = useState('···');
 
   async function refreshSeats() {
     const result = await api<{ places: Seat[] }>(`/api/seances/${id}/plan`);
@@ -130,9 +134,12 @@ export default function SeatSelectionPage({ user, notify }: Props) {
   }
 
   const grouped = useMemo(() => [...new Set(seats.map((seat) => seat.rangee))].sort().map((row) => ({ row, seats: seats.filter((seat) => seat.rangee === row).sort((a, b) => a.numero - b.numero) })), [seats]);
+  const chosenSeats = seats.filter((seat) => selected.includes(seat.id));
+  const seatSummary = chosenSeats.map((seat) => `${seat.rangee}${seat.numero}`).join(', ');
+  const totalAmount = (selected.length * 14.5).toFixed(2).replace('.', ',');
+
   if (loading) return <div className="loading-line">Ouverture de la salle…</div>;
   if (!session) return <div className="empty-state"><Film /><p>Séance introuvable.</p><Link to="/">Retour au programme</Link></div>;
-  const chosenSeats = seats.filter((seat) => selected.includes(seat.id));
   const date = new Date(session.date_heure);
 
   return <section className="booking-page">
@@ -141,7 +148,68 @@ export default function SeatSelectionPage({ user, notify }: Props) {
     <div className="booking-layout"><div className="seat-panel"><div className="screen-wrap"><div className="screen-glow" /><div className="screen-line" /><span>ÉCRAN</span></div><div className="seat-grid" aria-label="Plan des places">
       {grouped.map(({ row, seats: rowSeats }) => <div className="seat-row" key={row}><span className="row-label">{row}</span>{rowSeats.map((seat) => <button key={seat.id} disabled={busy || seat.etat === 'vendue' || (seat.etat === 'retenue' && !selected.includes(seat.id))} onClick={() => chooseSeat(seat)} className={`seat ${seat.etat} ${selected.includes(seat.id) ? 'selected' : ''} ${seat.type === 'accessible' ? 'accessible' : ''}`} title={`${row}${seat.numero} · ${seat.etat}`} aria-label={`Place ${row}${seat.numero}, ${seat.etat}`}>{seat.type === 'accessible' ? <Armchair size={12} /> : seat.numero}</button>)}</div>)}
     </div><div className="seat-legend"><span><i className="legend-seat free" />Disponible</span><span><i className="legend-seat chosen" />Votre choix</span><span><i className="legend-seat held" />En cours</span><span><i className="legend-seat sold" />Réservé</span></div><p className="seat-help"><LockKeyhole size={14} />{expiry ? <>Votre sélection expire dans <strong>{formatRemaining(remaining)}</strong>.</> : <>Votre sélection est gardée pendant 5 minutes.</>}</p></div>
-      <aside className="summary-panel"><span className="summary-kicker">RÉCAPITULATIF</span><div className="summary-title"><span className="summary-poster" style={{ backgroundImage: `url("${session.image_url}")` }} /><div><strong>{session.titre}</strong><span>{date.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long' })} · {date.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}</span></div></div><div className="summary-divider" /><div className="selection-label"><span>Vos places</span><span>{selected.length} / 8</span></div><div className="chosen-seats">{chosenSeats.length ? chosenSeats.map((seat) => <span className="chosen-pill" key={seat.id}>{seat.rangee}{seat.numero}</span>) : <span className="muted-copy">Choisissez vos sièges dans le plan</span>}</div><div className="summary-divider" /><div className="total-line"><span>Total <small>· paiement sur place</small></span><strong>{(selected.length * 14.5).toFixed(2).replace('.', ',')} $</strong></div><button className="button button-gold button-wide" disabled={!selected.length || busy} onClick={book}>{busy ? 'Un instant…' : <>Confirmer les places <ArrowRight size={16} /></>}</button><p className="secure-note"><LockKeyhole size={12} />Réservation sécurisée, sans paiement en ligne</p></aside>
+      <aside className="summary-panel"><span className="summary-kicker">RÉCAPITULATIF</span><div className="summary-title"><span className="summary-poster" style={{ backgroundImage: `url("${session.image_url}")` }} /><div><strong>{session.titre}</strong><span>{date.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long' })} · {date.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}</span></div></div><div className="summary-divider" /><div className="selection-label"><span>Vos places</span><span>{selected.length} / 8</span></div><div className="chosen-seats">{chosenSeats.length ? chosenSeats.map((seat) => <span className="chosen-pill" key={seat.id}>{seat.rangee}{seat.numero}</span>) : <span className="muted-copy">Choisissez vos sièges dans le plan</span>}</div><div className="summary-divider" /><div className="total-line"><span>Total <small>· paiement sur place</small></span><strong>{totalAmount} $</strong></div><button className="button button-gold button-wide" disabled={!selected.length || busy} onClick={() => setCheckoutOpen(true)}>{busy ? 'Un instant…' : <>Passer à la caisse <ArrowRight size={16} /></>}</button><p className="secure-note"><LockKeyhole size={12} />Réservation sécurisée, sans paiement en ligne</p></aside>
     </div>
+
+    {checkoutOpen && (
+      <div className="payment-overlay" onClick={() => setCheckoutOpen(false)}>
+        <div className="payment-card" onClick={(event) => event.stopPropagation()}>
+          <div className="payment-header">
+            <div>
+              <h2>Paiement</h2>
+              <p>Réservation sécurisée</p>
+            </div>
+            <button type="button" className="payment-close" onClick={() => setCheckoutOpen(false)} aria-label="Fermer la caisse">×</button>
+          </div>
+
+          <div className="payment-summary-block">
+            <div className="payment-section-label">Récapitulatif</div>
+            <div className="payment-line">
+              <span>{session.titre} · {seatSummary || 'Place sélectionnée'}</span>
+              <strong>{totalAmount} €</strong>
+            </div>
+            <div className="payment-line payment-line-total">
+              <span>Total</span>
+              <strong>{totalAmount} €</strong>
+            </div>
+          </div>
+
+          <div className="payment-form">
+            <label>
+              <span>NUMÉRO DE CARTE</span>
+              <div className="card-input card-input-number">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5A2.5 2.5 0 015.5 5h13A2.5 2.5 0 0121 7.5v9A2.5 2.5 0 0118.5 19h-13A2.5 2.5 0 013 16.5v-9Zm2 .5h14v2H5V8Zm0 4h8v2H5v-2Z"/></svg>
+                <input value={cardNumber} onChange={(event) => setCardNumber(event.target.value)} placeholder="4242 4242 4242 4242" />
+              </div>
+            </label>
+
+            <div className="payment-inline-fields">
+              <label>
+                <span>EXPIRATION</span>
+                <input value={cardExpiry} onChange={(event) => setCardExpiry(event.target.value)} placeholder="12/28" />
+              </label>
+
+              <label>
+                <span>CVV</span>
+                <input value={cardCvv} onChange={(event) => setCardCvv(event.target.value)} placeholder="···" />
+              </label>
+            </div>
+
+            <label className="payment-checkbox">
+              <input type="checkbox" defaultChecked />
+              <span>Paiement 3D Secure · Données chiffrées</span>
+            </label>
+          </div>
+
+          <div className="payment-actions">
+            <button type="button" className="payment-cancel" onClick={() => setCheckoutOpen(false)}>Annuler</button>
+            <button type="button" className="button button-gold payment-confirm" onClick={() => { setCheckoutOpen(false); void book(); }} disabled={busy}>
+              <span className="payment-icon">$</span>
+              {busy ? 'Un instant…' : `Confirmer — ${totalAmount} €`}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   </section>;
 }
