@@ -82,8 +82,9 @@ export default function SeatSelectionPage({ user, notify }: Props) {
 
   useEffect(() => {
     if (!expiry) return;
+    const end = expiry;
     function update() {
-      const secs = Math.max(0, Math.ceil((expiry - Date.now()) / 1000));
+      const secs = Math.max(0, Math.ceil((end - Date.now()) / 1000));
       setRemaining(secs);
     }
     update();
