@@ -18,6 +18,9 @@ services:
     environment:
       DATABASE_URL: postgres://parterre:parterre@db:5432/parterre
       JWT_SECRET: ${JWT_SECRET:-local-dev-secret-change-before-deploy}
+      INITIAL_ADMIN_NAME: ${INITIAL_ADMIN_NAME:-}
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
       PORT: 4000
     depends_on:
       db:

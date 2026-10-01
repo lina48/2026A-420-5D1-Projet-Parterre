@@ -12,7 +12,7 @@ docker compose up --build
 
 Ouvrir http://localhost:4000. Pour arrêter : `docker compose down`. Les données sont conservées dans le volume Docker `parterre-data`.
 
-Les pages et endpoints de connexion et d’inscription seront ajoutés dans une autre branche. Les opérations protégées nécessitent un jeton fourni par cette future intégration.
+La connexion est disponible à `/connexion`. Pour créer le premier compte gestionnaire, définissez `INITIAL_ADMIN_NAME`, `INITIAL_ADMIN_EMAIL` et `INITIAL_ADMIN_PASSWORD` dans l’environnement du serveur avant son démarrage. Le mot de passe doit contenir au moins 12 caractères. Le compte est ajouté seulement si son adresse courriel n’existe pas déjà; ces variables peuvent être retirées après le premier démarrage. En production, configurez-les dans les secrets du fournisseur d’hébergement et ne réutilisez pas le mot de passe de test local.
 
 ## Lancement de développement
 
