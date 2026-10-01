@@ -8,6 +8,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import ProgrammePage from './pages/ProgrammePage';
 import SeatSelectionPage from './pages/SeatSelectionPage';
 import type { User } from './types';
+import RegisterPage from './pages/RegisterPage';
 
 const savedUser = localStorage.getItem('parterre-user');
 const initialUser: User | null = savedUser ? JSON.parse(savedUser) as User : null;
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="/seances/:id" element={<SeatSelectionPage user={user} notify={setToast} />} />
           <Route path="/mes-reservations" element={<MyTicketsPage user={user} notify={setToast} />} />
           <Route path="/gestion/seances/nouvelle" element={<CreateSessionPage user={user} notify={setToast} />} />
+          <Route path="/inscription" element={<RegisterPage onAuth={handleAuth} notify={setToast} />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

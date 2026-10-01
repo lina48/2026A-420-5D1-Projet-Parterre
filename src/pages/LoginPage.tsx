@@ -43,10 +43,11 @@ export default function LoginPage({ onAuth, notify }: Props) {
       <h1>Content de vous revoir</h1>
       <form className="admin-form" onSubmit={submit}>
         <label>Courriel<input name="courriel" type="email" placeholder="vous@exemple.com" required /></label>
-        <label>Mot de passe<input name="motDePasse" type="password" required /></label>
+        <label>Mot de passe<input name="motDePasse" type="password" required minLength={8} /></label>
         {error && <p className="form-error"><X size={15} />{error}</p>}
         <button className="button button-gold" disabled={busy}>{busy ? 'Connexion…' : 'Se connecter'}</button>
       </form>
+      <p className="muted-copy">Pas encore de compte ? <Link to="/inscription">Créer un compte</Link></p>
     </section>
   );
 }
