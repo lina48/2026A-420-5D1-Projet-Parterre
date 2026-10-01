@@ -21,6 +21,7 @@ export type Seat = {
   type: string;
   etat: 'libre' | 'retenue' | 'vendue';
   retenue_active?: boolean;
+  retenue_expire_a?: string | null;
 };
 
 export type Reservation = {

@@ -34,11 +34,18 @@ export default function SeatSelectionPage({ user, notify }: Props) {
   useEffect(() => {
     const socket = io();
     socket.emit('seance:rejoindre', id);
-    socket.on('place:etat_change', (change: { id: number; etat: Seat['etat'] }) => {
-      setSeats((current) => current.map((seat) => seat.id === change.id ? { ...seat, etat: change.etat } : seat));
+    socket.on('place:etat_change', (change: { id: number; etat: Seat['etat']; expireA?: string | null }) => {
+      setSeats((current) => current.map((seat) => seat.id === change.id ? {
+        ...seat,
+        etat: change.etat,
+        retenue_expire_a: change.etat === 'retenue' ? (change.expireA ?? seat.retenue_expire_a) : null,
+      } : seat));
       if (change.etat === 'vendue' || change.etat === 'libre') setSelected((current) => current.filter((seatId) => seatId !== change.id));
     });
-    socket.on('place:retenue_expiree', (change: { id: number }) => setSeats((current) => current.map((seat) => seat.id === change.id ? { ...seat, etat: 'libre' } : seat)));
+    socket.on('place:retenue_expiree', (change: { id: number }) => {
+      setSeats((current) => current.map((seat) => seat.id === change.id ? { ...seat, etat: 'libre', retenue_expire_a: null } : seat));
+      setSelected((current) => current.filter((seatId) => seatId !== change.id));
+    });
     return () => { socket.emit('seance:quitter', id); socket.disconnect(); };
   }, [id]);
 
@@ -48,9 +55,14 @@ export default function SeatSelectionPage({ user, notify }: Props) {
     if (!user) { navigate('/connexion'); return; }
     setBusy(true);
     try {
-      await api(`/api/seances/${id}/places/${seat.id}/retenir`, { method: 'POST' });
+      const result = await api<{ place: { expireA?: string } }>(`/api/seances/${id}/places/${seat.id}/retenir`, { method: 'POST' });
+      const expiresAt = result.place.expireA ? new Date(result.place.expireA).toISOString() : new Date(Date.now() + 5 * 60 * 1000).toISOString();
       setSelected((current) => [...current, seat.id]);
-      setSeats((current) => current.map((item) => item.id === seat.id ? { ...item, etat: 'retenue' } : item));
+      setSeats((current) => current.map((item) => item.id === seat.id ? {
+        ...item,
+        etat: 'retenue',
+        retenue_expire_a: expiresAt,
+      } : item));
     } catch (error) { notify((error as Error).message); await refreshSeats(); }
     finally { setBusy(false); }
   }
@@ -68,38 +80,48 @@ export default function SeatSelectionPage({ user, notify }: Props) {
     finally { setBusy(false); }
   }
 
-  // Start expiry when selection is non-empty, clear when empty
-  useEffect(() => {
-    if (selected.length && !expiry) {
-      setExpiry(Date.now() + 5 * 60 * 1000); // 5 minutes
-    }
-    if (!selected.length && expiry) {
-      setExpiry(null);
-      setRemaining(0);
-    }
-  }, [selected]);
+  const selectedExpiry = useMemo(() => {
+    const timestamps = selected
+      .map((seatId) => {
+        const seat = seats.find((item) => item.id === seatId);
+        return seat?.retenue_expire_a ? new Date(seat.retenue_expire_a).getTime() : null;
+      })
+      .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
 
+    if (!timestamps.length) return null;
+    return Math.min(...timestamps);
+  }, [selected, seats]);
+
+  useEffect(() => {
+    setExpiry(selectedExpiry);
+    if (!selectedExpiry) setRemaining(0);
+  }, [selectedExpiry]);
 
   useEffect(() => {
     if (!expiry) return;
+    const deadline = expiry;
+
     function update() {
-      const secs = Math.max(0, Math.ceil((expiry - Date.now()) / 1000));
+      const secs = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
       setRemaining(secs);
     }
+
     update();
-    const timer = setInterval(update, 250);
-    return () => clearInterval(timer);
+    const timer = window.setInterval(update, 250);
+    return () => window.clearInterval(timer);
   }, [expiry]);
 
-
   useEffect(() => {
-    if (expiry && remaining === 0) {
-      setExpiry(null);
-      setSelected([]);
+    if (!expiry || remaining > 0) return;
+    setSelected((current) => current.filter((seatId) => {
+      const seat = seats.find((item) => item.id === seatId);
+      return Boolean(seat?.retenue_expire_a && new Date(seat.retenue_expire_a).getTime() > Date.now());
+    }));
+    if (selected.length) {
       notify('Votre retenue de 5 minutes est expirée. Les places sont de nouveau disponibles.');
-      refreshSeats().catch(() => {});
     }
-  }, [remaining, expiry]);
+    refreshSeats().catch(() => {});
+  }, [remaining, expiry, seats, selected, notify]);
 
   function formatRemaining(secs: number) {
     const m = Math.floor(secs / 60).toString().padStart(1, '0');
