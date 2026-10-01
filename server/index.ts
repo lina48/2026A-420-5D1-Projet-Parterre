@@ -7,9 +7,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Server } from 'socket.io';
 import { pool } from './db/pool';
-import { asyncRoute, requireAuth, requireManager, type AuthRequest, type User } from './middleware/auth';
+import { asyncRoute, createToken, requireAuth, requireManager, type AuthRequest, type User } from './middleware/auth';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 
 
 const app = express();
@@ -20,62 +19,58 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 
 app.use(express.json());
 
+app.post('/api/auth/connexion', asyncRoute(async (request, response) => {
+  const { courriel, motDePasse } = request.body as { courriel?: string; motDePasse?: string };
+  if (!courriel?.trim() || !motDePasse) return response.status(400).json({ error: 'Courriel et mot de passe requis.' });
+  const { rows } = await pool.query(
+    'SELECT id, nom, courriel, role, mot_de_passe_hash FROM utilisateur WHERE courriel = $1',
+    [courriel.trim().toLowerCase()]
+  );
+  const row = rows[0];
+  if (!row || !(await bcrypt.compare(motDePasse, row.mot_de_passe_hash))) {
+    return response.status(401).json({ error: 'Courriel ou mot de passe invalide.' });
+  }
+  const user = { id: row.id, nom: row.nom, courriel: row.courriel, role: row.role };
+  response.json({ token: createToken(user), user });
+}));
 
 async function seed() {
-
-  const { rows: films } = await pool.query('SELECT id FROM film LIMIT 1');
-
-  if (films.length) return;
+  const { rows: upcomingShows } = await pool.query(
+    "SELECT id FROM seance WHERE statut = 'ouverte' AND date_heure > NOW() LIMIT 1"
+  );
+  if (upcomingShows.length) return;
 
   const client = await pool.connect();
 
   try {
 
     await client.query('BEGIN');
-
-    const room = await client.query(
-      "INSERT INTO salle (nom, capacite, lieu) VALUES ('Salle Lumière', 72, 'Cinéma Parterre') RETURNING id"
-    );
-
-    for (const row of 'ABCDEFGH') for (let number = 1; number <= 9; number += 1) {
-
-      await client.query(
-        'INSERT INTO place (salle_id, rangee, numero, type) VALUES ($1, $2, $3, $4)',
-        [
-          room.rows[0].id,
-          row,
-          number,
-          row === 'H' && number <= 2 ? 'accessible' : 'standard'
-        ]
-      );
-
+    const { rows: rooms } = await client.query('SELECT id FROM salle ORDER BY id LIMIT 1');
+    const room = rooms[0] ?? (await client.query(
+      "INSERT INTO salle (nom, capacite) VALUES ('Salle Lumière', 72) RETURNING id"
+    )).rows[0];
+    const { rows: placeCount } = await client.query('SELECT COUNT(*)::int AS total FROM place WHERE salle_id = $1', [room.id]);
+    if (!placeCount[0].total) {
+      for (const row of 'ABCDEFGH') for (let number = 1; number <= 9; number += 1) {
+        await client.query(
+          'INSERT INTO place (salle_id, rangee, numero, type) VALUES ($1, $2, $3, $4) ON CONFLICT (salle_id, rangee, numero) DO NOTHING',
+          [room.id, row, number, row === 'H' && number <= 2 ? 'accessible' : 'standard']
+        );
+      }
     }
-
-    const movieRows = await client.query(
-      `INSERT INTO film (
-        titre,
-        duree_minutes,
-        genre,
-        image_url,
-        description,
-        sous_titre,
-        spectacle_type
-      ) VALUES
-       ('Les heures bleues', 118, 'Drame', 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=85', 'Une nuit suffit parfois à changer le cours d’une vie.', NULL, 'cinema'),
-       ('Le dernier été', 104, 'Comédie', 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=1200&q=85', 'Une parenthèse lumineuse au bord de la mer.', NULL, 'cinema'),
-       ('Mondes parallèles', 132, 'Science-fiction', 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=85', 'À la frontière du réel, une autre histoire commence.', NULL, 'cinema')
-       RETURNING id`
-    );
-
-    const filmIds = movieRows.rows.map((row) => row.id as number);
-
-    const schedule: Array<[number, number]> = [
-      [0, 18],
-      [1, 20],
-      [2, 21],
-      [0, 22]
-    ];
-
+    let { rows: films } = await client.query('SELECT id FROM film ORDER BY id LIMIT 3');
+    if (!films.length) {
+      const movieRows = await client.query(
+        `INSERT INTO film (titre, duree_minutes, genre, image_url, description) VALUES
+         ('Les heures bleues', 118, 'Drame', 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=85', 'Une nuit suffit parfois à changer le cours d’une vie.'),
+         ('Le dernier été', 104, 'Comédie', 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=1200&q=85', 'Une parenthèse lumineuse au bord de la mer.'),
+         ('Mondes parallèles', 132, 'Science-fiction', 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=85', 'À la frontière du réel, une autre histoire commence.')
+         RETURNING id`
+      );
+      films = movieRows.rows;
+    }
+    const filmIds = films.map((row) => row.id as number);
+    const schedule: Array<[number, number]> = [[0, 18], [1, 20], [2, 21], [0, 22]];
     for (const [index, hour] of schedule) {
 
       const starts = new Date();
@@ -85,16 +80,10 @@ async function seed() {
       }
 
       starts.setHours(hour, 0, 0, 0);
-
       const show = await client.query(
         'INSERT INTO seance (salle_id, film_id, date_heure) VALUES ($1, $2, $3) RETURNING id',
-        [
-          room.rows[0].id,
-          filmIds[index],
-          starts
-        ]
+        [room.id, filmIds[index % filmIds.length], starts]
       );
-
       const showId = show.rows[0].id;
 
       await client.query(
@@ -113,9 +102,10 @@ async function seed() {
           22
         FROM place
         WHERE salle_id = $2`,
+        ON CONFLICT (place_id, seance_id) DO NOTHING`,
         [
           showId,
-          room.rows[0].id
+          room.id
         ]
       );
 
@@ -166,62 +156,30 @@ app.post('/api/auth/inscription', asyncRoute(async (request, response) => {
   );
 
   const user = rows[0] as User;
-
-  const token = jwt.sign(user, secret, {
-    expiresIn: '7d'
-  });
-
-  response.status(201).json({
-    token,
-    user
-  });
-
+  const token = createToken(user);
+  response.status(201).json({ token, user });
 }));
 
-
-app.post('/api/auth/connexion', asyncRoute(async (request, response) => {
-
-  const { courriel, motDePasse } = request.body as {
-    courriel?: string;
-    motDePasse?: string;
-  };
-
-  if (!courriel?.trim() || !motDePasse) {
-    return response.status(400).json({
-      error: 'Courriel et mot de passe requis.'
-    });
+async function seedInitialManager() {
+  const name = process.env.INITIAL_ADMIN_NAME?.trim();
+  const email = process.env.INITIAL_ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.INITIAL_ADMIN_PASSWORD;
+  const configuredValues = [name, email, password].filter(Boolean).length;
+  if (configuredValues === 0) return;
+  if (!name || !email || !password) {
+    throw new Error('INITIAL_ADMIN_NAME, INITIAL_ADMIN_EMAIL et INITIAL_ADMIN_PASSWORD doivent être configurés ensemble.');
   }
+  if (password.length < 12) throw new Error('INITIAL_ADMIN_PASSWORD doit contenir au moins 12 caractères.');
 
-  const { rows } = await pool.query(
-    'SELECT * FROM utilisateur WHERE courriel = $1',
-    [courriel.trim().toLowerCase()]
+  const passwordHash = await bcrypt.hash(password, 10);
+  const { rowCount } = await pool.query(
+    `INSERT INTO utilisateur (nom, courriel, mot_de_passe_hash, role)
+     VALUES ($1, $2, $3, 'gestionnaire')
+     ON CONFLICT (courriel) DO NOTHING`,
+    [name, email, passwordHash]
   );
-
-  const row = rows[0];
-
-  if (!row || !(await bcrypt.compare(motDePasse, row.mot_de_passe_hash))) {
-    return response.status(401).json({
-      error: 'Courriel ou mot de passe invalide.'
-    });
-  }
-
-  const user: User = {
-    id: row.id,
-    nom: row.nom,
-    courriel: row.courriel,
-    role: row.role
-  };
-
-  const token = jwt.sign(user, secret, {
-    expiresIn: '7d'
-  });
-
-  response.json({
-    token,
-    user
-  });
-
-}));
+  if (rowCount) console.log(`Compte gestionnaire initial créé pour ${email}.`);
+}
 
 
 app.get('/api/seances', asyncRoute(async (_request, response) => {
@@ -313,46 +271,11 @@ app.post('/api/seances/:id/places/:placeId/retenir', requireAuth, asyncRoute(asy
       error: 'Cette place est bloquée.'
     });
   }
-
-  if (
-    seat.etat === 'vendue' ||
-    (
-      seat.etat === 'retenue' &&
-      seat.retenue_expire_a > new Date() &&
-      seat.retenue_par_utilisateur_id !== request.user!.id
-    )
-  ) {
-    return response.status(409).json({
-      error: 'Cette place vient d’être prise. Choisissez-en une autre.'
-    });
-  }
-
-  const expires = new Date(Date.now() + 8 * 60 * 1000);
-
-  await pool.query(
-    "UPDATE place_seance SET etat = 'retenue', retenue_par_utilisateur_id = $1, retenue_expire_a = $2 WHERE id = $3",
-    [
-      request.user!.id,
-      expires,
-      seat.id
-    ]
-  );
-
-  const change = {
-    id: seat.id,
-    etat: 'retenue',
-    expireA: expires.toISOString()
-  };
-
-  io.to(`seance:${request.params.id}`).emit(
-    'place:etat_change',
-    change
-  );
-
-  response.json({
-    place: change
-  });
-
+  const expires = new Date(Date.now() + 5 * 60 * 1000);
+  await pool.query("UPDATE place_seance SET etat = 'retenue', retenue_par_utilisateur_id = $1, retenue_expire_a = $2 WHERE id = $3", [request.user!.id, expires, seat.id]);
+  const change = { id: seat.id, etat: 'retenue', expireA: expires.toISOString() };
+  io.to(`seance:${request.params.id}`).emit('place:etat_change', change);
+  response.json({ place: change });
 }));
 
 
@@ -1013,7 +936,7 @@ async function start() {
   await pool.query(sql);
 
   await seed();
-
+  await seedInitialManager();
   setInterval(async () => {
 
     try {
