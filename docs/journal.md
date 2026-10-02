@@ -76,4 +76,28 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
   - Revue de la structure finale de la base avec PostgreSQL pour aligner le design avec les exigences de concurrence, d’annulation et de temps réel.
 
 
+*Les entrées du 28 septembre et du 1er octobre ont été rédigées le 1er octobre à partir de l'historique Git et de nos échanges de travail.*
+
+## 28 septembre 2026 (bloc 5, point de contrôle 2)
+
+- **Présences** : Tout l'équipe
+- **Avancement** : Backend du récit #1 (inscription, connexion, hachage des mots de passe, session, Docker, CI). PR #28 revue par Lina. Point de contrôle 2 passé : démarrage depuis un clone neuf, CI verte.
+- **Blocage** : Lina a restructuré la pile (React, TypeScript, Vite) le même jour, donc le backend d'Alexander doit être refait sur la nouvelle structure.
+- **Décisions** :
+  - Passage à React pour suivre `01-vision.md` (décision d'équipe).
+  - `bcryptjs` plutôt que `bcrypt` pour éviter les problèmes de compilation dans l'image Alpine.
+
+## 1er octobre 2026 (bloc 6, remise)
+
+- **Présences** : Lina
+- **Avancement** : #1 refait sur la nouvelle structure (PR #32), PR #33 (Docker, CI) et #34 (README) fusionnées. Ensuite : PR #41 (7 tests d'intégration de l'authentification avec `node:test`, la CI lance maintenant `npm test`), PR #38 (section « Ce qui est simulé » du README), PR #39 (mentions « simulé » à l'écran), PR #42 (comptes de démonstration), et la route `/gestion` qui manquait dans `App.tsx` (43). La PR #35 de Karel (dashboard et création de séance) avait une CI rouge à 15 h (erreur de syntaxe dans une requête SQL de `server/index.ts`). Karel l'a corrigée et elle est fusionnée.
+- **Blocage** : La concurrence (D1) n'est pas implémentée : pas de `FOR UPDATE` sur retenir et réserver (#5, #7), et aucun test sur ces récits. Les styles de la page de création de séance ne sont pas dans la PR #35. La route `/gestion` manquait, ce qui menait à une page 404 après la création d'une séance.
+- **Décisions** :
+  - Les tests lancent `server/index.ts` comme un vrai processus sur un port libre, au lieu de séparer `index.ts` en `app.ts`, parce que la PR #35 modifiait déjà ce fichier. C'est moins fidèle au cours, à refaire au sprint 2.
+  - Le test d'inscription a été vérifié : il devient rouge quand on retire le hachage du mot de passe.
+  - « Réservation sécurisée » remplacé à l'écran par une mention honnête, puisque la concurrence n'est pas gérée.
+  - Comptes de démo publics dans `docker-compose.yml`, à remplacer avant tout déploiement.
+  - Correction de la concurrence reportée au sprint 2 et écrite dans `06-risques.md`.
+
+
 *Ce journal continue d'être tenu à chaque bloc de cours pour le reste de la session.*
