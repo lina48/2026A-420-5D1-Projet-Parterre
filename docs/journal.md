@@ -66,7 +66,7 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 ## 21 septembre 2026
 
 - **Présences** : Lina, Alexander, Karel, Hsiao Shan
-- **Avancement** : Mêlée de 10 minutes sur l’état du projet. Chaque membre a fait le point sur ses tâches et sur les récits qu’il doit mener. La base de données a été revue et les règles d’intégrité ont été renforcées.
+- **Avancement** : Mêlée de 10 minutes sur l’état du projet. Chaque membre a fait le point sur ses tâches et sur les récits qu’il doit mener. La base de données a été revue et les règles d’intégrité ont été renforcées. Création du dashboard et de la création de séance.
 - **Blocage** : Incohérence de la conception de la base de données, notamment sur l’unicité des places par séance, les tables de jointure de réservation, la cohérence salle/place/séance et la gestion de l’annulation sans perdre une place définitivement.
 - **Décisions** :
   - Correction de la table `place_seance` avec `UNIQUE (place_id, seance_id)` pour éviter les doublons.
@@ -85,7 +85,7 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 ## 1er octobre 2026
 
 - **Présences** : Lina
-- **Avancement** : relier la connexion à l’application, ajouté l’accès à la connexion depuis l’accueil, traité le cas d’un utilisateur non connecté qui choisit une place et rendu le seed des séances de démonstration relançable lorsque les séances existantes sont passées (#1, #2; accès gestionnaire associé à #3).
+- **Avancement** : relier la connexion à l’application, ajouté l’accès à la connexion depuis l’accueil, traité le cas d’un utilisateur non connecté qui choisit une place et rendu le seed des séances de démonstration relançable lorsque les séances existantes sont passées (#1, #2; accès gestionnaire associé à #3). Gérer les merge conflicts pour le dashboard et createsession.
 - **Blocage** : Les séances de démonstration pouvaient rester dans la base persistante tout en étant toutes passées, laissant l’accueil sans séance.
 - **Décision** : Recréer une programmation de démonstration lorsqu’il ne reste aucune séance ouverte à venir, sans effacer les comptes, réservations ni anciennes séances.
 
