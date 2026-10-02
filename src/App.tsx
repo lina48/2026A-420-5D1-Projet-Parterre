@@ -56,6 +56,7 @@ export default function App() {
           <Route path="/seances/:id" element={<SeatSelectionPage user={user} notify={setToast} />} />
           <Route path="/mes-reservations" element={<MyTicketsPage user={user} notify={setToast} />} />
           <Route path="/gestion/seances/nouvelle" element={<CreateSessionPage user={user} notify={setToast} />} />
+          <Route path="/gestion" element={<DashboardPage user={user} />} />
           <Route path="/inscription" element={<RegisterPage onAuth={handleAuth} notify={setToast} />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
