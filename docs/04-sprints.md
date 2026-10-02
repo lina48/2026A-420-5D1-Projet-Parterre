@@ -71,3 +71,11 @@ Si la capacité se révèle insuffisante, nous retirons les récits dans cet ord
 | 1 | Jamais : #3, #4, #5, #6, #7 | Ce sont les récits porteurs de risque et la chaîne minimale qui prouve que le produit fonctionne. |
 | 2 | #17, puis #16 | Ce sont des `should`, ajoutés pour lisser la charge. Ils sortent avant tout `must`. |
 | 3 | #18, puis #15 | Mêmes raisons. Le déploiement en ligne et #12 restent prioritaires. |
+
+## Bilan du sprint 1
+
+- **Points engagés :** 34 (#1, #2, #3, #4, #5, #7).
+- **Points livrés :** 5 (#1 seulement). Seul #1 satisfait toute notre définition de « terminé » : PR revue, tests automatisés, CI verte. Un récit à moitié fait vaut zéro point.
+- **Vélocité réelle :** 5 points. Les récits #2, #3 et #4 fonctionnent de bout en bout mais n'ont pas de test automatisé. Les récits #5 et #7 fonctionnent, mais sans verrou `SELECT ... FOR UPDATE` (décision D1) ni test de concurrence.
+- **Écart avec l'ordre d'abandon :** nous avions écrit que #3 à #7 ne seraient jamais abandonnés. Ils ne sont pas abandonnés, mais incomplets. La pile a été restructurée le 28 septembre et les tests n'ont été écrits que le 1er octobre.
+- **Reporté au sprint 2 :** verrouillage pessimiste (D1) et test de concurrence, tests des récits #2, #3, #4, #5 et #7, styles de la page de création de séance.
