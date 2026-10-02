@@ -74,6 +74,19 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
   - Ajout de la cohérence salle/place/séance via les clés composites et les contraintes de relation.
   - Vérification stricte du statut de retenue avec `CHECK` pour empêcher les états incohérents.
   - Revue de la structure finale de la base avec PostgreSQL pour aligner le design avec les exigences de concurrence, d’annulation et de temps réel.
+    
+## 28 septembre 2026
 
+- **Présences** : Lina, Alexander, Karel, Hsiao Shan
+- **Avancement** : la migration vers le nouveau stack React/TypeScript et Express, à la séparation des pages et services, à la page de programmation et au nettoyage de l’ancienne structure. Ces changements soutiennent les récits de consultation, création et réservation (#2, #3, #4, #5 et #7), et aussi lier les pages de connexion avec le plan des salles
+- 
+- **Blocage** : L’ancienne structure séparait le backend et les pages statiques d’authentification du nouveau stack.
+- **Décision** : Regrouper le fonctionnement autour du stack utilisé par l’application afin que les pages et l’API travaillent avec la même base et le même serveur.
+## 1er octobre 2026
+
+- **Présences** : Lina
+- **Avancement** : relier la connexion à l’application, ajouté l’accès à la connexion depuis l’accueil, traité le cas d’un utilisateur non connecté qui choisit une place et rendu le seed des séances de démonstration relançable lorsque les séances existantes sont passées (#1, #2; accès gestionnaire associé à #3).
+- **Blocage** : Les séances de démonstration pouvaient rester dans la base persistante tout en étant toutes passées, laissant l’accueil sans séance.
+- **Décision** : Recréer une programmation de démonstration lorsqu’il ne reste aucune séance ouverte à venir, sans effacer les comptes, réservations ni anciennes séances.
 
 *Ce journal continue d'être tenu à chaque bloc de cours pour le reste de la session.*
