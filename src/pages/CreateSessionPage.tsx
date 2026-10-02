@@ -1280,4 +1280,4 @@ function Counter({
   );
 
 }
-}
+

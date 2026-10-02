@@ -87,27 +87,27 @@ async function seed() {
       const showId = show.rows[0].id;
 
       await client.query(
-        `INSERT INTO place_seance (
-          place_id,
-          salle_id,
-          seance_id,
-          zone,
-          prix
-        )
-        SELECT
-          id,
-          salle_id,
-          $1,
-          'standard',
-          22
-        FROM place
-        WHERE salle_id = $2`,
-        ON CONFLICT (place_id, seance_id) DO NOTHING`,
-        [
-          showId,
-          room.id
-        ]
-      );
+  `INSERT INTO place_seance (
+    place_id,
+    salle_id,
+    seance_id,
+    zone,
+    prix
+  )
+  SELECT
+    id,
+    salle_id,
+    $1,
+    'standard',
+    22
+  FROM place
+  WHERE salle_id = $2
+  ON CONFLICT (place_id, seance_id) DO NOTHING`,
+  [
+    showId,
+    room.id
+  ]
+);
 
     }
 
