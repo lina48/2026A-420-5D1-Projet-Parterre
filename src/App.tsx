@@ -9,6 +9,7 @@ import ProgrammePage from './pages/ProgrammePage';
 import SeatSelectionPage from './pages/SeatSelectionPage';
 import type { User } from './types';
 import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
 
 const savedUser = localStorage.getItem('parterre-user');
 const initialUser: User | null = savedUser ? JSON.parse(savedUser) as User : null;
