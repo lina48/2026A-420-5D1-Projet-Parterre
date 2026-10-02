@@ -16,6 +16,17 @@ L’inscription et la connexion sont disponibles sur `/inscription` et `/connexi
 
 Pour créer le premier compte gestionnaire, définissez `INITIAL_ADMIN_NAME`, `INITIAL_ADMIN_EMAIL` et `INITIAL_ADMIN_PASSWORD` dans l’environnement avant le démarrage du serveur. Le mot de passe doit contenir au moins 12 caractères. Le compte est créé uniquement si son adresse courriel n’existe pas déjà. En production, configurez ces valeurs dans les secrets de l’hébergeur; ne réutilisez pas les identifiants de test locaux.
 
+## Comptes de démonstration
+
+Ces deux comptes sont créés automatiquement au démarrage de Docker :
+
+| Rôle | Courriel | Mot de passe |
+|---|---|---|
+| Gestionnaire | `gestionnaire@parterre.demo` | `demo-gestionnaire-2026` |
+| Spectateur | `spectateur@parterre.demo` | `demo-spectateur-2026` |
+
+Ces identifiants sont publics et réservés à la démonstration. Avant tout déploiement, remplacez-les avec les variables `INITIAL_ADMIN_*` et `DEMO_SPECTATOR_*` de `docker-compose.yml`.
+
 ## Lancement de développement
 
 Prérequis : Node.js 22 ou plus récent, npm et PostgreSQL. Créez une base `parterre` et copiez `.env.example` en `.env`, puis :

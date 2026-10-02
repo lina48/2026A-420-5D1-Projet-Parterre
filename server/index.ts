@@ -181,6 +181,22 @@ async function seedInitialManager() {
   if (rowCount) console.log(`Compte gestionnaire initial créé pour ${email}.`);
 }
 
+async function seedDemoSpectator() {
+  const name = process.env.DEMO_SPECTATOR_NAME?.trim();
+  const email = process.env.DEMO_SPECTATOR_EMAIL?.trim().toLowerCase();
+  const password = process.env.DEMO_SPECTATOR_PASSWORD;
+  if (!name || !email || !password) return;
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  const { rowCount } = await pool.query(
+    `INSERT INTO utilisateur (nom, courriel, mot_de_passe_hash, role)
+     VALUES ($1, $2, $3, 'spectateur')
+     ON CONFLICT (courriel) DO NOTHING`,
+    [name, email, passwordHash]
+  );
+  if (rowCount) console.log(`Compte spectateur de demonstration cree pour ${email}.`);
+}
+
 
 app.get('/api/seances', asyncRoute(async (_request, response) => {
 
@@ -937,6 +953,7 @@ async function start() {
 
   await seed();
   await seedInitialManager();
+  await seedDemoSpectator();
   setInterval(async () => {
 
     try {

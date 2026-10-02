@@ -25,9 +25,12 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/siegevif
       JWT_SECRET: ${JWT_SECRET:-local-dev-secret-change-before-deploy}
-      INITIAL_ADMIN_NAME: ${INITIAL_ADMIN_NAME:-}
-      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-}
-      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
+      INITIAL_ADMIN_NAME: ${INITIAL_ADMIN_NAME:-Gestionnaire Demo}
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-gestionnaire@parterre.demo}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-demo-gestionnaire-2026}
+      DEMO_SPECTATOR_NAME: ${DEMO_SPECTATOR_NAME:-Spectateur Demo}
+      DEMO_SPECTATOR_EMAIL: ${DEMO_SPECTATOR_EMAIL:-spectateur@parterre.demo}
+      DEMO_SPECTATOR_PASSWORD: ${DEMO_SPECTATOR_PASSWORD:-demo-spectateur-2026}
       PORT: 3000
     ports:
       - "3000:3000"
