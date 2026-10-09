@@ -1,4 +1,3 @@
-[journal.md](https://github.com/user-attachments/files/32074156/journal.md)
 # Journal de bord
 
 Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin du bloc.
@@ -82,12 +81,28 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - 
 - **Blocage** : L’ancienne structure séparait le backend et les pages statiques d’authentification du nouveau stack.
 - **Décision** : Regrouper le fonctionnement autour du stack utilisé par l’application afin que les pages et l’API travaillent avec la même base et le même serveur.
+
+- **Avancement (Alexander)** : récit #1 (inscription et connexion) sur l'ancienne structure, PR #28 fusionnée. Lina a restructuré la pile le même jour (React, TypeScript, Vite, Express).
+- **Blocage (Alexander)** : le backend du récit #1 doit être refait sur la nouvelle structure.
+- **Décision (Alexander)** : `bcryptjs` plutôt que `bcrypt`, pour éviter les problèmes de compilation dans l'image Alpine.
+
+
 ## 1er octobre 2026
 
 - **Présences** : Lina
 - **Avancement** : relier la connexion à l’application, ajouté l’accès à la connexion depuis l’accueil, traité le cas d’un utilisateur non connecté qui choisit une place et rendu le seed des séances de démonstration relançable lorsque les séances existantes sont passées (#1, #2; accès gestionnaire associé à #3). Gérer les merge conflicts pour le dashboard et createsession.
 - **Blocage** : Les séances de démonstration pouvaient rester dans la base persistante tout en étant toutes passées, laissant l’accueil sans séance.
 - **Décision** : Recréer une programmation de démonstration lorsqu’il ne reste aucune séance ouverte à venir, sans effacer les comptes, réservations ni anciennes séances.
+
+- **Avancement (Alexander)** : récit #1 refait sur la nouvelle structure (PR #32); Docker et CI sur la nouvelle pile, ancien backend supprimé (PR #33); correction du README (PR #34). Le 1er octobre : 7 tests d'intégration de l'authentification avec `node:test`, la CI lance maintenant `npm test` (PR #41); section « Ce qui est simulé » du README (PR #38); mentions « simulé » à l'écran (PR #39); comptes de démonstration (PR #42); route `/gestion` qui manquait dans `App.tsx` (PR #43). Comme Scrum Master, j'ai trouvé la cause de la CI rouge de la PR #35 de Karel (erreur de syntaxe dans une requête SQL de `server/index.ts`); il l'a corrigée lui-même.
+- **Blocage (Alexander)** : la concurrence (D1) n'est pas implémentée : pas de `FOR UPDATE` sur « retenir » et « réserver » (#5, #7), et aucun test sur ces récits. La route `/gestion` manquait, ce qui menait à une page 404 après la création d'une séance.
+- **Décisions (Alexander)** :
+  - Règle pour la PR #35 : description, CI verte et approbation avant 22 h, sinon reportée au sprint 2.
+  - Les tests lancent `server/index.ts` comme un vrai processus sur un port libre, au lieu de séparer `app.ts`, parce que la PR #35 modifiait déjà ce fichier. C'est moins fidèle au cours, à refaire au sprint 2.
+  - Test d'inscription vérifié : il devient rouge quand on retire le hachage du mot de passe.
+  - « Réservation sécurisée » remplacé à l'écran par une mention honnête parce que la concurrence n'est pas gérée.
+  - Comptes de démo publics dans `docker-compose.yml`, à remplacer avant tout déploiement.
+  - Correction de la concurrence reportée au sprint 2 et notée dans `06-risques.md`.
 
 # 8 octobre 2026
 
@@ -96,3 +111,7 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - **Blocage** : Dashboard
 - **Décision** : Karel s'occupera de gérer le problème du dashboard
 
+- **Avancement (Alexander)** : revue du sprint 1 à partir d'un clone neuf de l'étiquette `alpha-v1`; l'application démarre sur http://localhost:3000. Deux défauts vus : le dashboard (Karel) et le premier siège libre qui ne se laisse pas retenir (à régler). Le prof donne jusqu'au 9 octobre pour une étiquette `alpha-v2`.
+- **Décision (Alexander)** : ajouter avant `alpha-v2` le README des tests, le retrait de `dist/` et les documents du sprint 1 chacun dans sa PR.
+
+*Les lignes marquées (Alexander) ont été ajoutées le 9 octobre à partir de l'historique Git.*
