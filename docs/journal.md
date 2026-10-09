@@ -89,4 +89,10 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - **Blocage** : Les séances de démonstration pouvaient rester dans la base persistante tout en étant toutes passées, laissant l’accueil sans séance.
 - **Décision** : Recréer une programmation de démonstration lorsqu’il ne reste aucune séance ouverte à venir, sans effacer les comptes, réservations ni anciennes séances.
 
+# 8 octobre 2026
+
+- **Présences** : Lina, Alexander, Karel, Hsiao Shan
+- **Avancement** : Revue le web et repartir des taches du Sprint 2
+- **Blocage** : Dashboard
+- **Décision** : 
 *Ce journal continue d'être tenu à chaque bloc de cours pour le reste de la session.*
