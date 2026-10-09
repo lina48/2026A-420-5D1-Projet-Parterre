@@ -38,6 +38,18 @@ npm run dev
 
 Le client est servi sur http://localhost:5173 et l’API sur http://localhost:4000. `npm run build` produit le client de production. Au premier démarrage, l’API crée le schéma et quelques séances d’exemple.
 
+## Tests
+
+Les tests d'intégration de l'authentification utilisent une base PostgreSQL séparée de celle de l'application. Prérequis : Node.js 22 ou plus récent, Docker et `npm install`.
+
+```sh
+docker run --name pg-test -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=parterre_test -p 5432:5432 -d postgres:16
+export TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/parterre_test
+npm test
+```
+
+Sous PowerShell, remplacez la deuxième ligne par `$env:TEST_DATABASE_URL = "postgres://postgres:postgres@localhost:5432/parterre_test"`. Les tests refusent de démarrer si `TEST_DATABASE_URL` n'est pas défini. Ils sont aussi lancés par la CI à chaque poussée. Pour supprimer la base de test : `docker rm -f pg-test`.
+
 ## Organisation du code
 
 ```text
