@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes } from 'react-router-dom';
 import { Check, Clapperboard, LogIn, LogOut } from 'lucide-react';
@@ -43,7 +44,7 @@ export default function App() {
         <nav className="main-nav" aria-label="Navigation principale">
           <NavLink to="/" end>Programmation</NavLink>
           {user && <NavLink to="/mes-reservations">Mes billets</NavLink>}
-          {user?.role === 'gestionnaire' && <NavLink to="/gestion/seances/nouvelle">Gestion</NavLink>}
+          {user?.role === 'gestionnaire' && <NavLink to="/gestion">Gestion</NavLink>}
         </nav>
         <div className="account-area">
           {user ? <><span className="account-name"><span className="online-dot" />{user.nom.split(' ')[0]}</span><button className="icon-button" title="Déconnexion" onClick={signOut}><LogOut size={17} /></button></> : <Link className="account-link" to="/connexion"><LogIn size={15} />Se connecter</Link>}
