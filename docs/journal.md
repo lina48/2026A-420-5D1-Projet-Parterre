@@ -92,7 +92,7 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 # 8 octobre 2026
 
 - **Présences** : Lina, Alexander, Karel, Hsiao Shan
-- **Avancement** : Revue le web et repartir des taches du Sprint 2
+- **Avancement** : Revue le web et repartir des taches du Sprint 2. Correction de la gestion (dashboard et createsession)
 - **Blocage** : Dashboard
-- **Décision** : 
-*Ce journal continue d'être tenu à chaque bloc de cours pour le reste de la session.*
+- **Décision** : Karel s'occupera de gérer le problème du dashboard
+
