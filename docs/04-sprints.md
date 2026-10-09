@@ -71,3 +71,11 @@ Si la capacité se révèle insuffisante, nous retirons les récits dans cet ord
 | 1 | Jamais : #3, #4, #5, #6, #7 | Ce sont les récits porteurs de risque et la chaîne minimale qui prouve que le produit fonctionne. |
 | 2 | #17, puis #16 | Ce sont des `should`, ajoutés pour lisser la charge. Ils sortent avant tout `must`. |
 | 3 | #18, puis #15 | Mêmes raisons. Le déploiement en ligne et #12 restent prioritaires. |
+
+### Bilan du sprint 1
+
+- **Points engagés** : 34 (#1, #2, #3, #4, #5, #7). Le journal du 10 septembre mentionnait 15 points; le plan retenu et le tableau ci-dessus sont à 34.
+- **Points livrés** : 5 (#1). Selon notre définition de « terminé » (`05-equipe.md`), un récit sans tests automatisés n'est pas terminé; seule l'authentification en a (7 tests). Un récit à moitié fini ne compte pas.
+- **Vélocité mesurée** : 5 points. Les récits #2, #3, #4, #5 et #7 fonctionnent en grande partie à la démonstration, mais n'ont pas de tests; à la revue, le dashboard (#3, corrigé depuis) et la retenue du premier siège libre (#5) avaient aussi des défauts.
+- **Points abandonnés** : 0. Aucun récit n'a été retiré du plan; #2 à #7 sont incomplets, pas abandonnés.
+- **Reporté au sprint 2** : tests de #2, #3, #4, #5 et #7; verrou `SELECT … FOR UPDATE` dans une transaction, avec un test de deux requêtes simultanées; correction du premier siège libre. Le plan du sprint 2 (19 points) sera révisé à partir de cette vélocité.
