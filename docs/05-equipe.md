@@ -66,7 +66,7 @@ Le journal est tenu dans [journal.md](journal.md), une entrée par bloc de cours
 
 | Membre | Contributions à la soumission |
 |---|---|
-| Lina | Sprint0 : Récits de l'épique Catalogue ,les issues Sprint1 : Page affiche et base de donnees Sprint2 : Valider un billet à l'entrée de la salle|
+| Lina | Sprint0 : Récits de l'épique Catalogue ,les issues Sprint1 : Page affiche et base de donnees Sprint2 : Valider un billet à l'entrée de la salle et ajout de formulaire de payment par carte|
 | Alexander | Sprint0 : Conception , maquette de l'écran de recherche Sprint1 : Page connexion Sprint2 : Courriel de confirmation avec le billet|
 | Karel | Sprint0 : Rédaction de la vision et les risques Sprint1: Dashboard Sprint2 : Consulter ses billets à venir et passés|
 | Hsiao Shan | Sprint0 : Sprints et organisation de l'équipe Sprint1: Reservation des billets Sprint2: Voir les places changer d'état en direct|
