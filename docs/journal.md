@@ -75,5 +75,9 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
   - Vérification stricte du statut de retenue avec `CHECK` pour empêcher les états incohérents.
   - Revue de la structure finale de la base avec PostgreSQL pour aligner le design avec les exigences de concurrence, d’annulation et de temps réel.
 
+## 24 septembre 2026
 
+## 28 septembre 2026
+
+## 1 octobre 2025
 *Ce journal continue d'être tenu à chaque bloc de cours pour le reste de la session.*
