@@ -33,6 +33,7 @@ export default function ProgrammePage() {
     </section>}
     <section className="programme-section">
       <div className="section-heading"><div><div className="eyebrow"><span className="eyebrow-line" />LE PROGRAMME</div><h2>Les prochaines séances</h2></div><span className="results-count">{sessions.length.toString().padStart(2, '0')} SÉANCES</span></div>
+      <p className="muted-copy"><span className="tag tag-gold">DONNÉES DE DÉMONSTRATION</span> Films, affiches et séances d'exemple. Tarif fixe, aucun paiement en ligne.</p>
       <div className="filter-row" role="group" aria-label="Filtrer par genre">{genres.map((genre) => <button key={genre} className={`filter-chip ${filter === genre ? 'active' : ''}`} onClick={() => setFilter(genre)}>{genre}</button>)}</div>
       {loading ? <div className="loading-line">La programmation arrive…</div> : error ? <div className="empty-state"><Film /><p>{error}</p><small>Vérifiez que l’API et PostgreSQL sont démarrés.</small></div> : visibleSessions.length ? <div className="session-list">{visibleSessions.map((session, index) => <SessionRow key={session.id} session={session} index={index} />)}</div> : <div className="empty-state"><Film /><p>Aucune séance dans cette catégorie.</p></div>}
     </section>

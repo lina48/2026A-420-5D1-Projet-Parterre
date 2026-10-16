@@ -12,7 +12,20 @@ docker compose up --build
 
 Ouvrir http://localhost:3000. Pour arrêter : `docker compose down`. Les données sont conservées dans le volume Docker `donnees_postgres` : `docker compose down` les garde, mais `docker compose down -v` les **efface**.
 
-L'inscription et la connexion sont disponibles (`/inscription`, `/connexion`). Les opérations protégées nécessitent le jeton renvoyé à la connexion.
+L’inscription et la connexion sont disponibles sur `/inscription` et `/connexion`. Les opérations protégées utilisent le jeton JWT renvoyé après l’authentification.
+
+Pour créer le premier compte gestionnaire, définissez `INITIAL_ADMIN_NAME`, `INITIAL_ADMIN_EMAIL` et `INITIAL_ADMIN_PASSWORD` dans l’environnement avant le démarrage du serveur. Le mot de passe doit contenir au moins 12 caractères. Le compte est créé uniquement si son adresse courriel n’existe pas déjà. En production, configurez ces valeurs dans les secrets de l’hébergeur; ne réutilisez pas les identifiants de test locaux.
+
+## Comptes de démonstration
+
+Ces deux comptes sont créés automatiquement au démarrage de Docker :
+
+| Rôle | Courriel | Mot de passe |
+|---|---|---|
+| Gestionnaire | `gestionnaire@parterre.demo` | `demo-gestionnaire-2026` |
+| Spectateur | `spectateur@parterre.demo` | `demo-spectateur-2026` |
+
+Ces identifiants sont publics et réservés à la démonstration. Avant tout déploiement, remplacez-les avec les variables `INITIAL_ADMIN_*` et `DEMO_SPECTATOR_*` de `docker-compose.yml`.
 
 ## Lancement de développement
 
@@ -24,6 +37,18 @@ npm run dev
 ```
 
 Le client est servi sur http://localhost:5173 et l’API sur http://localhost:4000. `npm run build` produit le client de production. Au premier démarrage, l’API crée le schéma et quelques séances d’exemple.
+
+## Tests
+
+Les tests d'intégration de l'authentification utilisent une base PostgreSQL séparée de celle de l'application. Prérequis : Node.js 22 ou plus récent, Docker et `npm install`.
+
+```sh
+docker run --name pg-test -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=parterre_test -p 5432:5432 -d postgres:16
+export TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/parterre_test
+npm test
+```
+
+Sous PowerShell, remplacez la deuxième ligne par `$env:TEST_DATABASE_URL = "postgres://postgres:postgres@localhost:5432/parterre_test"`. Les tests refusent de démarrer si `TEST_DATABASE_URL` n'est pas défini. Ils sont aussi lancés par la CI à chaque poussée. Pour supprimer la base de test : `docker rm -f pg-test`.
 
 ## Organisation du code
 
@@ -55,6 +80,8 @@ docs/             # Conception et organisation de l’équipe
 
 | Méthode | Endpoint | Accès |
 |---|---|---|
+| `POST` | `/api/auth/inscription` | Public |
+| `POST` | `/api/auth/connexion` | Public |
 | `GET` | `/api/seances` | Public |
 | `GET` | `/api/seances/:id/plan` | Public |
 | `POST` | `/api/seances/:id/places/:placeId/retenir` | Connecté |
@@ -67,6 +94,14 @@ Socket.IO diffuse `place:etat_change` et `place:retenue_expiree` par salle. Les 
 
 La documentation détaillée du projet et les décisions techniques restent disponibles dans `docs/`.
  
+## Ce qui est simulé dans l'alpha
+
+| Élément | Ce qui est simulé | Ce qui le remplacera | Sprint |
+|---|---|---|---|
+| Paiement | Aucun paiement en ligne : le total affiché est indicatif (« paiement sur place ») et la réservation est confirmée sans carte | Rien, le paiement réel est hors portée du projet (#21) | — |
+| Tarif | Prix fixe de 14,50 $ par place, écrit dans le code du serveur et de l'écran | Tarifs réduits et catégories de prix (#15) | 3 |
+| Films et séances | 3 films de démonstration et des séances de démo recréées au démarrage de l'application, seulement s'il n'en reste aucune à venir | Séances créées par le gestionnaire (#3) | 1 |
+| Affiches | Images chargées depuis Unsplash (site externe) | Images hébergées dans le projet | À décider (aucun récit au backlog) |
 
 ## Documentation
 

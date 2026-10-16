@@ -6,6 +6,10 @@ export type AuthRequest = Request & { user?: User };
 
 const secret = process.env.JWT_SECRET ?? 'dev-secret-change-me';
 
+export function createToken(user: User) {
+  return jwt.sign(user, secret, { expiresIn: '7d' });
+}
+
 export function requireAuth(request: AuthRequest, response: Response, next: NextFunction) {
   const token = request.headers.authorization?.replace(/^Bearer\s+/i, '');
   if (!token) return response.status(401).json({ error: 'Connectez-vous pour continuer.' });
