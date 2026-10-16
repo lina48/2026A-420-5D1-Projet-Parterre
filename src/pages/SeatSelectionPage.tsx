@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { Armchair, ArrowLeft, ArrowRight, Film, LockKeyhole } from 'lucide-react';
+import { Armchair, ArrowLeft, ArrowRight, Clock3, Film, LockKeyhole } from 'lucide-react';
 import { api } from '../services/api';
 import type { Seat, Session, User } from '../types';
 
@@ -34,12 +34,28 @@ export default function SeatSelectionPage({ user, notify }: Props) {
   useEffect(() => {
     const socket = io();
     socket.emit('seance:rejoindre', id);
-    socket.on('place:etat_change', (change: { id: number; etat: Seat['etat'] }) => {
-      setSeats((current) => current.map((seat) => seat.id === change.id ? { ...seat, etat: change.etat } : seat));
+    const synchronizeSeats = () => {
+      socket.emit('seance:rejoindre', id);
+      refreshSeats().catch((error: Error) => notify(error.message));
+    };
+    socket.on('connect', synchronizeSeats);
+    socket.on('place:etat_change', (change: { id: number; etat: Seat['etat']; expireA?: string | null }) => {
+      setSeats((current) => current.map((seat) => seat.id === change.id ? {
+        ...seat,
+        etat: change.etat,
+        retenue_expire_a: change.etat === 'retenue' ? (change.expireA ?? seat.retenue_expire_a) : null,
+      } : seat));
       if (change.etat === 'vendue' || change.etat === 'libre') setSelected((current) => current.filter((seatId) => seatId !== change.id));
     });
-    socket.on('place:retenue_expiree', (change: { id: number }) => setSeats((current) => current.map((seat) => seat.id === change.id ? { ...seat, etat: 'libre' } : seat)));
-    return () => { socket.emit('seance:quitter', id); socket.disconnect(); };
+    socket.on('place:retenue_expiree', (change: { id: number }) => {
+      setSeats((current) => current.map((seat) => seat.id === change.id ? { ...seat, etat: 'libre', retenue_expire_a: null } : seat));
+      setSelected((current) => current.filter((seatId) => seatId !== change.id));
+    });
+    return () => {
+      socket.off('connect', synchronizeSeats);
+      socket.emit('seance:quitter', id);
+      socket.disconnect();
+    };
   }, [id]);
 
   async function chooseSeat(seat: Seat) {
@@ -52,9 +68,16 @@ export default function SeatSelectionPage({ user, notify }: Props) {
     }
     setBusy(true);
     try {
-      await api(`/api/seances/${id}/places/${seat.id}/retenir`, { method: 'POST' });
+      const result = await api<{ place: { expireA?: string } }>(`/api/seances/${id}/places/${seat.id}/retenir`, { method: 'POST' });
+      const expiresAt = result.place.expireA
+        ? new Date(result.place.expireA).toISOString()
+        : new Date(Date.now() + 5 * 60 * 1000).toISOString();
       setSelected((current) => [...current, seat.id]);
-      setSeats((current) => current.map((item) => item.id === seat.id ? { ...item, etat: 'retenue' } : item));
+      setSeats((current) => current.map((item) => item.id === seat.id ? {
+        ...item,
+        etat: 'retenue',
+        retenue_expire_a: expiresAt,
+      } : item));
     } catch (error) { notify((error as Error).message); await refreshSeats(); }
     finally { setBusy(false); }
   }
@@ -72,17 +95,19 @@ export default function SeatSelectionPage({ user, notify }: Props) {
     finally { setBusy(false); }
   }
 
-  // Start expiry when selection is non-empty, clear when empty
-  useEffect(() => {
-    if (selected.length && !expiry) {
-      setExpiry(Date.now() + 5 * 60 * 1000); // 5 minutes
-    }
-    if (!selected.length && expiry) {
-      setExpiry(null);
-      setRemaining(0);
-    }
-  }, [selected]);
+  const selectedExpiry = useMemo(() => {
+    const timestamps = selected
+      .map((seatId) => seats.find((seat) => seat.id === seatId)?.retenue_expire_a)
+      .filter((value): value is string => Boolean(value))
+      .map((value) => new Date(value).getTime())
+      .filter((value) => Number.isFinite(value));
+    return timestamps.length ? Math.min(...timestamps) : null;
+  }, [selected, seats]);
 
+  useEffect(() => {
+    setExpiry(selectedExpiry);
+    if (!selectedExpiry) setRemaining(0);
+  }, [selectedExpiry]);
 
   useEffect(() => {
     if (!expiry) return;
@@ -102,9 +127,9 @@ export default function SeatSelectionPage({ user, notify }: Props) {
       setExpiry(null);
       setSelected([]);
       notify('Votre retenue de 5 minutes est expirée. Les places sont de nouveau disponibles.');
-      refreshSeats().catch(() => {});
+      refreshSeats().catch((error: Error) => notify(error.message));
     }
-  }, [remaining, expiry]);
+  }, [remaining, expiry, notify]);
 
   function formatRemaining(secs: number) {
     const m = Math.floor(secs / 60).toString().padStart(1, '0');
@@ -120,7 +145,7 @@ export default function SeatSelectionPage({ user, notify }: Props) {
 
   return <section className="booking-page">
     <Link className="back-link" to="/"><ArrowLeft size={16} />Retour au programme</Link>
-    <div className="booking-heading"><div><div className="eyebrow"><span className="eyebrow-line" />VOTRE SOIRÉE</div><h1>{session.titre}</h1><p>{date.toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' })} <span>·</span> {date.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })} <span>·</span> {session.salle}</p></div><span className="live-label"><span className="live-pulse" />PLAN EN DIRECT</span></div>
+    <div className="booking-heading"><div><div className="eyebrow"><span className="eyebrow-line" />VOTRE SOIRÉE</div><h1>{session.titre}</h1><p>{date.toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' })} <span>·</span> {date.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })} <span>·</span> {session.salle}</p></div><div className="booking-status"><span className="live-label"><span className="live-pulse" />PLAN EN DIRECT</span>{expiry && <span className={`hold-timer ${remaining <= 60 ? 'urgent' : ''}`}><Clock3 size={14} />{formatRemaining(remaining)} <small>retenue</small></span>}</div></div>
     <div className="booking-layout"><div className="seat-panel"><div className="screen-wrap"><div className="screen-glow" /><div className="screen-line" /><span>ÉCRAN</span></div><div className="seat-grid" aria-label="Plan des places">
       {grouped.map(({ row, seats: rowSeats }) => <div className="seat-row" key={row}><span className="row-label">{row}</span>{rowSeats.map((seat) => <button key={seat.id} disabled={busy || seat.etat === 'vendue' || (seat.etat === 'retenue' && !selected.includes(seat.id))} onClick={() => chooseSeat(seat)} className={`seat ${seat.etat} ${selected.includes(seat.id) ? 'selected' : ''} ${seat.type === 'accessible' ? 'accessible' : ''}`} title={`${row}${seat.numero} · ${seat.etat}`} aria-label={`Place ${row}${seat.numero}, ${seat.etat}`}>{seat.type === 'accessible' ? <Armchair size={12} /> : seat.numero}</button>)}</div>)}
     </div><div className="seat-legend"><span><i className="legend-seat free" />Disponible</span><span><i className="legend-seat chosen" />Votre choix</span><span><i className="legend-seat held" />En cours</span><span><i className="legend-seat sold" />Réservé</span></div><p className="seat-help"><LockKeyhole size={14} />{expiry ? <>Votre sélection expire dans <strong>{formatRemaining(remaining)}</strong>.</> : <>Votre sélection est gardée pendant 5 minutes.</>}</p></div>
