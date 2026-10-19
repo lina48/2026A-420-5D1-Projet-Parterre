@@ -295,6 +295,31 @@ app.post('/api/seances/:id/places/:placeId/retenir', requireAuth, asyncRoute(asy
 }));
 
 
+app.post('/api/seances/:id/places/:placeId/bloquer', requireAuth, requireManager, asyncRoute(async (request, response) => {
+  const { rows } = await pool.query(
+    'SELECT id FROM place_seance WHERE seance_id = $1 AND id = $2',
+    [request.params.id, request.params.placeId]
+  );
+
+  if (!rows[0]) {
+    return response.status(404).json({ error: 'Place introuvable.' });
+  }
+
+  const { rowCount } = await pool.query(
+    "UPDATE place_seance SET etat = 'bloquee' WHERE id = $1 AND etat = 'libre' AND zone <> 'bloque'",
+    [rows[0].id]
+  );
+
+  if (!rowCount) {
+    return response.status(409).json({ error: 'Seule une place libre peut être bloquée.' });
+  }
+
+  const change = { id: rows[0].id, etat: 'bloquee' };
+  io.to(`seance:${request.params.id}`).emit('place:etat_change', change);
+  response.json({ place: change });
+}));
+
+
 app.post('/api/reservations', requireAuth, asyncRoute(async (request, response) => {
 
   const { seanceId, placeIds } = request.body as {
