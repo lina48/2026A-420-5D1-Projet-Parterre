@@ -282,7 +282,7 @@ app.post('/api/seances/:id/places/:placeId/retenir', requireAuth, asyncRoute(asy
     });
   }
 
-  if (seat.zone === 'bloque') {
+  if (seat.zone === 'bloque' || seat.etat === 'bloquee') {
     return response.status(409).json({
       error: 'Cette place est bloquée.'
     });
