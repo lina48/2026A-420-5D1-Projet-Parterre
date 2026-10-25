@@ -214,7 +214,7 @@ app.get('/api/seances', asyncRoute(async (_request, response) => {
        f.description,
        f.sous_titre,
        f.spectacle_type,
-       COUNT(ps.id) FILTER (WHERE ps.zone <> 'bloque')::int AS capacite,
+       COUNT(ps.id) FILTER (WHERE ps.zone <> 'bloque' AND ps.etat <> 'bloquee')::int AS capacite,
        COUNT(ps.id) FILTER (WHERE ps.etat = 'libre' AND ps.zone <> 'bloque')::int AS places_disponibles
      FROM seance s
      JOIN salle sa ON sa.id = s.salle_id

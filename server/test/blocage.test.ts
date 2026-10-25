@@ -133,3 +133,16 @@ test('débloquer une place bloquée : 200 et la place redevient libre', async ()
   assert.equal(status, 200);
   assert.equal(await etatDeLaPlace(), 'libre');
 });
+
+test('bloquer une place réduit la capacité de la séance', async () => {
+  await remettreLibre();
+  const lireCapacite = async () => {
+    const { donnees } = await serveur.request('GET', '/api/seances');
+    return donnees.seances.find((seance: any) => seance.id === seanceId).capacite;
+  };
+  const avant = await lireCapacite();
+
+  await actionSurLaPlace('bloquer', jetonGestionnaire);
+
+  assert.equal(await lireCapacite(), avant - 1);
+});
