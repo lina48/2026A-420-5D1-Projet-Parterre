@@ -237,6 +237,205 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
 .toast { position: fixed; z-index: 20; right: 24px; bottom: 24px; display: flex; max-width: min(390px, calc(100vw - 32px)); align-items: center; gap: 9px; padding: 13px 16px; border: 1px solid rgba(74, 222, 128, .28); border-radius: 6px; color: var(--text); background: #101a1c; box-shadow: 0 14px 40px rgba(0, 0, 0, .35); font-size: 11px; animation: arrive .2s ease both; }
 .toast svg { flex: 0 0 auto; color: var(--green); }
 
+.payment-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(5, 7, 13, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.payment-card {
+  width: min(100%, 520px);
+  padding: 0 0 18px;
+  border: 1px solid rgba(92, 110, 155, 0.45);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(15, 21, 32, 0.96), rgba(12, 17, 28, 0.98));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+}
+
+.payment-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 22px 22px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.payment-header h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.payment-header p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.payment-close {
+  border: 0;
+  background: transparent;
+  color: rgba(232, 234, 242, 0.8);
+  font-size: 38px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.payment-summary-block {
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.payment-section-label {
+  margin-bottom: 12px;
+  color: #c3cce2;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.payment-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.payment-line span {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.payment-line strong {
+  color: var(--gold);
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.payment-line-total {
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px 22px 0;
+}
+
+.payment-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #c3cce2;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.payment-form input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(93, 111, 151, 0.45);
+  border-radius: 6px;
+  outline: none;
+  color: var(--text);
+  background: rgba(17, 24, 36, 0.7);
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.payment-form input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px rgba(232, 184, 75, 0.3);
+}
+
+.card-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(93, 111, 151, 0.45);
+  border-radius: 6px;
+  background: rgba(17, 24, 36, 0.7);
+}
+
+.card-input svg {
+  width: 18px;
+  height: 18px;
+  margin-left: 14px;
+  fill: rgba(232, 234, 242, 0.72);
+}
+
+.card-input input {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.payment-inline-fields {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 14px;
+}
+
+.payment-checkbox {
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted) !important;
+  font-size: 11px !important;
+  letter-spacing: 0 !important;
+  text-transform: none;
+}
+
+.payment-checkbox input {
+  width: 16px;
+  min-height: 16px;
+  accent-color: var(--gold);
+}
+
+.payment-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.7fr;
+  gap: 12px;
+  padding: 18px 22px 0;
+}
+
+.payment-cancel {
+  min-height: 48px;
+  border: 1px solid rgba(93, 111, 151, 0.45);
+  border-radius: 8px;
+  color: var(--text);
+  background: transparent;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.payment-confirm {
+  min-height: 48px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.payment-icon {
+  display: inline-block;
+  transform: rotate(12deg);
+}
+
 @keyframes arrive { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulse { 0% { transform: scale(.7); opacity: .85; } 100% { transform: scale(1.8); opacity: 0; } }
 
