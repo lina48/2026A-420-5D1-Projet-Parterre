@@ -19,7 +19,7 @@ export type Seat = {
   rangee: string;
   numero: number;
   type: string;
-  etat: 'libre' | 'retenue' | 'vendue';
+  etat: 'libre' | 'retenue' | 'vendue' | 'bloquee';
   retenue_active?: boolean;
   retenue_expire_a?: string | null;
 };

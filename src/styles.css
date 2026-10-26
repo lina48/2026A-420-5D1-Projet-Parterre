@@ -143,6 +143,7 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
 .seat:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--green); }
 .seat.retenue { border-color: rgba(251, 146, 60, .32); color: var(--amber); background: var(--amber-wash); cursor: not-allowed; }
 .seat.vendue { border-color: var(--line); color: var(--dim); background: var(--raised); cursor: not-allowed; }
+.seat.bloquee { border-style: dashed; border-color: var(--line-strong); color: var(--dim); background: var(--raised); cursor: not-allowed; }
 .seat.selected { border-color: var(--gold); color: #17130b; background: var(--gold); box-shadow: 0 0 12px rgba(232, 184, 75, .17); }
 .seat.selected:hover { border-color: #f6d47b; background: #f0c963; }
 .seat.accessible { color: #b4a9ff; border-color: rgba(124, 106, 247, .34); background: var(--violet-wash); }
@@ -154,6 +155,7 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
 .legend-seat.chosen { border-color: var(--gold); background: var(--gold); }
 .legend-seat.held { border-color: rgba(251, 146, 60, .45); background: var(--amber-wash); }
 .legend-seat.sold { border-color: var(--line-strong); background: var(--raised); }
+.legend-seat.blocked { border-style: dashed; border-color: var(--line-strong); background: var(--raised); }
 .seat-help { display: flex; justify-content: center; align-items: center; gap: 6px; margin: 13px 0 0; color: var(--dim); font-size: 9px; }
 .summary-panel { padding: 21px 19px 16px; }
 .summary-title { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
