@@ -122,13 +122,13 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - **Avancement (Alexander)** : j'ai pris le récit #10 (bloquer des places). Route `bloquer` faite, et j'ai corrigé `retenir`, qui laissait retenir une place bloquée.
 - **Blocage (Alexander)** : `npm run dev` joint pas PostgreSQL (le `db` du compose publie pas de port). Je passe par `docker compose up --build`.
 - **Décisions (Alexander)** : bloquer change `etat`, jamais `zone`, pour pouvoir débloquer après. Seule une place `libre` peut être bloquée, sinon 409. Je réutilise `requireManager`.
-- **Prof** : il veut qu'on s'entende sur le changement de la rétro du sprint 1 et sur la vélocité. Bilan sprint 1 : 5 points sur 34. Le tableau du sprint 2 additionne 27 mais affiche 19. Chiffre retenu et changement de rétro : à compléter.
+- **Prof** : il veut qu'on s'entende sur le changement de la rétro du sprint 1 et sur la vélocité. Bilan sprint 1 : 5 points sur 34. Le tableau du sprint 2 additionne 27 mais affiche 19.
 
 # 23 au 25 octobre 2026
 
 - **Avancement (Alexander)** : route `debloquer` (23), 9 tests dans `blocage.test.ts` (24), écran du gestionnaire : un clic sur une place la bloque ou la débloque (25). PR #50 fusionnée dans la nuit du 25 au 26.
 - **Blocage (Alexander)** : le test de capacité était rouge (72 au lieu de 71) : la capacité comptait encore les places bloquées. Corrigé.
-- **Coordination (Alexander)** : le 24, message à l'équipe : la connexion GitHub a pas de responsable, il faut un récit fusionné et testé pour le point de contrôle 2, et la planif du sprint 2 est à compléter. Karel dit qu'il fait deux récits (lesquels : à compléter).
+- **Coordination (Alexander)** : le 24, message à l'équipe : la connexion GitHub a pas de responsable, il faut un récit fusionné et testé pour le point de contrôle 2, et la planif du sprint 2 est à compléter. Karel dit qu'il fait ces deux récits.
 
 # 26 octobre 2026 — Point de contrôle 2
 
