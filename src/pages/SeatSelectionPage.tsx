@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { Armchair, ArrowLeft, ArrowRight, Film, LockKeyhole } from 'lucide-react';
@@ -17,28 +17,41 @@ export default function SeatSelectionPage({ user, notify }: Props) {
   const [remaining, setRemaining] = useState<number>(0);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const seatVersion = useRef(0);
+  const refreshVersion = useRef(0);
 
   async function refreshSeats() {
+    const version = seatVersion.current;
+    const requestVersion = ++refreshVersion.current;
     const result = await api<{ places: Seat[] }>(`/api/seances/${id}/plan`);
-    setSeats(result.places);
+    if (version === seatVersion.current && requestVersion === refreshVersion.current) setSeats(result.places);
   }
 
   useEffect(() => {
     setLoading(true);
+    const version = seatVersion.current;
+    const requestVersion = ++refreshVersion.current;
     Promise.all([api<{ seances: Session[] }>('/api/seances'), api<{ places: Seat[] }>(`/api/seances/${id}/plan`)]).then(([schedule, plan]) => {
       setSession(schedule.seances.find((show) => String(show.id) === id) ?? null);
-      setSeats(plan.places);
+      if (version === seatVersion.current && requestVersion === refreshVersion.current) setSeats(plan.places);
     }).catch((error: Error) => notify(error.message)).finally(() => setLoading(false));
   }, [id]);
 
   useEffect(() => {
     const socket = io();
-    socket.emit('seance:rejoindre', id);
+    socket.on('connect', () => {
+      socket.emit('seance:rejoindre', id);
+      refreshSeats().catch((error: Error) => notify(error.message));
+    });
     socket.on('place:etat_change', (change: { id: number; etat: Seat['etat'] }) => {
+      seatVersion.current += 1;
       setSeats((current) => current.map((seat) => seat.id === change.id ? { ...seat, etat: change.etat } : seat));
       if (change.etat === 'vendue' || change.etat === 'libre') setSelected((current) => current.filter((seatId) => seatId !== change.id));
     });
-    socket.on('place:retenue_expiree', (change: { id: number }) => setSeats((current) => current.map((seat) => seat.id === change.id ? { ...seat, etat: 'libre' } : seat)));
+    socket.on('place:retenue_expiree', (change: { id: number }) => {
+      seatVersion.current += 1;
+      setSeats((current) => current.map((seat) => seat.id === change.id ? { ...seat, etat: 'libre' } : seat));
+    });
     return () => { socket.emit('seance:quitter', id); socket.disconnect(); };
   }, [id]);
 
@@ -63,8 +76,10 @@ export default function SeatSelectionPage({ user, notify }: Props) {
     if (!selected.length) return;
     setBusy(true);
     try {
-      const result = await api<{ reservation: { code_billet: string } }>('/api/reservations', { method: 'POST', body: JSON.stringify({ seanceId: Number(id), placeIds: selected }) });
-      notify(`Réservation confirmée · ${result.reservation.code_billet}`);
+      const result = await api<{ reservation: { code_billet: string }; courrielEnvoye: boolean }>('/api/reservations', { method: 'POST', body: JSON.stringify({ seanceId: Number(id), placeIds: selected }) });
+      notify(result.courrielEnvoye
+        ? `Réservation confirmée · billet envoyé par courriel (${result.reservation.code_billet}).`
+        : `Réservation confirmée · ${result.reservation.code_billet}. Le courriel n’a pas pu être envoyé.`);
       setExpiry(null);
       setRemaining(0);
       navigate('/mes-reservations');

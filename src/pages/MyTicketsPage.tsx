@@ -9,6 +9,7 @@ type Props = { user: User | null; notify: (message: string) => void };
 export default function MyTicketsPage({ user, notify }: Props) {
   const [tickets, setTickets] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [canceling, setCanceling] = useState<number | null>(null);
 
   async function load() {
     return api<{ reservations: Reservation[] }>('/api/reservations').then(({ reservations }) => setTickets(reservations));
@@ -20,11 +21,13 @@ export default function MyTicketsPage({ user, notify }: Props) {
   }, [user]);
 
   async function cancel(id: number) {
+    setCanceling(id);
     try {
       await api(`/api/reservations/${id}`, { method: 'DELETE' });
       notify('Votre réservation a été annulée.');
       await load();
     } catch (error) { notify((error as Error).message); }
+    finally { setCanceling(null); }
   }
 
   return <section className="tickets-page">
@@ -36,7 +39,7 @@ export default function MyTicketsPage({ user, notify }: Props) {
         <p>{new Date(ticket.date_heure).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' })} · {new Date(ticket.date_heure).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}</p>
         <div className="ticket-bottom"><span className="seat-code">{ticket.places.map(({ rangee, numero }) => `${rangee}${numero}`).join('  ·  ')}</span><span className="ticket-ref">{ticket.code_billet}</span></div>
       </div>
-      <div className="ticket-price"><strong>{Number(ticket.montant_total).toFixed(2).replace('.', ',')} $</strong>{ticket.statut === 'confirmee' && new Date(ticket.date_heure) > new Date() && <button onClick={() => cancel(ticket.id)}>Annuler</button>}</div>
+      <div className="ticket-price"><strong>{Number(ticket.montant_total).toFixed(2).replace('.', ',')} $</strong>{ticket.statut === 'confirmee' && new Date(ticket.date_heure) > new Date() && <button disabled={canceling === ticket.id} onClick={() => cancel(ticket.id)}>{canceling === ticket.id ? 'Annulation…' : 'Annuler'}</button>}</div>
     </article>)}</div> : <div className="empty-state"><Ticket /><p>Pas encore de billet dans votre carnet.</p><Link to="/">Trouver une séance <ArrowRight size={15} /></Link></div>}
   </section>;
 }

@@ -16,6 +16,8 @@ L’inscription et la connexion sont disponibles sur `/inscription` et `/connexi
 
 Pour créer le premier compte gestionnaire, définissez `INITIAL_ADMIN_NAME`, `INITIAL_ADMIN_EMAIL` et `INITIAL_ADMIN_PASSWORD` dans l’environnement avant le démarrage du serveur. Le mot de passe doit contenir au moins 12 caractères. Le compte est créé uniquement si son adresse courriel n’existe pas déjà. En production, configurez ces valeurs dans les secrets de l’hébergeur; ne réutilisez pas les identifiants de test locaux.
 
+Pour envoyer le billet après la confirmation d'une réservation, configurez `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_FROM`, `SMTP_USER` et `SMTP_PASSWORD` dans `.env` (ou dans les variables d'environnement de l'hébergeur). Si le courriel ne peut pas être envoyé, la réservation confirmée reste disponible dans « Mes billets » et l'application l'indique au spectateur.
+
 ## Lancement de développement
 
 Prérequis : Node.js 22 ou plus récent, npm et PostgreSQL. Créez une base `parterre` et copiez `.env.example` en `.env`, puis :
@@ -65,7 +67,7 @@ docs/             # Conception et organisation de l’équipe
 | `DELETE` | `/api/reservations/:id` | Propriétaire |
 | `POST` | `/api/seances` | Gestionnaire |
 
-Socket.IO diffuse `place:etat_change` et `place:retenue_expiree` par salle. Les actions de modification restent exclusivement sur l’API REST. La gestion des conflits entre réservations simultanées n’est pas encore implémentée.
+Socket.IO diffuse `place:etat_change` et `place:retenue_expiree` par salle. Les actions de modification restent exclusivement sur l’API REST. Les réservations, rétentions et annulations verrouillent les places concernées dans des transactions PostgreSQL afin d'éviter les conflits simultanés.
 
 La documentation détaillée du projet et les décisions techniques restent disponibles dans `docs/`.
  
