@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes } from 'react-router-dom';
 import { Check, Clapperboard, LogIn, LogOut } from 'lucide-react';
@@ -9,6 +10,7 @@ import ProgrammePage from './pages/ProgrammePage';
 import SeatSelectionPage from './pages/SeatSelectionPage';
 import type { User } from './types';
 import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
 
 const savedUser = localStorage.getItem('parterre-user');
 const initialUser: User | null = savedUser ? JSON.parse(savedUser) as User : null;
@@ -42,7 +44,7 @@ export default function App() {
         <nav className="main-nav" aria-label="Navigation principale">
           <NavLink to="/" end>Programmation</NavLink>
           {user && <NavLink to="/mes-reservations">Mes billets</NavLink>}
-          {user?.role === 'gestionnaire' && <NavLink to="/gestion/seances/nouvelle">Gestion</NavLink>}
+          {user?.role === 'gestionnaire' && <NavLink to="/gestion">Gestion</NavLink>}
         </nav>
         <div className="account-area">
           {user ? <><span className="account-name"><span className="online-dot" />{user.nom.split(' ')[0]}</span><button className="icon-button" title="Déconnexion" onClick={signOut}><LogOut size={17} /></button></> : <Link className="account-link" to="/connexion"><LogIn size={15} />Se connecter</Link>}
@@ -55,6 +57,7 @@ export default function App() {
           <Route path="/seances/:id" element={<SeatSelectionPage user={user} notify={setToast} />} />
           <Route path="/mes-reservations" element={<MyTicketsPage user={user} notify={setToast} />} />
           <Route path="/gestion/seances/nouvelle" element={<CreateSessionPage user={user} notify={setToast} />} />
+          <Route path="/gestion" element={<DashboardPage user={user} />} />
           <Route path="/inscription" element={<RegisterPage onAuth={handleAuth} notify={setToast} />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
