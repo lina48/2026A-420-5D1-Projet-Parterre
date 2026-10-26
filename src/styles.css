@@ -1289,3 +1289,145 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
     grid-template-columns: 1fr;
   }
 }
+
+
+.tickets-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  margin-top: 25px;
+}
+
+.tickets-section {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.tickets-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #2a3558;
+}
+
+.tickets-section-heading > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tickets-section-heading svg {
+  color: #e8b84b;
+}
+
+.tickets-section-heading h2 {
+  margin: 0;
+  color: #e8eaf2;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.tickets-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid #2a3558;
+  border-radius: 6px;
+  color: #8892b0;
+  background: #141929;
+  font-size: 12px;
+}
+
+.ticket-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 9px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.ticket-status-upcoming {
+  background: rgba(74, 222, 128, 0.12);
+  border: 1px solid rgba(74, 222, 128, 0.28);
+  color: #4ade80;
+}
+
+.ticket-status-expired {
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: #f87171;
+}
+
+.ticket-status-cancelled {
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: #f87171;
+}
+
+.ticket-past {
+  background: #11151f;
+  border-color: #252a36;
+  opacity: 0.78;
+}
+
+.ticket-past .ticket-art {
+  filter: grayscale(100%);
+}
+
+.ticket-past .ticket-details h2 {
+  color: #a1a8b8;
+}
+
+.ticket-past .ticket-details p,
+.ticket-past .ticket-ref,
+.ticket-past .seat-code {
+  color: #777f91;
+}
+
+.ticket-past .ticket-price strong {
+  color: #a1a8b8;
+}
+
+.ticket-past .ticket-status-expired {
+  color: #ff7272;
+  opacity: 1;
+}
+
+.ticket-expired-note {
+  color: #f87171;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tickets-section-empty {
+  padding: 32px 20px;
+  border: 1px dashed #2a3558;
+  border-radius: 8px;
+  background: #0f1420;
+  color: #8892b0;
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .tickets-sections {
+    gap: 36px;
+  }
+
+  .tickets-section-heading h2 {
+    font-size: 16px;
+  }
+
+  .ticket-status {
+    font-size: 9px;
+  }
+}
