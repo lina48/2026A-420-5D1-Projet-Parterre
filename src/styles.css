@@ -1064,3 +1064,372 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
     padding: 16px;
   }
 }
+
+
+.payment-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(5, 7, 13, 0.78);
+  backdrop-filter: blur(6px);
+}
+
+.payment-modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  border: 1px solid #2a3558;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #141929, #0f1420);
+  color: #e8eaf2;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  animation: arrive 0.2s ease both;
+}
+
+.payment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 26px 26px 20px;
+  border-bottom: 1px solid #2a3558;
+}
+
+.payment-eyebrow {
+  display: block;
+  margin-bottom: 10px;
+  color: #e8b84b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.payment-header h2 {
+  margin: 0;
+  color: #e8eaf2;
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 400;
+}
+
+.payment-header p {
+  margin: 9px 0 0;
+  color: #8892b0;
+  font-size: 12px;
+}
+
+.payment-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #8892b0;
+  cursor: pointer;
+}
+
+.payment-close:hover {
+  color: #e8eaf2;
+  background: #1a2035;
+}
+
+.payment-order {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 26px 0;
+  padding: 18px;
+  border: 1px solid #1e2640;
+  border-radius: 9px;
+  background: #080b14;
+}
+
+.payment-order span {
+  color: #8892b0;
+  font-size: 13px;
+}
+
+.payment-order strong {
+  color: #e8b84b;
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.payment-modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 19px;
+  padding: 24px 26px 26px;
+}
+
+.payment-modal form label {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  color: #c3cce2;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.payment-modal form input {
+  width: 100%;
+  min-width: 0;
+  min-height: 45px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid #2a3558;
+  border-radius: 7px;
+  outline: none;
+  background: #080b14;
+  color: #e8eaf2;
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.payment-modal form input::placeholder {
+  color: #59647e;
+}
+
+.payment-modal form input:focus {
+  border-color: #e8b84b;
+  box-shadow: 0 0 0 2px rgba(232, 184, 75, 0.12);
+}
+
+.payment-fields-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.payment-disclaimer {
+  margin: 0;
+  color: #8892b0;
+  font-size: 11px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.payment-error {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid rgba(255, 100, 100, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 100, 100, 0.08);
+  color: #ff8585;
+  font-size: 12px;
+}
+
+.payment-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 50px;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #e8b84b;
+  color: #080b14;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.payment-confirm:hover:not(:disabled) {
+  background: #f3c96e;
+}
+
+.payment-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+  .payment-overlay {
+    padding: 12px;
+  }
+
+  .payment-modal {
+    max-height: 95vh;
+  }
+
+  .payment-header {
+    padding: 22px 20px 18px;
+  }
+
+  .payment-header h2 {
+    font-size: 26px;
+  }
+
+  .payment-order {
+    margin: 20px 20px 0;
+  }
+
+  .payment-modal form {
+    padding: 20px;
+  }
+
+  .payment-fields-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.tickets-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  margin-top: 25px;
+}
+
+.tickets-section {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.tickets-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #2a3558;
+}
+
+.tickets-section-heading > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tickets-section-heading svg {
+  color: #e8b84b;
+}
+
+.tickets-section-heading h2 {
+  margin: 0;
+  color: #e8eaf2;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.tickets-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid #2a3558;
+  border-radius: 6px;
+  color: #8892b0;
+  background: #141929;
+  font-size: 12px;
+}
+
+.ticket-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 9px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.ticket-status-upcoming {
+  background: rgba(74, 222, 128, 0.12);
+  border: 1px solid rgba(74, 222, 128, 0.28);
+  color: #4ade80;
+}
+
+.ticket-status-expired {
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: #f87171;
+}
+
+.ticket-status-cancelled {
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: #f87171;
+}
+
+.ticket-past {
+  background: #11151f;
+  border-color: #252a36;
+  opacity: 0.78;
+}
+
+.ticket-past .ticket-art {
+  filter: grayscale(100%);
+}
+
+.ticket-past .ticket-details h2 {
+  color: #a1a8b8;
+}
+
+.ticket-past .ticket-details p,
+.ticket-past .ticket-ref,
+.ticket-past .seat-code {
+  color: #777f91;
+}
+
+.ticket-past .ticket-price strong {
+  color: #a1a8b8;
+}
+
+.ticket-past .ticket-status-expired {
+  color: #ff7272;
+  opacity: 1;
+}
+
+.ticket-expired-note {
+  color: #f87171;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tickets-section-empty {
+  padding: 32px 20px;
+  border: 1px dashed #2a3558;
+  border-radius: 8px;
+  background: #0f1420;
+  color: #8892b0;
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .tickets-sections {
+    gap: 36px;
+  }
+
+  .tickets-section-heading h2 {
+    font-size: 16px;
+  }
+
+  .ticket-status {
+    font-size: 9px;
+  }
+}
