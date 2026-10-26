@@ -86,8 +86,6 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
 .button:disabled { opacity: .42; cursor: not-allowed; }
 .button-gold { color: #181409; background: var(--gold); }
 .button-gold:hover:not(:disabled) { background: #f0c963; }
-.button-github { width: 100%; margin-top: 14px; color: var(--text); border-color: var(--line-strong); background: var(--panel); text-decoration: none; }
-.button-github:hover { border-color: var(--gold); }
 .button-wide { width: 100%; }
 .feature-copy .button { min-height: 36px; font-size: 10px; }
 .feature-caption { position: absolute; right: 15px; bottom: 13px; color: rgba(232, 234, 242, .55); font-family: var(--mono); font-size: 8px; }

@@ -18,16 +18,6 @@ Pour créer le premier compte gestionnaire, définissez `INITIAL_ADMIN_NAME`, `I
 
 Pour envoyer le billet après la confirmation d'une réservation, configurez `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_FROM`, `SMTP_USER` et `SMTP_PASSWORD` dans `.env` (ou dans les variables d'environnement de l'hébergeur). Si le courriel ne peut pas être envoyé, la réservation confirmée reste disponible dans « Mes billets » et l'application l'indique au spectateur.
 
-## Préparer l'authentification GitHub
-
-L'application propose la connexion GitHub OAuth sur la page `/connexion`. Copiez `.env.example` vers `.env`, puis renseignez `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET` et `GITHUB_OAUTH_CALLBACK_URL`.
-
-Créez une **OAuth App** dans les paramètres développeur GitHub. Pour `npm run dev`, utilisez `http://localhost:5173` comme URL d'accueil et `http://localhost:4000/api/auth/github/callback` comme URL de rappel. Avec Docker Compose, l'URL d'accueil et l'origine client sont `http://localhost:3000`; définissez `GITHUB_OAUTH_CALLBACK_URL=http://localhost:3000/api/auth/github/callback` dans `.env`. L'URL de rappel configurée dans GitHub doit correspondre exactement à `GITHUB_OAUTH_CALLBACK_URL`. Une OAuth App GitHub n'acceptant qu'une URL de rappel, modifiez-la selon le mode utilisé.
-
-Au premier accès, l'application demande l'identifiant public, le nom et le courriel GitHub vérifié principal. Une adresse déjà utilisée par un compte Parterre n'est pas liée automatiquement : connectez-vous à ce compte avec son mot de passe. En production, configurez l'origine client et l'URL de rappel sur le domaine HTTPS déployé.
-
-Ne partagez pas et ne commitez jamais `GITHUB_OAUTH_CLIENT_SECRET`. Le fichier `.env` est ignoré par Git; configurez ces valeurs comme secrets d'environnement sur l'hébergeur.
-
 ## Comptes de démonstration
 
 Ces deux comptes sont créés automatiquement au démarrage de Docker :

@@ -31,7 +31,7 @@ export async function requete(sql: string, params: unknown[] = []) {
   }
 }
 
-export async function startServer(overrides: Record<string, string> = {}) {
+export async function startServer() {
   const port = await portLibre();
   const enfant: ChildProcess = spawn(process.execPath, ['--import', 'tsx', 'server/index.ts'], {
     env: {
@@ -43,11 +43,6 @@ export async function startServer(overrides: Record<string, string> = {}) {
       INITIAL_ADMIN_NAME: '',
       INITIAL_ADMIN_EMAIL: '',
       INITIAL_ADMIN_PASSWORD: '',
-      GITHUB_OAUTH_CLIENT_ID: '',
-      GITHUB_OAUTH_CLIENT_SECRET: '',
-      GITHUB_OAUTH_CALLBACK_URL: '',
-      CLIENT_ORIGIN: 'http://localhost:5173',
-      ...overrides,
     },
   });
 
@@ -76,7 +71,6 @@ export async function startServer(overrides: Record<string, string> = {}) {
         method: methode,
         headers: entetes,
         body: corps ? JSON.stringify(corps) : undefined,
-        redirect: 'manual',
       });
       const texte = await reponse.text();
       let donnees: any;
@@ -85,7 +79,7 @@ export async function startServer(overrides: Record<string, string> = {}) {
       } catch {
         donnees = texte;
       }
-      return { status: reponse.status, donnees, entetes: reponse.headers };
+      return { status: reponse.status, donnees };
     },
     async close() {
       enfant.removeAllListeners('exit');
