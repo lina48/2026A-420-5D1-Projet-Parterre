@@ -136,7 +136,7 @@ export default function SeatSelectionPage({ user, notify }: Props) {
 
 
   useEffect(() => {
-    if (expiry && remaining === 0) {
+    if (expiry && expiry <= Date.now()) {
       setExpiry(null);
       setSelected([]);
       notify('Votre retenue de 5 minutes est expirée. Les places sont de nouveau disponibles.');
