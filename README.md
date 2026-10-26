@@ -52,6 +52,16 @@ npm test
 
 Sous PowerShell, remplacez la deuxième ligne par `$env:TEST_DATABASE_URL = "postgres://postgres:postgres@localhost:5432/parterre_test"`. Les tests refusent de démarrer si `TEST_DATABASE_URL` n'est pas défini. Ils sont aussi lancés par la CI à chaque poussée. Pour supprimer la base de test : `docker rm -f pg-test`.
 
+Sous PowerShell, dans un nouvel environnement non préconfiguré, le motif `**` de `npm test` n'est pas interprété. Si le port 5432 est déjà utilisé par un PostgreSQL local, publiez le conteneur sur un autre port (ici 5433) et lancez les fichiers de test explicitement, depuis la racine du projet :
+
+```powershell
+npm install
+docker run --name pg-test -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=parterre_test -p 5433:5432 -d postgres:16
+$env:TEST_DATABASE_URL = "postgresql://postgres:postgres@localhost:5433/parterre_test"
+node --import tsx --test --test-concurrency=1 server/test/auth.test.ts server/test/blocage.test.ts
+```
+
+Si le conteneur `pg-test` existe déjà, remplacez la commande `docker run` par `docker start pg-test`.
 ## Organisation du code
 
 ```text
