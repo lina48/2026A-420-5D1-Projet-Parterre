@@ -81,6 +81,46 @@ test('route protégée sans jeton : 401', async () => {
   assert.equal(status, 401);
 });
 
+test('OAuth GitHub indisponible sans identifiants configurés', async () => {
+  const { status, donnees } = await serveur.request('GET', '/api/auth/github/status');
+
+  assert.equal(status, 200);
+  assert.equal(donnees.configured, false);
+});
+
+test('démarrage OAuth GitHub refusé sans configuration', async () => {
+  const { status, donnees } = await serveur.request('GET', '/api/auth/github');
+
+  assert.equal(status, 503);
+  assert.match(donnees.error, /GitHub/);
+});
+
+test('démarrage OAuth GitHub renvoie une URL avec état CSRF et cookie sécurisé', async () => {
+  const oauthServer = await startServer({
+    GITHUB_OAUTH_CLIENT_ID: 'client-id-test',
+    GITHUB_OAUTH_CLIENT_SECRET: 'client-secret-test',
+    GITHUB_OAUTH_CALLBACK_URL: 'http://localhost:4000/api/auth/github/callback',
+  });
+  try {
+    const { status, entetes } = await oauthServer.request('GET', '/api/auth/github');
+    const authorization = new URL(entetes.get('location')!);
+    const cookie = entetes.get('set-cookie') ?? '';
+
+    assert.equal(status, 302);
+    assert.equal(authorization.origin, 'https://github.com');
+    assert.equal(authorization.pathname, '/login/oauth/authorize');
+    assert.equal(authorization.searchParams.get('client_id'), 'client-id-test');
+    assert.equal(authorization.searchParams.get('redirect_uri'), 'http://localhost:4000/api/auth/github/callback');
+    assert.equal(authorization.searchParams.get('scope'), 'read:user user:email');
+    assert.match(authorization.searchParams.get('state') ?? '', /^[a-f0-9]{64}$/);
+    assert.match(cookie, /HttpOnly/i);
+    assert.match(cookie, /SameSite=Lax/i);
+    assert.ok(cookie.includes(authorization.searchParams.get('state')!));
+  } finally {
+    await oauthServer.close();
+  }
+});
+
 test('spectateur sur la création de séance : 403', async () => {
   const { donnees } = await serveur.request('POST', '/api/auth/inscription', {
     nom: 'Sophie Martin',

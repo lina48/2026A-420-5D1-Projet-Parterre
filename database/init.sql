@@ -3,10 +3,14 @@ CREATE TABLE IF NOT EXISTS utilisateur (
   nom VARCHAR(120) NOT NULL,
   courriel VARCHAR(255) NOT NULL UNIQUE,
   mot_de_passe_hash VARCHAR(255) NOT NULL,
+  github_id BIGINT UNIQUE,
   role VARCHAR(20) NOT NULL DEFAULT 'spectateur'
     CHECK (role IN ('spectateur', 'gestionnaire')),
   cree_le TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE utilisateur
+  ADD COLUMN IF NOT EXISTS github_id BIGINT UNIQUE;
 
 
 CREATE TABLE IF NOT EXISTS salle (

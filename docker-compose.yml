@@ -31,6 +31,10 @@ services:
       DEMO_SPECTATOR_NAME: ${DEMO_SPECTATOR_NAME:-Spectateur Demo}
       DEMO_SPECTATOR_EMAIL: ${DEMO_SPECTATOR_EMAIL:-spectateur@parterre.demo}
       DEMO_SPECTATOR_PASSWORD: ${DEMO_SPECTATOR_PASSWORD:-demo-spectateur-2026}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:3000}
+      GITHUB_OAUTH_CLIENT_ID: ${GITHUB_OAUTH_CLIENT_ID:-}
+      GITHUB_OAUTH_CLIENT_SECRET: ${GITHUB_OAUTH_CLIENT_SECRET:-}
+      GITHUB_OAUTH_CALLBACK_URL: ${GITHUB_OAUTH_CALLBACK_URL:-http://localhost:3000/api/auth/github/callback}
       PORT: 3000
     ports:
       - "3000:3000"
