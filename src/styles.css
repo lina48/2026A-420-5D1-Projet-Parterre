@@ -245,6 +245,7 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
 .ticket-ref { color: var(--dim); }
 .ticket-price { display: flex; flex-direction: column; align-items: flex-end; gap: 17px; }
 .ticket-price strong { color: var(--text); font-family: var(--mono); font-size: 13px; font-weight: 500; }
+.ticket-qr { display: block; width: 72px; height: 72px; margin: 0 auto 8px; padding: 3px; border-radius: 4px; background: #fff; }
 .ticket-price button { padding: 0; border: 0; color: var(--red); background: none; font-size: 9px; cursor: pointer; }
 .ticket-price button:hover { text-decoration: underline; }
 
