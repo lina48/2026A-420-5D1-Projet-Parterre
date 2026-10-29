@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Ticket, CalendarDays, Clock3 } from 'lucide-react';
+import QRCode from 'qrcode';
 import { api } from '../services/api';
 import type { Reservation, User } from '../types';
 
@@ -14,6 +15,7 @@ export default function MyTicketsPage({ user, notify }: Props) {
   const [loading, setLoading] = useState(true);
   const [canceling, setCanceling] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
+  const [qrCodes, setQrCodes] = useState<Record<number, string>>({});
 
   async function load() {
     const { reservations } = await api<{ reservations: Reservation[] }>(
@@ -35,6 +37,33 @@ export default function MyTicketsPage({ user, notify }: Props) {
       .catch((error: Error) => notify(error.message))
       .finally(() => setLoading(false));
   }, [user]);
+
+  useEffect(() => {
+    let active = true;
+    if (!tickets.length) {
+      setQrCodes({});
+      return () => {
+        active = false;
+      };
+    }
+
+    Promise.all(
+      tickets.map(async (ticket) => [
+        ticket.id,
+        await QRCode.toDataURL(ticket.code_billet, {
+          width: 96,
+          margin: 1,
+          errorCorrectionLevel: 'M'
+        })
+      ] as const)
+    ).then((codes) => {
+      if (active) setQrCodes(Object.fromEntries(codes));
+    }).catch((error: Error) => notify(`Impossible de préparer les QR codes : ${error.message}`));
+
+    return () => {
+      active = false;
+    };
+  }, [tickets, notify]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -160,6 +189,13 @@ export default function MyTicketsPage({ user, notify }: Props) {
         </div>
 
         <div className="ticket-price">
+          {qrCodes[ticket.id] && (
+            <img
+              className="ticket-qr"
+              src={qrCodes[ticket.id]}
+              alt={`QR code du billet ${ticket.code_billet}`}
+            />
+          )}
           <strong>
             {Number(ticket.montant_total)
               .toFixed(2)
