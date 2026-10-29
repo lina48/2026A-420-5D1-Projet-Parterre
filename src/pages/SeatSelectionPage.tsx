@@ -1,12 +1,12 @@
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { Armchair, ArrowLeft, ArrowRight, Clock3, Film, LockKeyhole, CreditCard, X } from 'lucide-react';
 import { api } from '../services/api';
 import type { Seat, Session, User } from '../types';
 
-type Props = { user: User | null; notify: (message: string) => void };
+type Props = { user: User | null; notify: (message: ReactNode) => void };
 
 type FakePayment = {
   firstName: string;
@@ -256,7 +256,13 @@ export default function SeatSelectionPage({ user, notify }: Props) {
       setSelected([]);
 
       notify(result.courrielEnvoye
-        ? `Réservation confirmée · billet envoyé par courriel (${result.reservation.code_billet}).`
+        ? <span>
+            Votre réservation est confirmée ! Votre billet a été envoyé. Consultez votre{' '}
+            <a href="http://localhost:8025" target="_blank" rel="noopener noreferrer">
+              boîte de réception sur Mailpit
+            </a>{' '}
+            pour le retrouver. ({result.reservation.code_billet})
+          </span>
         : `Réservation confirmée · ${result.reservation.code_billet}. Le courriel n’a pas pu être envoyé.`);
       navigate('/mes-reservations');
 

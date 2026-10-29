@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, Route, Routes } from 'react-router-dom';
 import { Check, Clapperboard, LogIn, LogOut } from 'lucide-react';
 import CreateSessionPage from './pages/CreateSessionPage';
@@ -17,11 +17,11 @@ const initialUser: User | null = savedUser ? JSON.parse(savedUser) as User : nul
 
 export default function App() {
   const [user, setUser] = useState<User | null>(initialUser);
-  const [toast, setToast] = useState('');
+  const [toast, setToast] = useState<ReactNode>('');
 
   useEffect(() => {
     if (!toast) return;
-    const timeout = window.setTimeout(() => setToast(''), 3500);
+    const timeout = window.setTimeout(() => setToast(''), typeof toast === 'string' ? 3500 : 60000);
     return () => window.clearTimeout(timeout);
   }, [toast]);
 
