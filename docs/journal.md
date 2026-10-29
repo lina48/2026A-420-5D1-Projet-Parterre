@@ -126,6 +126,7 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - **Avancement (Lina)** : PR #51 — transactions PostgreSQL et verrous `FOR UPDATE` pour retenir/confirmer les places; annulation avant séance; diffusion Socket.IO des changements; envoi SMTP du billet après confirmation.
 - **Avancement (Lina)** : tests d'intégration des réservations, annulations, courriels et événements Socket.IO; configuration SMTP documentée.
 - **Avancement (Lina)** : PR #52 — authentification GitHub OAuth, état anti-CSRF, vérification du courriel et interface de connexion.
+- **Avancement (Karel)** : Fonctionnalité de paiement et de filtrage de billets à venir et passés
 
 ## Jeudi 29 octobre 2026
 
