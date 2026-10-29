@@ -127,8 +127,10 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - **Avancement (Lina)** : tests d'intégration des réservations, annulations, courriels et événements Socket.IO; configuration SMTP documentée.
 - **Avancement (Lina)** : PR #52 — authentification GitHub OAuth, état anti-CSRF, vérification du courriel et interface de connexion.
 - **Avancement (Karel)** : Fonctionnalité de paiement et de filtrage de billets à venir et passés
+- **Avancement (Hsiao Shan)** : Voir l'état des places
 
 ## Jeudi 29 octobre 2026
 
 - **Avancement (Lina)** : avant la séance, le 28 octobre, fusion de `main` et ajout du lien Mailpit à la confirmation d'envoi du billet; la notification reste visible 60 secondes.
 - **Avancement (Lina)** : le 29 octobre, réorganisation du journal pour consigner les changements par date, avec des résumés techniques concis.
+- **Avancement (Hsiao Shan)** : Validation des billets à l'entrée de la salle
