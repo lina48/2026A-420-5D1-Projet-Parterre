@@ -68,6 +68,7 @@ export async function startServer(overrides: Record<string, string> = {}) {
 
   const base = `http://localhost:${port}`;
   return {
+    url: base,
     async request(methode: string, chemin: string, corps?: unknown, jeton?: string) {
       const entetes: Record<string, string> = {};
       if (corps) entetes['Content-Type'] = 'application/json';

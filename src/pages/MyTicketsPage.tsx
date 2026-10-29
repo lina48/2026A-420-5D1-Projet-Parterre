@@ -12,6 +12,7 @@ type Props = {
 export default function MyTicketsPage({ user, notify }: Props) {
   const [tickets, setTickets] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [canceling, setCanceling] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
 
   async function load() {
@@ -44,6 +45,7 @@ export default function MyTicketsPage({ user, notify }: Props) {
   }, []);
 
   async function cancel(id: number) {
+    setCanceling(id);
     try {
       await api(`/api/reservations/${id}`, {
         method: 'DELETE'
@@ -53,6 +55,8 @@ export default function MyTicketsPage({ user, notify }: Props) {
       await load();
     } catch (error) {
       notify((error as Error).message);
+    } finally {
+      setCanceling(null);
     }
   }
 
@@ -163,8 +167,8 @@ export default function MyTicketsPage({ user, notify }: Props) {
           </strong>
 
           {!isPast && !isCancelled && (
-            <button onClick={() => cancel(ticket.id)}>
-              Annuler
+            <button disabled={canceling === ticket.id} onClick={() => cancel(ticket.id)}>
+              {canceling === ticket.id ? 'Annulation…' : 'Annuler'}
             </button>
           )}
 

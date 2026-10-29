@@ -1,12 +1,12 @@
 
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { Armchair, ArrowLeft, ArrowRight, Clock3, Film, LockKeyhole, CreditCard, X } from 'lucide-react';
 import { api } from '../services/api';
 import type { Seat, Session, User } from '../types';
 
-type Props = { user: User | null; notify: (message: string) => void };
+type Props = { user: User | null; notify: (message: ReactNode) => void };
 
 type FakePayment = {
   firstName: string;
@@ -34,31 +34,36 @@ export default function SeatSelectionPage({ user, notify }: Props) {
   const [remaining, setRemaining] = useState<number>(0);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const seatVersion = useRef(0);
+  const refreshVersion = useRef(0);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [payment, setPayment] = useState<FakePayment>(emptyPayment);
   const [paymentError, setPaymentError] = useState('');
   const isManager = user?.role === 'gestionnaire';
 
   async function refreshSeats() {
+    const version = seatVersion.current;
+    const requestVersion = ++refreshVersion.current;
     const result = await api<{ places: Seat[] }>(`/api/seances/${id}/plan`);
-    setSeats(result.places);
+    if (version === seatVersion.current && requestVersion === refreshVersion.current) setSeats(result.places);
   }
 
   useEffect(() => {
     setLoading(true);
+    const version = seatVersion.current;
+    const requestVersion = ++refreshVersion.current;
     Promise.all([
       api<{ seances: Session[] }>('/api/seances'),
       api<{ places: Seat[] }>(`/api/seances/${id}/plan`)
     ]).then(([schedule, plan]) => {
       setSession(schedule.seances.find((show) => String(show.id) === id) ?? null);
-      setSeats(plan.places);
+      if (version === seatVersion.current && requestVersion === refreshVersion.current) setSeats(plan.places);
     }).catch((error: Error) => notify(error.message))
       .finally(() => setLoading(false));
   }, [id]);
 
   useEffect(() => {
     const socket = io();
-    socket.emit('seance:rejoindre', id);
 
     const synchronizeSeats = () => {
       socket.emit('seance:rejoindre', id);
@@ -72,6 +77,7 @@ export default function SeatSelectionPage({ user, notify }: Props) {
       etat: Seat['etat'];
       expireA?: string | null;
     }) => {
+      seatVersion.current += 1;
       setSeats((current) => current.map((seat) =>
         seat.id === change.id ? {
           ...seat,
@@ -88,6 +94,7 @@ export default function SeatSelectionPage({ user, notify }: Props) {
     });
 
     socket.on('place:retenue_expiree', (change: { id: number }) => {
+      seatVersion.current += 1;
       setSeats((current) => current.map((seat) =>
         seat.id === change.id
           ? { ...seat, etat: 'libre', retenue_expire_a: null }
@@ -231,7 +238,8 @@ export default function SeatSelectionPage({ user, notify }: Props) {
 
     try {
       const result = await api<{
-        reservation: { code_billet: string }
+        reservation: { code_billet: string };
+        courrielEnvoye: boolean;
       }>('/api/reservations', {
         method: 'POST',
         body: JSON.stringify({
@@ -247,7 +255,15 @@ export default function SeatSelectionPage({ user, notify }: Props) {
       setRemaining(0);
       setSelected([]);
 
-      notify(`Réservation confirmée · ${result.reservation.code_billet}`);
+      notify(result.courrielEnvoye
+        ? <span>
+            Votre réservation est confirmée ! Votre billet a été envoyé. Consultez votre{' '}
+            <a href="http://localhost:8025" target="_blank" rel="noopener noreferrer">
+              boîte de réception sur Mailpit
+            </a>{' '}
+            pour le retrouver. ({result.reservation.code_billet})
+          </span>
+        : `Réservation confirmée · ${result.reservation.code_billet}. Le courriel n’a pas pu être envoyé.`);
       navigate('/mes-reservations');
 
     } catch (error) {
