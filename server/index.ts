@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { createServer } from 'node:http';
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,6 +9,12 @@ import { Server } from 'socket.io';
 import { pool } from './db/pool';
 import { asyncRoute, createToken, requireAuth, requireManager, type AuthRequest, type User } from './middleware/auth';
 import { sendTicketEmail } from './email';
+import {
+  buildGitHubAuthorizationUrl,
+  getGitHubOAuthConfig,
+  getGitHubRedirectUri,
+  getVerifiedGitHubIdentity,
+} from './github-oauth';
 import bcrypt from 'bcryptjs';
 
 
@@ -33,6 +39,105 @@ app.post('/api/auth/connexion', asyncRoute(async (request, response) => {
   }
   const user = { id: row.id, nom: row.nom, courriel: row.courriel, role: row.role };
   response.json({ token: createToken(user), user });
+}));
+
+app.get('/api/auth/github/status', asyncRoute(async (_request, response) => {
+  response.json({ configured: Boolean(getGitHubOAuthConfig()) });
+}));
+
+app.get('/api/auth/github', asyncRoute(async (_request, response) => {
+  const config = getGitHubOAuthConfig();
+  if (!config) return response.status(503).json({ error: 'La connexion GitHub n’est pas configurée.' });
+
+  const state = randomBytes(32).toString('hex');
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  response.append(
+    'Set-Cookie',
+    `github_oauth_state=${state}; HttpOnly; SameSite=Lax; Path=/api/auth/github; Max-Age=600${secure}`
+  );
+  response.redirect(302, buildGitHubAuthorizationUrl(config, state));
+}));
+
+app.get('/api/auth/github/callback', asyncRoute(async (request, response) => {
+  const config = getGitHubOAuthConfig();
+  if (!config) return response.status(503).send('La connexion GitHub n’est pas configurée.');
+
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  response.append(
+    'Set-Cookie',
+    `github_oauth_state=; HttpOnly; SameSite=Lax; Path=/api/auth/github; Max-Age=0${secure}`
+  );
+  const stateCookie = request.headers.cookie
+    ?.split(';')
+    .map((cookie) => cookie.trim())
+    .find((cookie) => cookie.startsWith('github_oauth_state='))
+    ?.slice('github_oauth_state='.length);
+  const returnedState = typeof request.query.state === 'string' ? request.query.state : '';
+  if (!stateCookie || !/^[a-f0-9]{64}$/.test(stateCookie) || !/^[a-f0-9]{64}$/.test(returnedState)) {
+    return response.redirect(303, getGitHubRedirectUri(config, { oauth: 'github_state_error' }));
+  }
+  const cookieState = Buffer.from(stateCookie);
+  const queryState = Buffer.from(returnedState);
+  if (cookieState.length !== queryState.length || !timingSafeEqual(cookieState, queryState)) {
+    return response.redirect(303, getGitHubRedirectUri(config, { oauth: 'github_state_error' }));
+  }
+  if (typeof request.query.error === 'string') {
+    return response.redirect(303, getGitHubRedirectUri(config, { oauth: 'github_denied' }));
+  }
+  const code = typeof request.query.code === 'string' ? request.query.code : '';
+  if (!code || code.length > 2048) {
+    return response.redirect(303, getGitHubRedirectUri(config, { oauth: 'github_error' }));
+  }
+
+  let identity: Awaited<ReturnType<typeof getVerifiedGitHubIdentity>>;
+  try {
+    identity = await getVerifiedGitHubIdentity(config, code);
+  } catch (error) {
+    console.error('Échec de l’authentification OAuth GitHub.', error);
+    return response.redirect(303, getGitHubRedirectUri(config, { oauth: 'github_error' }));
+  }
+
+  let { rows } = await pool.query(
+    'SELECT id, nom, courriel, role FROM utilisateur WHERE github_id = $1',
+    [identity.githubId]
+  );
+  let user = rows[0] as User | undefined;
+  if (!user) {
+    const existingEmail = await pool.query('SELECT id FROM utilisateur WHERE courriel = $1', [identity.email]);
+    if (existingEmail.rows.length) {
+      return response.redirect(303, getGitHubRedirectUri(config, { oauth: 'github_account_exists' }));
+    }
+
+    const passwordHash = await bcrypt.hash(randomBytes(48).toString('hex'), 10);
+    const created = await pool.query(
+      `INSERT INTO utilisateur (nom, courriel, mot_de_passe_hash, github_id)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT DO NOTHING
+       RETURNING id, nom, courriel, role`,
+      [identity.name, identity.email, passwordHash, identity.githubId]
+    );
+    user = created.rows[0] as User | undefined;
+    if (!user) {
+      rows = (await pool.query(
+        'SELECT id, nom, courriel, role FROM utilisateur WHERE github_id = $1',
+        [identity.githubId]
+      )).rows;
+      user = rows[0] as User | undefined;
+      if (!user) return response.redirect(303, getGitHubRedirectUri(config, { oauth: 'github_account_exists' }));
+    }
+  }
+
+  const token = createToken(user);
+  response.redirect(303, getGitHubRedirectUri(config, { access_token: token }));
+}));
+
+app.get('/api/auth/me', requireAuth, asyncRoute(async (request, response) => {
+  const { rows } = await pool.query(
+    'SELECT id, nom, courriel, role FROM utilisateur WHERE id = $1',
+    [request.user!.id]
+  );
+  if (!rows.length) return response.status(401).json({ error: 'Ce compte n’existe plus.' });
+  response.json({ user: rows[0] });
 }));
 
 async function seed() {
