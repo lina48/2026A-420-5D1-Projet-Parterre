@@ -116,6 +116,29 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 
 *Les lignes marquées (Alexander) ont été ajoutées le 9 octobre à partir de l'historique Git.*
 
+# 19 octobre 2026 — Point de contrôle 1
+
+- **Présences** : Alexander et Hsiao Shan
+- **Avancement (Alexander)** : j'ai pris le récit #10 (bloquer des places). Route `bloquer` faite, et j'ai corrigé `retenir`, qui laissait retenir une place bloquée.
+- **Blocage (Alexander)** : `npm run dev` joint pas PostgreSQL (le `db` du compose publie pas de port). Je passe par `docker compose up --build`.
+- **Décisions (Alexander)** : bloquer change `etat`, jamais `zone`, pour pouvoir débloquer après. Seule une place `libre` peut être bloquée, sinon 409. Je réutilise `requireManager`.
+- **Prof** : il veut qu'on s'entende sur le changement de la rétro du sprint 1 et sur la vélocité. Bilan sprint 1 : 5 points sur 34. Le tableau du sprint 2 additionne 27 mais affiche 19.
+
+# 23 au 25 octobre 2026
+
+- **Avancement (Alexander)** : route `debloquer` (23), 9 tests dans `blocage.test.ts` (24), écran du gestionnaire : un clic sur une place la bloque ou la débloque (25). PR #50 fusionnée dans la nuit du 25 au 26.
+- **Blocage (Alexander)** : le test de capacité était rouge (72 au lieu de 71) : la capacité comptait encore les places bloquées. Corrigé.
+- **Coordination (Alexander)** : le 24, message à l'équipe : la connexion GitHub a pas de responsable, il faut un récit fusionné et testé pour le point de contrôle 2, et la planif du sprint 2 est à compléter. Karel dit qu'il fait ces deux récits.
+
+# 26 octobre 2026 — Point de contrôle 2
+
+- **Présences** : Alexander, Hsiao Shan et Lina
+- **Avancement (Alexander)** : fusionné la #52 (connexion GitHub, Lina) et corrigé le bogue « retenue expirée » que le prof avait vu au sprint 1 (PR #53, une ligne).
+- **Point de contrôle 2** : moyen. Le prof a pas pu tester la connexion GitHub (pas de `.env` OAuth sur la machine de démo). Il la veut pour la démo de jeudi.
+- **Blocage (Alexander)** : `.env.example` mettait le callback sur le port 4000, mais Docker est sur 3000. J'avais aussi collé deux fois le nom de la variable dans mon `.env` : « erreur serveur ». Corrigé, la connexion GitHub marche en local.
+- **Décisions (Alexander)** : envoyer le `.env` complet au prof sur MIO avant jeudi 23 h 59. Mettre le callback sur 3000 dans `.env.example` et sortir `dist/` de Git (PR de ménage).
+
+*Les entrées du 19 au 25 octobre ont été écrites le 26 octobre à partir de l'historique Git.*
 ## 16 octobre 2026
 
 - **Avancement** : synchronisation du plan de salle en temps réel et ajustement du compte à rebours des retenues.
