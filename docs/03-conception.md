@@ -1,4 +1,3 @@
-[03-conception.md](https://github.com/user-attachments/files/31762367/03-conception.md)
 # Conception technique
 
 ## Modèle de données cohérent
@@ -279,6 +278,38 @@ Le client n'émet aucun événement : les actions (retenir, confirmer) passent p
 - **Décision.** Socket.IO.
 - **Raison.** Le concept de *room* correspond exactement à « tous les clients qui regardent la séance X »; reconnexion automatique gérée; techno enseignée dans Applications web 2.
 - **Ce que ça coûte.** Une dépendance de plus à apprendre plutôt que les WebSockets natifs du navigateur.
+
+### D4 — Comment on connecte quelqu'un avec GitHub ?
+
+- **La question.** Le prof se connecte avec son propre compte GitHub, que l'app a jamais vu. Il faut que ça marche sans que le secret de l'app sorte du serveur.
+- **Options envisagées.** (a) Une bibliothèque OAuth; (b) écrire le flux nous-mêmes avec `fetch`, comme dans la référence du cours.
+- **Décision.** (b), dans `server/github-oauth.ts`. Le serveur envoie le navigateur chez GitHub avec un `state` gardé dans un cookie, vérifie le `state` au retour, échange le code contre un jeton (serveur à serveur, avec le secret), lit le profil et le courriel (qui doit être vérifié), puis oublie le jeton. On garde juste le `github_id`.
+- **Raison.** C'est le flux vu au cours, et on peut l'expliquer au complet à la revue.
+- **Ce que ça coûte.** La grille veut une bibliothèque reconnue : c'est un écart qu'on assume. Les étapes sensibles (`state`, erreurs de GitHub), c'est nous qui les maintenons. Passer à une bibliothèque, ce serait pour le sprint 3.
+
+### D5 — Comment on garde la personne connectée ?
+
+- **La question.** Une fois connecté (mot de passe ou GitHub), comment le serveur sait qui envoie chaque requête ?
+- **Options envisagées.** (a) Un cookie de session signé (`HttpOnly`, `SameSite`), comme dans la référence du cours; (b) un JWT dans l'en-tête `Authorization`.
+- **Décision.** (b). Le serveur signe un JWT valide 7 jours (id, nom, courriel, rôle). Le navigateur le garde dans `localStorage` et l'envoie à chaque requête. `requireAuth` le vérifie, `requireManager` refuse les non-gestionnaires (403). Après GitHub, le jeton revient dans l'adresse (`#access_token=`), la page le lit et l'efface de la barre d'adresse.
+- **Raison.** Un seul système pour la connexion par mot de passe (comptes de démo) et pour GitHub, déjà en place depuis le sprint 1. Un jeton dans un en-tête part pas tout seul avec chaque requête, donc pas de CSRF.
+- **Ce que ça coûte.** Un script de la page pourrait lire le jeton (XSS), alors qu'un cookie `HttpOnly` l'éviterait. Pas de révocation : se déconnecter efface le jeton du navigateur, mais il reste valide 7 jours. Si `JWT_SECRET` manque, le serveur prend une valeur de dev : à enlever avant le déploiement. La grille veut des cookies `HttpOnly` et `SameSite` : écart connu, piste pour le sprint 3.
+
+### D6 — Quel rôle reçoit un nouveau compte GitHub ?
+
+- **La question.** Quelqu'un que l'app a jamais vu se connecte avec GitHub : il reçoit quel rôle ?
+- **Options envisagées.** (a) Toujours `spectateur`; (b) une liste de comptes GitHub autorisés comme gestionnaires; (c) le premier compte créé devient gestionnaire.
+- **Décision.** (a). À la création, on précise pas de rôle : la base met `spectateur` par défaut. Le compte reçoit son `github_id` et un mot de passe aléatoire que personne connaît. Les gestionnaires sont créés au démarrage avec `INITIAL_ADMIN_*`.
+- **Raison.** Le moins de droits possible : un inconnu doit rien pouvoir modifier. Ce que le gestionnaire peut faire reste protégé par `requireManager` côté serveur.
+- **Ce que ça coûte.** Impossible de nommer un gestionnaire depuis l'app avant le récit #14 (sprint 3). Si le courriel GitHub existe déjà dans `utilisateur` sans `github_id`, la connexion est refusée (« Un compte existe déjà avec ce courriel ») : pas de fusion automatique, la personne passe par son mot de passe.
+
+### D7 — Est-ce qu'on authentifie le WebSocket ?
+
+- **La question.** Comment le serveur sait qui est le client Socket.IO ?
+- **Options envisagées.** (a) Authentifier chaque connexion avec le JWT; (b) connexions anonymes en lecture seule, toutes les écritures par l'API REST.
+- **Décision.** (b). Le client s'authentifie pas. Il envoie juste `seance:rejoindre` et `seance:quitter` pour entrer dans la room `seance:<id>` ou en sortir, et il écoute `place:etat_change` et `place:retenue_expiree`. Retenir, réserver, annuler et bloquer passent par l'API REST avec `requireAuth`.
+- **Raison.** Ce qui est diffusé (une place et son nouvel état) est déjà public : `GET /api/seances/:id/plan` demande pas de connexion. Une seule porte d'écriture, c'est moins de contrôles de permissions à dupliquer.
+- **Ce que ça coûte.** N'importe qui peut rejoindre la room de n'importe quelle séance. Le serveur valide pas encore l'identifiant reçu (entier positif, séance qui existe) : c'est la prochaine amélioration. Si on ajoute un jour un événement privé, il faudra authentifier la connexion avec le JWT.
 
 ## Notes complémentaires (demandées par le prof, hors sprint 1)
 

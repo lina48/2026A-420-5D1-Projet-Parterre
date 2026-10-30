@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { Server } from 'socket.io';
 import { pool } from './db/pool';
 import { asyncRoute, createToken, requireAuth, requireManager, type AuthRequest, type User } from './middleware/auth';
+import { sendTicketEmail } from './email';
 import {
   buildGitHubAuthorizationUrl,
   getGitHubOAuthConfig,
@@ -370,35 +371,147 @@ app.get('/api/seances/:id/plan', asyncRoute(async (request, response) => {
 
 
 app.post('/api/seances/:id/places/:placeId/retenir', requireAuth, asyncRoute(async (request, response) => {
-
-  const { rows } = await pool.query(
-    'SELECT * FROM place_seance WHERE seance_id = $1 AND id = $2',
-    [
-      request.params.id,
-      request.params.placeId
-    ]
-  );
-
-  const seat = rows[0];
-
-  if (!seat) {
-    return response.status(404).json({
-      error: 'Place introuvable.'
-    });
+  const client = await pool.connect();
+  let change: { id: number; etat: 'retenue'; expireA: string };
+  try {
+    await client.query('BEGIN');
+    const { rows } = await client.query(
+      `SELECT ps.*, s.date_heure, s.statut AS seance_statut
+       FROM place_seance ps JOIN seance s ON s.id = ps.seance_id
+       WHERE ps.seance_id = $1 AND ps.id = $2 FOR UPDATE OF ps`,
+      [request.params.id, request.params.placeId]
+    );
+    const seat = rows[0];
+    if (!seat) {
+      await client.query('ROLLBACK');
+      return response.status(404).json({ error: 'Place introuvable.' });
+    }
+    if (seat.seance_statut !== 'ouverte' || seat.date_heure <= new Date()) {
+      await client.query('ROLLBACK');
+      return response.status(409).json({ error: 'Cette séance n’accepte plus de réservation.' });
+    }
+    if (seat.zone === 'bloque' || seat.etat === 'bloquee') {
+      await client.query('ROLLBACK');
+      return response.status(409).json({ error: 'Cette place est bloquée.' });
+    }
+    if (seat.etat === 'vendue' || (seat.etat === 'retenue' && seat.retenue_expire_a > new Date() && seat.retenue_par_utilisateur_id !== request.user!.id)) {
+      await client.query('ROLLBACK');
+      return response.status(409).json({ error: 'Cette place vient d’être prise. Choisissez-en une autre.' });
+    }
+    const expires = new Date(Date.now() + 5 * 60 * 1000);
+    await client.query(
+      "UPDATE place_seance SET etat = 'retenue', retenue_par_utilisateur_id = $1, retenue_expire_a = $2 WHERE id = $3",
+      [request.user!.id, expires, seat.id]
+    );
+    await client.query('COMMIT');
+    change = { id: seat.id, etat: 'retenue', expireA: expires.toISOString() };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
   }
-
-  if (seat.zone === 'bloque' || seat.etat === 'bloquee') {
-    return response.status(409).json({
-      error: 'Cette place est bloquée.'
-    });
-  }
-  const expires = new Date(Date.now() + 5 * 60 * 1000);
-  await pool.query("UPDATE place_seance SET etat = 'retenue', retenue_par_utilisateur_id = $1, retenue_expire_a = $2 WHERE id = $3", [request.user!.id, expires, seat.id]);
-  const change = { id: seat.id, etat: 'retenue', expireA: expires.toISOString() };
   io.to(`seance:${request.params.id}`).emit('place:etat_change', change);
   response.json({ place: change });
 }));
 
+app.post('/api/reservations', requireAuth, asyncRoute(async (request, response) => {
+  const { seanceId, placeIds } = request.body as { seanceId?: number; placeIds?: number[] };
+  const ids = Array.isArray(placeIds) ? [...new Set(placeIds.map(String))] : [];
+  if (!Number.isSafeInteger(seanceId) || !ids.length || ids.length > 8 || ids.some((id) => !/^[1-9]\d*$/.test(id) || !Number.isSafeInteger(Number(id)))) {
+    return response.status(400).json({ error: 'Sélectionnez de 1 à 8 places valides.' });
+  }
+
+  const client = await pool.connect();
+  let reservation: { id: number; code_billet: string; montant_total: string; creee_le: Date };
+  let seats: Array<{
+    id: number;
+    rangee: string;
+    numero: number;
+    etat: string;
+    zone: string;
+    prix: number;
+    retenue_par_utilisateur_id: number | null;
+    retenue_expire_a: Date | null;
+  }>;
+  let show: { titre: string; date_heure: Date };
+  try {
+    await client.query('BEGIN');
+    const { rows: shows } = await client.query(
+      `SELECT s.statut, s.date_heure, f.titre FROM seance s
+       JOIN film f ON f.id = s.film_id
+       WHERE s.id = $1 AND s.statut = 'ouverte' AND s.date_heure > NOW()`,
+      [seanceId]
+    );
+    if (!shows.length) {
+      await client.query('ROLLBACK');
+      return response.status(409).json({ error: 'Cette séance n’accepte plus de réservation.' });
+    }
+    show = shows[0];
+    const result = await client.query(
+      `SELECT ps.*, p.rangee, p.numero FROM place_seance ps
+       JOIN place p ON p.id = ps.place_id
+       WHERE ps.seance_id = $1 AND ps.id = ANY($2::bigint[])
+       ORDER BY ps.id FOR UPDATE OF ps`,
+      [seanceId, ids]
+    );
+    seats = result.rows;
+    if (seats.length !== ids.length || seats.some((seat) =>
+      seat.zone === 'bloque' ||
+      seat.etat === 'bloquee' ||
+      seat.etat !== 'retenue' ||
+      seat.retenue_par_utilisateur_id !== request.user!.id ||
+      !seat.retenue_expire_a ||
+      seat.retenue_expire_a <= new Date()
+    )) {
+      await client.query('ROLLBACK');
+      return response.status(409).json({ error: 'Une ou plusieurs rétentions ont expiré. Sélectionnez vos places à nouveau.' });
+    }
+    const code = `PT-${randomUUID().slice(0, 8).toUpperCase()}`;
+    const montantTotal = seats.reduce((total, seat) => total + Number(seat.prix), 0);
+    const booking = await client.query(
+      'INSERT INTO reservation (utilisateur_id, seance_id, code_billet, montant_total) VALUES ($1, $2, $3, $4) RETURNING id, code_billet, montant_total, creee_le',
+      [request.user!.id, seanceId, code, montantTotal]
+    );
+    reservation = booking.rows[0];
+    for (const seat of seats) {
+      await client.query(
+        'INSERT INTO reservation_place (reservation_id, place_seance_id, seance_id) VALUES ($1, $2, $3)',
+        [reservation.id, seat.id, seanceId]
+      );
+    }
+    await client.query(
+      "UPDATE place_seance SET etat = 'vendue', retenue_par_utilisateur_id = NULL, retenue_expire_a = NULL WHERE id = ANY($1::bigint[])",
+      [ids]
+    );
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+
+  ids.forEach((id) => io.to(`seance:${seanceId}`).emit('place:etat_change', { id, etat: 'vendue' }));
+  let courrielEnvoye = true;
+  try {
+    await sendTicketEmail({
+      to: request.user!.courriel,
+      name: request.user!.nom,
+      title: show.titre,
+      startsAt: new Date(show.date_heure),
+      seatCodes: seats.map(({ rangee, numero }) => `${rangee}${numero}`),
+      ticketCode: reservation.code_billet,
+    });
+  } catch (error) {
+    courrielEnvoye = false;
+    console.error('Courriel de billet non envoyé.', error);
+  }
+  response.status(201).json({
+    reservation: { ...reservation, places: seats.map(({ id, rangee, numero }) => ({ id, rangee, numero })) },
+    courrielEnvoye,
+  });
+}));
 
 app.post('/api/seances/:id/places/:placeId/bloquer', requireAuth, requireManager, asyncRoute(async (request, response) => {
   const { rows } = await pool.query(
@@ -450,119 +563,6 @@ app.post('/api/seances/:id/places/:placeId/debloquer', requireAuth, requireManag
 }));
 
 
-app.post('/api/reservations', requireAuth, asyncRoute(async (request, response) => {
-
-  const { seanceId, placeIds } = request.body as {
-    seanceId?: number;
-    placeIds?: number[];
-  };
-
-  const ids = [...new Set(placeIds ?? [])];
-
-  if (!seanceId || !ids.length || ids.length > 8) {
-    return response.status(400).json({
-      error: 'Sélectionnez de 1 à 8 places.'
-    });
-  }
-
-  const { rows: seats } = await pool.query(
-    `SELECT
-       ps.*,
-       p.rangee,
-       p.numero
-     FROM place_seance ps
-     JOIN place p ON p.id = ps.place_id
-     WHERE ps.seance_id = $1
-       AND ps.id = ANY($2::bigint[])
-     ORDER BY ps.id`,
-    [
-      seanceId,
-      ids
-    ]
-  );
-
-  if (
-    seats.length !== ids.length ||
-    seats.some(
-      (seat) =>
-        seat.zone === 'bloque' ||
-        seat.etat !== 'retenue' ||
-        seat.retenue_par_utilisateur_id !== request.user!.id ||
-        seat.retenue_expire_a <= new Date()
-    )
-  ) {
-    return response.status(409).json({
-      error: 'Une ou plusieurs rétentions ont expiré. Sélectionnez vos places à nouveau.'
-    });
-  }
-
-  const code = `PT-${randomUUID().slice(0, 8).toUpperCase()}`;
-
-  const montantTotal = seats.reduce(
-    (total, seat) => total + Number(seat.prix ?? 14.5),
-    0
-  );
-
-  const booking = await pool.query(
-    'INSERT INTO reservation (utilisateur_id, seance_id, code_billet, montant_total) VALUES ($1, $2, $3, $4) RETURNING id, code_billet, montant_total, creee_le',
-    [
-      request.user!.id,
-      seanceId,
-      code,
-      montantTotal
-    ]
-  );
-
-  const reservation = booking.rows[0];
-
-  for (const seat of seats) {
-
-    await pool.query(
-      'INSERT INTO reservation_place (reservation_id, place_seance_id, seance_id) VALUES ($1, $2, $3)',
-      [
-        reservation.id,
-        seat.id,
-        seanceId
-      ]
-    );
-
-  }
-
-  await pool.query(
-    "UPDATE place_seance SET etat = 'vendue', retenue_par_utilisateur_id = NULL, retenue_expire_a = NULL WHERE id = ANY($1::bigint[])",
-    [ids]
-  );
-
-  ids.forEach((id) => {
-    io.to(`seance:${seanceId}`).emit(
-      'place:etat_change',
-      {
-        id,
-        etat: 'vendue'
-      }
-    );
-  });
-
-  response.status(201).json({
-    reservation: {
-      ...reservation,
-      places: seats.map(
-        ({
-          id,
-          rangee,
-          numero
-        }) => ({
-          id,
-          rangee,
-          numero
-        })
-      )
-    }
-  });
-
-}));
-
-
 app.get('/api/reservations', requireAuth, asyncRoute(async (request, response) => {
 
   const { rows } = await pool.query(
@@ -602,63 +602,133 @@ app.get('/api/reservations', requireAuth, asyncRoute(async (request, response) =
 
 
 app.delete('/api/reservations/:id', requireAuth, asyncRoute(async (request, response) => {
+  const client = await pool.connect();
+  let seanceId: number;
+  let releasedSeatIds: number[];
+  try {
+    await client.query('BEGIN');
+    const { rows } = await client.query(
+      `SELECT r.*, s.date_heure FROM reservation r
+       JOIN seance s ON s.id = r.seance_id
+       WHERE r.id = $1 AND r.utilisateur_id = $2 FOR UPDATE OF r`,
+      [request.params.id, request.user!.id]
+    );
+    if (!rows.length) {
+      await client.query('ROLLBACK');
+      return response.status(404).json({ error: 'Réservation introuvable.' });
+    }
+    if (rows[0].statut !== 'confirmee' || rows[0].date_heure <= new Date()) {
+      await client.query('ROLLBACK');
+      return response.status(409).json({ error: 'Cette réservation ne peut plus être annulée.' });
+    }
+    seanceId = rows[0].seance_id;
+    const { rows: seats } = await client.query(
+      `SELECT ps.id FROM reservation_place rp
+       JOIN place_seance ps ON ps.id = rp.place_seance_id
+       WHERE rp.reservation_id = $1 AND rp.active = TRUE
+       ORDER BY ps.id FOR UPDATE OF ps`,
+      [request.params.id]
+    );
+    releasedSeatIds = seats.map(({ id }) => id);
+    await client.query("UPDATE reservation SET statut = 'annulee' WHERE id = $1", [request.params.id]);
+    await client.query('UPDATE reservation_place SET active = FALSE WHERE reservation_id = $1', [request.params.id]);
+    await client.query(
+      "UPDATE place_seance SET etat = 'libre' WHERE id = ANY($1::bigint[]) AND etat = 'vendue'",
+      [releasedSeatIds]
+    );
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+  releasedSeatIds.forEach((id) => io.to(`seance:${seanceId}`).emit('place:etat_change', { id, etat: 'libre' }));
+  response.json({ success: true });
+}));
 
-  const { rows } = await pool.query(
-    'SELECT r.*, s.date_heure FROM reservation r JOIN seance s ON s.id = r.seance_id WHERE r.id = $1 AND r.utilisateur_id = $2',
-    [
-      request.params.id,
-      request.user!.id
-    ]
-  );
 
-  if (
-    !rows.length ||
-    rows[0].statut !== 'confirmee' ||
-    rows[0].date_heure <= new Date()
-  ) {
-    return response.status(404).json({
-      error: 'Réservation introuvable ou non annulable.'
-    });
+app.post('/api/gestion/validation-billet', requireAuth, requireManager, asyncRoute(async (request, response) => {
+  const code = typeof request.body?.codeBillet === 'string'
+    ? request.body.codeBillet.trim().toUpperCase()
+    : '';
+
+  if (!/^PT-[A-F0-9]{8}$/.test(code)) {
+    return response.status(400).json({ error: 'Le code du billet est invalide.' });
   }
 
-  const { rows: seats } = await pool.query(
-    'SELECT place_seance_id FROM reservation_place WHERE reservation_id = $1 AND active = TRUE',
-    [request.params.id]
-  );
-
-  await pool.query(
-    "UPDATE reservation SET statut = 'annulee' WHERE id = $1",
-    [request.params.id]
-  );
-
-  await pool.query(
-    'UPDATE reservation_place SET active = FALSE WHERE reservation_id = $1',
-    [request.params.id]
-  );
-
-  await pool.query(
-    "UPDATE place_seance SET etat = 'libre' WHERE id = ANY($1::bigint[])",
-    [
-      seats.map(
-        (seat) => seat.place_seance_id
-      )
-    ]
-  );
-
-  seats.forEach(({ place_seance_id }) => {
-    io.to(`seance:${rows[0].seance_id}`).emit(
-      'place:etat_change',
-      {
-        id: place_seance_id,
-        etat: 'libre'
-      }
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows } = await client.query(
+      `SELECT
+         r.id,
+         r.code_billet,
+         r.statut,
+         r.valide_le,
+         s.date_heure,
+         f.titre,
+         u.nom AS client
+       FROM reservation r
+       JOIN seance s ON s.id = r.seance_id
+       JOIN film f ON f.id = s.film_id
+       JOIN utilisateur u ON u.id = r.utilisateur_id
+       WHERE r.code_billet = $1
+       FOR UPDATE OF r`,
+      [code]
     );
-  });
+    const reservation = rows[0];
 
-  response.json({
-    success: true
-  });
+    if (!reservation) {
+      await client.query('ROLLBACK');
+      return response.status(404).json({ error: 'Billet introuvable.' });
+    }
 
+    if (reservation.statut !== 'confirmee') {
+      await client.query('ROLLBACK');
+      return response.status(409).json({ error: 'Ce billet est annulé et ne peut pas être utilisé.' });
+    }
+
+    if (reservation.valide_le) {
+      await client.query('ROLLBACK');
+      return response.status(409).json({
+        error: 'Ce billet a déjà été utilisé.',
+        billet: reservation
+      });
+    }
+
+    if (new Date(reservation.date_heure) <= new Date()) {
+      await client.query('ROLLBACK');
+      return response.status(409).json({ error: 'Cette séance est déjà passée.' });
+    }
+
+    const { rows: validatedRows } = await client.query(
+      `UPDATE reservation
+       SET valide_le = NOW(), valide_par_utilisateur_id = $1
+       WHERE id = $2 AND valide_le IS NULL
+       RETURNING id, code_billet, valide_le`,
+      [request.user!.id, reservation.id]
+    );
+
+    if (!validatedRows.length) {
+      await client.query('ROLLBACK');
+      return response.status(409).json({ error: 'Ce billet a déjà été utilisé.' });
+    }
+
+    await client.query('COMMIT');
+    response.json({
+      success: true,
+      billet: {
+        ...reservation,
+        valide_le: validatedRows[0].valide_le
+      }
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 }));
 
 

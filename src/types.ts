@@ -20,6 +20,7 @@ export type Seat = {
   numero: number;
   type: string;
   etat: 'libre' | 'retenue' | 'vendue' | 'bloquee';
+  prix: number | string;
   retenue_active?: boolean;
   retenue_expire_a?: string | null;
 };

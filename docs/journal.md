@@ -139,3 +139,21 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - **Décisions (Alexander)** : envoyer le `.env` complet au prof sur MIO avant jeudi 23 h 59. Mettre le callback sur 3000 dans `.env.example` et sortir `dist/` de Git (PR de ménage).
 
 *Les entrées du 19 au 25 octobre ont été écrites le 26 octobre à partir de l'historique Git.*
+## 16 octobre 2026
+
+- **Avancement** : synchronisation du plan de salle en temps réel et ajustement du compte à rebours des retenues.
+
+## 26 octobre 2026
+
+- **Présences** : Lina, Alexander, Hsiao Shan
+- **Avancement (Lina)** : PR #51 — transactions PostgreSQL et verrous `FOR UPDATE` pour retenir/confirmer les places; annulation avant séance; diffusion Socket.IO des changements; envoi SMTP du billet après confirmation.
+- **Avancement (Lina)** : tests d'intégration des réservations, annulations, courriels et événements Socket.IO; configuration SMTP documentée.
+- **Avancement (Lina)** : PR #52 — authentification GitHub OAuth, état anti-CSRF, vérification du courriel et interface de connexion.
+- **Avancement (Karel)** : Fonctionnalité de paiement et de filtrage de billets à venir et passés
+- **Avancement (Hsiao Shan)** : Voir l'état des places
+
+## Jeudi 29 octobre 2026
+
+- **Avancement (Lina)** : avant la séance, le 28 octobre, fusion de `main` et ajout du lien Mailpit à la confirmation d'envoi du billet; la notification reste visible 60 secondes.
+- **Avancement (Lina)** : le 29 octobre, réorganisation du journal pour consigner les changements par date, avec des résumés techniques concis.
+- **Avancement (Hsiao Shan)** : Validation des billets à l'entrée de la salle

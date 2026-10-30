@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, Route, Routes } from 'react-router-dom';
 import { Check, Clapperboard, LogIn, LogOut } from 'lucide-react';
 import CreateSessionPage from './pages/CreateSessionPage';
@@ -11,17 +11,18 @@ import SeatSelectionPage from './pages/SeatSelectionPage';
 import type { User } from './types';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import TicketValidationPage from './pages/TicketValidationPage';
 
 const savedUser = localStorage.getItem('parterre-user');
 const initialUser: User | null = savedUser ? JSON.parse(savedUser) as User : null;
 
 export default function App() {
   const [user, setUser] = useState<User | null>(initialUser);
-  const [toast, setToast] = useState('');
+  const [toast, setToast] = useState<ReactNode>('');
 
   useEffect(() => {
     if (!toast) return;
-    const timeout = window.setTimeout(() => setToast(''), 3500);
+    const timeout = window.setTimeout(() => setToast(''), typeof toast === 'string' ? 3500 : 60000);
     return () => window.clearTimeout(timeout);
   }, [toast]);
 
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/mes-reservations" element={<MyTicketsPage user={user} notify={setToast} />} />
           <Route path="/gestion/seances/nouvelle" element={<CreateSessionPage user={user} notify={setToast} />} />
           <Route path="/gestion" element={<DashboardPage user={user} />} />
+          <Route path="/gestion/validation" element={<TicketValidationPage user={user} notify={setToast} />} />
           <Route path="/inscription" element={<RegisterPage onAuth={handleAuth} notify={setToast} />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

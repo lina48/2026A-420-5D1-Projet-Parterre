@@ -56,11 +56,44 @@ Par exemple, si deux spectateurs consultent le siège A10 et que le premier le r
 
 Le système doit également empêcher que deux réservations soient confirmées pour le même siège et la même séance.
 
-## 5. Objectif
+## 5. Récits utilisateurs
+
+### Récit #6 — Voir les places changer d'état en direct
+
+En tant que spectateur qui consulte une séance, je veux voir les places changer d'état en direct afin de choisir une place réellement disponible sans recharger la page.
+
+**Critères d'acceptation**
+- Quand une place est retenue, confirmée, libérée ou qu'une rétention expire, son nouvel état est diffusé aux spectateurs qui consultent cette séance.
+- La carte des sièges affiche le nouvel état sans rechargement de la page.
+- Si une place devient indisponible pendant ma sélection, je ne peux pas confirmer une réservation pour cette place.
+- Les changements d'une séance ne modifient pas la carte des autres séances.
+
+### Récit #9 — Annuler sa réservation avant la séance
+
+En tant que spectateur ayant une réservation, je veux pouvoir l'annuler avant le début de la séance afin de libérer mes places si je ne peux plus y assister.
+
+**Critères d'acceptation**
+- Je peux consulter mes réservations et annuler une réservation qui m'appartient tant que la séance n'a pas commencé.
+- Une réservation annulée ne peut plus être présentée comme un billet valide.
+- Les places annulées redeviennent disponibles et leur nouvel état est visible sur la carte de la séance.
+- Je ne peux ni annuler la réservation d'un autre spectateur ni annuler une réservation après le début de la séance.
+- Une confirmation indique que l'annulation a réussi.
+
+### Récit #17 — Recevoir le billet par courriel après la confirmation
+
+En tant que spectateur qui confirme une réservation, je veux recevoir mon billet par courriel après la confirmation afin de pouvoir le retrouver facilement et le présenter à l'entrée.
+
+**Critères d'acceptation**
+- Le courriel est envoyé à l'adresse associée à mon compte uniquement après la confirmation réussie de la réservation.
+- Le courriel contient les informations de la séance et le billet associé à la réservation.
+- Le billet reçu correspond à la réservation confirmée et peut être vérifié à l'entrée.
+- Si la réservation n'est pas confirmée, aucun courriel ne présente un billet comme valide.
+
+## 6. Objectif
 
 L'objectif du projet est de rendre la réservation de sièges plus simple, claire et fiable pour les spectateurs tout en fournissant au gérant les outils nécessaires pour gérer les séances, les salles et leur occupation.
 
-## 6. Respect des exigences techniques
+## 7. Respect des exigences techniques
 
 | # | Exigence | Technologie retenue | Comment le projet la satisfait |
 |---|---|---|---|

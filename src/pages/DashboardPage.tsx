@@ -141,6 +141,9 @@ export default function DashboardPage({ user }: Props) {
           >
             + Nouvelle séance
           </Link>
+          <Link className="dashboard-new-session" to="/gestion/validation">
+            <Ticket size={15} /> Valider un billet
+          </Link>
 
         </div>
 
