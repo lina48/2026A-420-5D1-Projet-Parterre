@@ -4,8 +4,10 @@
 
 Le changement proposé était que l'auteur teste son parcours sur une base propre et ajoute ou mette à jour un test avant chaque PR, puis que l'équipe note les tests, les PR vérifiées et les blocages dans le journal à chaque bloc de cours.
 
-- **Appliqué en partie :** le dépôt contient maintenant des tests d'intégration pour l'authentification, les réservations, la concurrence, les courriels, Socket.IO et le blocage des places. La CI construit l'application et lance les tests à chaque push et PR.
-- **À améliorer :** le journal ne consigne pas systématiquement, pour chaque bloc de cours, les tests exécutés et les PR vérifiées. Les traces disponibles ne permettent donc pas de confirmer que la vérification sur une base propre a été faite avant chaque PR.
+- **Appliqué en partie :** des tests ont été ajoutés dans les PR #50, #51 et #52. Les PR #53, #54 et #61 ont été fusionnées sans ajout de tests.
+- **Suivi :** la mesure choisie au sprint 1 était déjà de noter les tests exécutés, les PR vérifiées et les blocages dans `docs/journal.md`. Le journal documente notamment les changements et les blocages des séances.
+- **Fusions :** les PR #50, #52, #53 et #54 ont été fusionnées le lundi 26 octobre. La PR #51 a été fusionnée le jeudi 29 octobre à 9 h 10, et la PR #61 le jeudi 29 octobre à 22 h 39 (heure locale).
+- **CI :** les vérifications GitHub Actions ont réussi pour ces PR; « sans test » signifie qu'aucun nouveau test n'a été ajouté dans la PR.
 
 ## Les trois questions
 
@@ -19,8 +21,7 @@ La démonstration de la connexion a été retardée parce que le bouton permetta
 
 ### 3. Quel changement concret adoptons-nous?
 
-Renforcer le rituel de suivi à chaque bloc de cours : tenir une courte réunion au début du bloc pour partager l'avancement et les blocages, puis consigner dans `docs/journal.md` les tests exécutés, les PR vérifiées et les blocages avec leur résolution.
+Protéger la branche `main` : toute modification doit passer par une PR, la CI doit être verte et au moins une personne doit approuver la PR avant sa fusion. Les modifications directes de `main` seront ainsi bloquées.
 
-- **Responsable du suivi :** Alexander.
-- **Échéance de remise :** chaque membre termine son code et le teste sur sa machine avant la séance de tests en équipe, puis remet sa PR prête à vérifier au début de la séance. La séance est ainsi consacrée aux tests collectifs.
-- **Mesure :** vérifier à la prochaine rétrospective que chaque bloc de cours du sprint a une entrée au journal contenant ces éléments.
+- **Responsable :** l'équipe, avec la personne qui administre le dépôt chargée de configurer la règle GitHub.
+- **Mesure :** vérifier que chaque fusion dans `main` provient d'une PR approuvée et dont les vérifications CI sont réussies.
