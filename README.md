@@ -10,13 +10,13 @@ Docker Compose démarre PostgreSQL, crée les tables, prépare une programmation
 docker compose up --build
 ```
 
-Ouvrir http://localhost:3000. Pour arrêter : `docker compose down`. Les données sont conservées dans le volume Docker `donnees_postgres` : `docker compose down` les garde, mais `docker compose down -v` les **efface**.
+Ouvrir http://localhost:3000. Mailpit reçoit les courriels de test envoyés par l'application; consultez-les sur http://localhost:8025. Ces courriels ne sont pas transmis à de vraies adresses. Pour arrêter : `docker compose down`. Les données sont conservées dans le volume Docker `donnees_postgres` : `docker compose down` les garde, mais `docker compose down -v` les **efface**.
 
 L’inscription et la connexion sont disponibles sur `/inscription` et `/connexion`. Les opérations protégées utilisent le jeton JWT renvoyé après l’authentification.
 
 Pour créer le premier compte gestionnaire, définissez `INITIAL_ADMIN_NAME`, `INITIAL_ADMIN_EMAIL` et `INITIAL_ADMIN_PASSWORD` dans l’environnement avant le démarrage du serveur. Le mot de passe doit contenir au moins 12 caractères. Le compte est créé uniquement si son adresse courriel n’existe pas déjà. En production, configurez ces valeurs dans les secrets de l’hébergeur; ne réutilisez pas les identifiants de test locaux.
 
-Pour envoyer le billet après la confirmation d'une réservation, configurez `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_FROM`, `SMTP_USER` et `SMTP_PASSWORD` dans `.env` (ou dans les variables d'environnement de l'hébergeur). Si le courriel ne peut pas être envoyé, la réservation confirmée reste disponible dans « Mes billets » et l'application l'indique au spectateur.
+Avec Docker Compose, Mailpit est configuré par défaut comme serveur SMTP de test. Pour utiliser un autre fournisseur, définissez `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_FROM`, `SMTP_USER` et `SMTP_PASSWORD` dans `.env` (ou dans les variables d'environnement de l'hébergeur); gardez les identifiants réels hors du dépôt. Si le courriel ne peut pas être envoyé, la réservation confirmée reste disponible dans « Mes billets » et l'application l'indique au spectateur.
 
 ## Préparer l'authentification GitHub
 
