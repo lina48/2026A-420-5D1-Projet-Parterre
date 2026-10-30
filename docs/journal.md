@@ -125,12 +125,18 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - **Présences** : Lina, Alexander, Hsiao Shan
 - **Avancement (Lina)** : PR #51 — transactions PostgreSQL et verrous `FOR UPDATE` pour retenir/confirmer les places; annulation avant séance; diffusion Socket.IO des changements; envoi SMTP du billet après confirmation.
 - **Avancement (Lina)** : tests d'intégration des réservations, annulations, courriels et événements Socket.IO; configuration SMTP documentée.
+- **Blocage (Lina)** : valider l'envoi de billets sans dépendre d'un compte Gmail, de ses identifiants SMTP et de l'envoi de vrais courriels.
+- **Décision (Lina)** : utiliser un serveur SMTP de test (Mailpit) en développement plutôt que Gmail SMTP; cela concerne la livraison des courriels, et non l'authentification des utilisateurs (GitHub OAuth).
 - **Avancement (Lina)** : PR #52 — authentification GitHub OAuth, état anti-CSRF, vérification du courriel et interface de connexion.
 
 ## Jeudi 29 octobre 2026
 
 - **Présences** : Alexander et Hsiao Shan
 - **Avancement (Lina)** : avant la séance, le 28 octobre, fusion de `main` et ajout du lien Mailpit à la confirmation d'envoi du billet; la notification reste visible 60 secondes.
+- **Blocage (Lina)** : après une réservation, il n'était pas évident où consulter le courriel capturé par Mailpit.
+- **Résolution (Lina)** : ajouter à la confirmation un lien direct vers la boîte Mailpit locale et garder cette notification visible pendant 60 secondes.
+- **Blocage (Lina)** : si le serveur SMTP échoue, l'envoi du billet ne doit pas faire échouer une réservation déjà confirmée.
+- **Résolution (Lina)** : conserver la réservation confirmée, indiquer que le courriel n'a pas été envoyé et tester ce cas d'échec.
 - **Avancement (Lina)** : le 29 octobre, réorganisation du journal pour consigner les changements par date, avec des résumés techniques concis.
 - **Avancement (Alexander)** : récit #10 (bloquer des places) — route `bloquer` réalisée; correction de `retenir`, qui permettait auparavant de retenir une place bloquée.
 - **Blocage (Alexander)** : `npm run dev` ne rejoint pas PostgreSQL, car le service `db` de Compose ne publie pas de port. Pour le développement, démarrer l'ensemble avec `docker compose up --build`.
