@@ -22,4 +22,5 @@ La démonstration de la connexion a été retardée parce que le bouton permetta
 Renforcer le rituel de suivi à chaque bloc de cours : tenir une courte réunion au début du bloc pour partager l'avancement et les blocages, puis consigner dans `docs/journal.md` les tests exécutés, les PR vérifiées et les blocages avec leur résolution.
 
 - **Responsable du suivi :** Alexander.
+- **Échéance de remise :** chaque membre termine son code et le teste sur sa machine avant la séance de tests en équipe, puis remet sa PR prête à vérifier au début de la séance. La séance est ainsi consacrée aux tests collectifs.
 - **Mesure :** vérifier à la prochaine rétrospective que chaque bloc de cours du sprint a une entrée au journal contenant ces éléments.
