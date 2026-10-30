@@ -157,3 +157,8 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - **Avancement (Lina)** : avant la séance, le 28 octobre, fusion de `main` et ajout du lien Mailpit à la confirmation d'envoi du billet; la notification reste visible 60 secondes.
 - **Avancement (Lina)** : le 29 octobre, réorganisation du journal pour consigner les changements par date, avec des résumés techniques concis.
 - **Avancement (Hsiao Shan)** : Validation des billets à l'entrée de la salle
+- **Avancement (Alexander)** : clone neuf de `main` testé de bout en bout : connexion GitHub (nouveau compte = `spectateur`), déconnexion, cycle de réservation avec le compte gestionnaire de démo, accès spectateur refusé sur `/gestion/seances/nouvelle`.
+- **Avancement (Alexander)** : test manuel de la #11 (validation des billets, Hsiao Shan) sur un clone neuf : QR sur le billet, validation, billet déjà utilisé, code inconnu, billet annulé, accès spectateur refusé. Tout passe.
+- **Avancement (Alexander)** : `.env` complet envoyé au prof sur MIO, avec un `JWT_SECRET` neuf et un secret OAuth régénéré. Commentaires des variables `SMTP_*` dans `.env.example` (PR ouverte).
+- **Blocage (Alexander)** : la #11 est arrivée directement sur `main` (4 commits, sans PR ni revue) et la route `validation-billet` n'a aucun test automatisé dans `server/test/`.
+- **Décisions (Alexander)** : la #11 est revue par un test manuel sur clone neuf, faute de PR. Elle respecte la définition de terminé seulement quand la route aura son test.
