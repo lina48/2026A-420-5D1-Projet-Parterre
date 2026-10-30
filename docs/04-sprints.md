@@ -29,7 +29,7 @@
 | #11 | Valider un billet à l'entrée de la salle | Exploitation | 5 |
 | #16 | Filtrer l'affiche par ville, date et genre | Programmation | 3 |
 | #17 | Courriel de confirmation avec le billet | Réservation et billets | 3 |
-| | **Total** | | **19** |
+| | **Total** | | **27** |
 
 **Incrément démontrable.** Un spectateur peut consulter son historique, annuler sa réservation et libérer sa place. Le gérant peut bloquer manuellement des sièges, par exemple réservés PMR ou défectueux, et valider les billets des spectateurs à l'entrée.
 
@@ -79,3 +79,33 @@ Si la capacité se révèle insuffisante, nous retirons les récits dans cet ord
 - **Vélocité mesurée** : 5 points. Les récits #2, #3, #4, #5 et #7 fonctionnent en grande partie à la démonstration, mais n'ont pas de tests; à la revue, le dashboard (#3, corrigé depuis) et la retenue du premier siège libre (#5) avaient aussi des défauts.
 - **Points abandonnés** : 0. Aucun récit n'a été enlevé du plan. Les récits 2, 3, 4, 5 et 7 sont incomplets et pas abandonnés.
 - **Reporté au sprint 2** : tests de #2, #3, #4, #5 et #7; verrou `SELECT … FOR UPDATE` dans une transaction, avec un test de deux requêtes simultanées; correction du premier siège libre. Le plan du sprint 2 (19 points) sera révisé à partir de cette vélocité.
+
+### Planification du sprint 2
+
+*Section rédigée le 29 octobre, à la fin du sprint : le plan n'a pas été révisé au début du sprint, comme le bilan du sprint 1 le prévoyait.*
+
+- **Objectif** : offrir l'autonomie de gestion des billets aux spectateurs, sécuriser l'accès aux fonctions d'administration et outiller le gérant pour la salle.
+- **Engagement** : 27 points (#6, #8, #9, #10, #11, #16, #17). Le tableau du sprint 2 affichait un total de 19, mais la somme de ses récits est 27; le total est corrigé.
+- **Écart avec la vélocité** : la vélocité mesurée au sprint 1 était de 5 points, très loin de 27. Nous n'avons pas recalculé l'engagement à partir de ce chiffre : c'est une erreur de planification, pas un choix justifié.
+- **Responsables** : voir le tableau ci-dessous. #16 et #17 n'avaient pas de responsable désigné au départ.
+
+| Récit | Responsable prévu (`02-backlog.md`) | Réalisé par (historique Git) |
+|---|---|---|
+| #6 Voir les places changer d'état en direct | Lina | Lina (diffusion, tests), Hsiao Shan (affichage) |
+| #8 Consulter ses billets à venir et passés | Hsiao Shan | Karel |
+| #9 Annuler sa réservation avant la séance | Lina | Lina |
+| #10 Bloquer des places | Alexander | Alexander |
+| #11 Valider un billet à l'entrée | Karel | Hsiao Shan |
+| #16 Filtrer l'affiche | — | Personne (seul le filtre par genre existe) |
+| #17 Courriel de confirmation | — | Lina |
+
+### Bilan du sprint 2
+
+*État au 29 octobre, 23 h; mis à jour si des tests sont fusionnés avant la remise.*
+
+- **Points engagés** : 27 (#6, #8, #9, #10, #11, #16, #17).
+- **Points livrés** : 17 — #6 (8), #9 (3), #10 (3) et #17 (3), fusionnés avec des tests automatisés (`reservations.test.ts` pour #6, #9 et #17; `blocage.test.ts` pour #10). Selon notre définition de « terminé » (`05-equipe.md`), un récit sans test n'est pas terminé et ne compte pas.
+- **Vélocité mesurée** : 17 points (5 au sprint 1).
+- **Points abandonnés ou non terminés** : 10. #11 (5) est arrivé directement sur `main` le 29 octobre à 19 h 21, sans PR, sans revue ni test automatisé. #8 (2) est fusionné (#54) mais sans test. #16 (3) est abandonné : seul le filtre par genre existe, ceux par ville et par date n'ont pas été faits.
+- **Ordre d'abandon** : il prévoyait #17, puis #16. #17 a été livré avec #51 et #16 a été abandonné, mais #8 et #11, des `must`, ne sont pas terminés : l'écart n'est pas le résultat d'un arbitrage.
+- **Reporté au sprint 3** : tests de #11 et de #8; protection de la branche `main`; revue obligatoire avant fusion.

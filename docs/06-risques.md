@@ -76,3 +76,26 @@ Aucun risque initial n'a disparu au sprint 1.
 | Couverture de tests insuffisante : seul le récit #1 est testé. | Aucun récit n'entre en revue sans tests. |
 | Traces de revue incomplètes : certaines demandes de tirage ont été fusionnées sans approbation lisible. | Approbation avec commentaire avant toute fusion. |
 | Secrets de démonstration : comptes de démo publics (README) et clé JWT par défaut. | Les remplacer par des variables d'environnement avant tout déploiement. |
+
+## Bilan du sprint 2
+
+### Risques survenus ou toujours ouverts
+
+- **Risque 1, réservation simultanée** : atténué. Les réservations, rétentions et annulations verrouillent les places avec `SELECT … FOR UPDATE`, et un test vérifie que deux spectateurs qui retiennent la même place en même temps ne peuvent pas gagner tous les deux.
+- **Risque 2, désynchronisation de la carte** : atténué par la diffusion Socket.IO et la correction du bogue « retenue expirée » (#53). Limite : la salle `seance:<id>` accepte n'importe quel identifiant, sans validation côté serveur.
+- **Risque 3, temps réel** : atténué. La diffusion de `place:etat_change` est faite et testée (#51), au sprint 2 plutôt qu'au sprint 1.
+- **Risque 4, retard** : survenu. 17 points livrés sur 27 engagés (voir `04-sprints.md`); #11 est arrivé le dernier jour, sans test.
+- **Risque 5, erreurs de gestion des séances** : pas réévalué au sprint 2.
+
+### Risques disparus
+
+Aucun. Les risques 1 et 3, entiers à la fin du sprint 1, sont maintenant atténués.
+
+### Nouveaux risques
+
+| Risque | Atténuation |
+|---|---|
+| Fusion directe sur `main` sans PR, sans revue ni test (cas de #11). | Protéger `main` : PR, CI verte et une approbation obligatoires (Lina, propriétaire du dépôt). |
+| Authentification écrite à la main : OAuth GitHub sans bibliothèque reconnue, et jeton JWT gardé dans `localStorage` plutôt que dans un cookie HttpOnly avec protection CSRF (D4 et D5 de `03-conception.md`). | Limites documentées; à défendre à la revue. Migrer vers une bibliothèque et des cookies si le temps le permet. |
+| Secrets : le `.env` voyage par MIO; la clé JWT par défaut et les comptes de démonstration restent publics dans le dépôt. | Secret OAuth et clé JWT remplacés avant l'envoi; remplacer les comptes de démonstration avant tout déploiement. |
+| Tableau de bord : la capacité compte encore les places bloquées (`etat = 'bloquee'`), contrairement à la liste des séances. | Ajouter le filtre dans la requête du tableau de bord et un test. |
