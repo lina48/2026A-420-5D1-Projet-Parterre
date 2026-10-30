@@ -162,6 +162,12 @@ CREATE TABLE IF NOT EXISTS reservation (
   montant_total NUMERIC(10,2) NOT NULL
     CHECK (montant_total >= 0),
 
+  valide_le TIMESTAMPTZ,
+
+  valide_par_utilisateur_id BIGINT
+    REFERENCES utilisateur(id)
+    ON DELETE SET NULL,
+
   UNIQUE (id, seance_id)
 );
 
@@ -192,6 +198,15 @@ CREATE TABLE IF NOT EXISTS reservation_place (
     REFERENCES place_seance(id, seance_id)
     ON DELETE RESTRICT
 );
+
+
+ALTER TABLE reservation
+  ADD COLUMN IF NOT EXISTS valide_le TIMESTAMPTZ;
+
+ALTER TABLE reservation
+  ADD COLUMN IF NOT EXISTS valide_par_utilisateur_id BIGINT
+    REFERENCES utilisateur(id)
+    ON DELETE SET NULL;
 
 
 ALTER TABLE salle
@@ -341,6 +356,9 @@ CREATE INDEX IF NOT EXISTS idx_reservation_utilisateur
     utilisateur_id,
     creee_le DESC
   );
+
+CREATE INDEX IF NOT EXISTS idx_reservation_code_billet
+  ON reservation (code_billet);
 
 
 CREATE INDEX IF NOT EXISTS idx_seance_date

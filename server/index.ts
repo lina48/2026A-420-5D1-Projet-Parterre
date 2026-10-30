@@ -648,6 +648,90 @@ app.delete('/api/reservations/:id', requireAuth, asyncRoute(async (request, resp
 }));
 
 
+app.post('/api/gestion/validation-billet', requireAuth, requireManager, asyncRoute(async (request, response) => {
+  const code = typeof request.body?.codeBillet === 'string'
+    ? request.body.codeBillet.trim().toUpperCase()
+    : '';
+
+  if (!/^PT-[A-F0-9]{8}$/.test(code)) {
+    return response.status(400).json({ error: 'Le code du billet est invalide.' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows } = await client.query(
+      `SELECT
+         r.id,
+         r.code_billet,
+         r.statut,
+         r.valide_le,
+         s.date_heure,
+         f.titre,
+         u.nom AS client
+       FROM reservation r
+       JOIN seance s ON s.id = r.seance_id
+       JOIN film f ON f.id = s.film_id
+       JOIN utilisateur u ON u.id = r.utilisateur_id
+       WHERE r.code_billet = $1
+       FOR UPDATE OF r`,
+      [code]
+    );
+    const reservation = rows[0];
+
+    if (!reservation) {
+      await client.query('ROLLBACK');
+      return response.status(404).json({ error: 'Billet introuvable.' });
+    }
+
+    if (reservation.statut !== 'confirmee') {
+      await client.query('ROLLBACK');
+      return response.status(409).json({ error: 'Ce billet est annulé et ne peut pas être utilisé.' });
+    }
+
+    if (reservation.valide_le) {
+      await client.query('ROLLBACK');
+      return response.status(409).json({
+        error: 'Ce billet a déjà été utilisé.',
+        billet: reservation
+      });
+    }
+
+    if (new Date(reservation.date_heure) <= new Date()) {
+      await client.query('ROLLBACK');
+      return response.status(409).json({ error: 'Cette séance est déjà passée.' });
+    }
+
+    const { rows: validatedRows } = await client.query(
+      `UPDATE reservation
+       SET valide_le = NOW(), valide_par_utilisateur_id = $1
+       WHERE id = $2 AND valide_le IS NULL
+       RETURNING id, code_billet, valide_le`,
+      [request.user!.id, reservation.id]
+    );
+
+    if (!validatedRows.length) {
+      await client.query('ROLLBACK');
+      return response.status(409).json({ error: 'Ce billet a déjà été utilisé.' });
+    }
+
+    await client.query('COMMIT');
+    response.json({
+      success: true,
+      billet: {
+        ...reservation,
+        valide_le: validatedRows[0].valide_le
+      }
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}));
+
+
 /* =========================
    DASHBOARD GESTIONNAIRE
 ========================= */
