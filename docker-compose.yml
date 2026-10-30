@@ -14,6 +14,17 @@ services:
       timeout: 3s
       retries: 10
 
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    networks:
+      default:
+        aliases:
+          - parterre-mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
   app:
     build:
       context: .
@@ -22,6 +33,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/siegevif
       JWT_SECRET: ${JWT_SECRET:-local-dev-secret-change-before-deploy}
@@ -31,12 +44,12 @@ services:
       DEMO_SPECTATOR_NAME: ${DEMO_SPECTATOR_NAME:-Spectateur Demo}
       DEMO_SPECTATOR_EMAIL: ${DEMO_SPECTATOR_EMAIL:-spectateur@parterre.demo}
       DEMO_SPECTATOR_PASSWORD: ${DEMO_SPECTATOR_PASSWORD:-demo-spectateur-2026}
-      SMTP_HOST: ${SMTP_HOST:-}
-      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
       SMTP_SECURE: ${SMTP_SECURE:-false}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_FROM: ${SMTP_FROM:-Parterre <billets@parterre.local>}
       CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:3000}
       GITHUB_OAUTH_CLIENT_ID: ${GITHUB_OAUTH_CLIENT_ID:-}
       GITHUB_OAUTH_CLIENT_SECRET: ${GITHUB_OAUTH_CLIENT_SECRET:-}
