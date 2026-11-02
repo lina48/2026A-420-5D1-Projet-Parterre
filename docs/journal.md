@@ -120,6 +120,7 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 
 - **Présences** : Alexander et Hsiao Shan
 - **Avancement (Alexander)** : j'ai pris le récit #10 (bloquer des places). Route `bloquer` faite, et j'ai corrigé `retenir`, qui laissait retenir une place bloquée.
+- **Avancement (Karel)** : Aucun avancement dans github. Revérification des fonctionnalités développés au sprint 1
 - **Blocage (Alexander)** : `npm run dev` joint pas PostgreSQL (le `db` du compose publie pas de port). Je passe par `docker compose up --build`.
 - **Décisions (Alexander)** : bloquer change `etat`, jamais `zone`, pour pouvoir débloquer après. Seule une place `libre` peut être bloquée, sinon 409. Je réutilise `requireManager`.
 - **Prof** : il veut qu'on s'entende sur le changement de la rétro du sprint 1 et sur la vélocité. Bilan sprint 1 : 5 points sur 34. Le tableau du sprint 2 additionne 27 mais affiche 19.
@@ -134,6 +135,7 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 
 - **Présences** : Alexander, Hsiao Shan et Lina
 - **Avancement (Alexander)** : fusionné la #52 (connexion GitHub, Lina) et corrigé le bogue « retenue expirée » que le prof avait vu au sprint 1 (PR #53, une ligne).
+- **Avancement (Karel)** : Début du dévoleppement des fonctionnalités. (Oublie de commit dans ma branche)
 - **Point de contrôle 2** : moyen. Le prof a pas pu tester la connexion GitHub (pas de `.env` OAuth sur la machine de démo). Il la veut pour la démo de jeudi.
 - **Blocage (Alexander)** : `.env.example` mettait le callback sur le port 4000, mais Docker est sur 3000. J'avais aussi collé deux fois le nom de la variable dans mon `.env` : « erreur serveur ». Corrigé, la connexion GitHub marche en local.
 - **Décisions (Alexander)** : envoyer le `.env` complet au prof sur MIO avant jeudi 23 h 59. Mettre le callback sur 3000 dans `.env.example` et sortir `dist/` de Git (PR de ménage).
@@ -157,6 +159,7 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 ## Jeudi 29 octobre 2026
 
 - **Présences** : Alexander et Hsiao Shan
+- **Avancement (Karel)** : Révision de mes fonctionnalités après l'ajout des fonctionnalités des autres
 - **Avancement (Lina)** : avant la séance, le 28 octobre, fusion de `main` et ajout du lien Mailpit à la confirmation d'envoi du billet; la notification reste visible 60 secondes.
 - **Blocage (Lina)** : après une réservation, il n'était pas évident où consulter le courriel capturé par Mailpit.
 - **Résolution (Lina)** : ajouter à la confirmation un lien direct vers la boîte Mailpit locale et garder cette notification visible pendant 60 secondes.
