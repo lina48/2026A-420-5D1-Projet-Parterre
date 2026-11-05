@@ -171,3 +171,8 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
   - Le tableau du sprint 2 totalise 27 points d'après les récits détaillés, alors que son total affiché est 19. Il faut convenir si le périmètre reste à 19 points (et retirer ou réestimer 8 points) ou si le total et l'engagement sont portés à 27.
   - **À valider en équipe** : mettre à jour la rétrospective du sprint 1 pour distinguer explicitement les points engagés, les points terminés et la vélocité mesurée, puis décider comment cette vélocité influence l'engagement du sprint 2. Aucun changement de périmètre ni de total n'est considéré comme convenu avant cet échange.
 - **Avancement (Hsiao Shan)** : Validation des billets à l'entrée de la salle
+- **Avancement (Alexander)** : clone neuf de `main` testé de bout en bout : connexion GitHub (nouveau compte = `spectateur`), déconnexion, cycle de réservation avec le compte gestionnaire de démo, accès spectateur refusé sur `/gestion/seances/nouvelle`.
+- **Avancement (Alexander)** : test manuel de la #11 (validation des billets, Hsiao Shan) sur un clone neuf : QR sur le billet, validation, billet déjà utilisé, code inconnu, billet annulé, accès spectateur refusé. Tout passe.
+- **Avancement (Alexander)** : `.env` complet envoyé au prof sur MIO, avec un `JWT_SECRET` neuf et un secret OAuth régénéré.
+- **Blocage (Alexander)** : la #11 est arrivée directement sur `main` (4 commits, sans PR ni revue) et la route `validation-billet` n'a aucun test automatisé dans `server/test/`.
+- **Décisions (Alexander)** : la #11 est revue par un test manuel sur clone neuf, faute de PR. Elle respecte la définition de terminé seulement quand la route aura son test.
