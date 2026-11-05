@@ -35,7 +35,8 @@ type Zone =
   | 'vip'
   | 'standard'
   | 'economique'
-  | 'bloque';
+  | 'bloque'
+  | 'vide';
 
 
 type Form = {
@@ -79,6 +80,239 @@ const prices = {
 };
 
 
+type RoomTemplate = {
+  id: string;
+  nom: string;
+  salle: string;
+  lieu: string;
+  type: 'cinema' | 'theatre';
+  description: string;
+  grid: Zone[][];
+};
+
+
+/**
+ * Construit une grille de salle réaliste :
+ * - `aisles` : colonnes réservées aux allées (aucun siège)
+ * - `trim` : nombre de sièges retirés de chaque côté d'un rang
+ *   (permet les premiers rangs incurvés et les salles en éventail)
+ * - `zone` : zone tarifaire de chaque siège restant
+ */
+function buildLayout(
+  rows: number,
+  columns: number,
+  options: {
+    aisles?: number[];
+    trim?: (row: number) => number;
+    zone: (row: number, column: number) => Zone;
+  }
+): Zone[][] {
+
+  const { aisles = [], trim, zone } = options;
+
+  return Array.from(
+    { length: rows },
+
+    (_, row) =>
+      Array.from(
+        { length: columns },
+
+        (_, column) => {
+
+          const cut = trim ? trim(row) : 0;
+
+          if (
+            column < cut ||
+            column >= columns - cut
+          ) {
+            return 'vide';
+          }
+
+          if (aisles.includes(column)) {
+            return 'vide';
+          }
+
+          return zone(row, column);
+        }
+      )
+  );
+
+}
+
+
+// Plans inspirés de vraies salles de cinéma et de théâtre de Montréal.
+const roomTemplates: RoomTemplate[] = [
+
+  {
+    id: 'banque-scotia-imax',
+    nom: 'Cinéma Banque Scotia',
+    salle: 'Salle IMAX',
+    lieu: 'Cinéma Banque Scotia, 977 rue Sainte-Catherine O, Montréal',
+    type: 'cinema',
+    description:
+      'Grande salle stadium : deux allées verticales et premiers rangs incurvés.',
+
+    grid: buildLayout(14, 21, {
+      aisles: [5, 15],
+
+      trim: row =>
+        row < 2 ? 3 - row : 0,
+
+      zone: row =>
+        row < 2
+          ? 'economique'
+          : row >= 11
+          ? 'vip'
+          : 'standard'
+    })
+  },
+
+  {
+    id: 'quartier-latin',
+    nom: 'Cineplex Odeon Quartier Latin',
+    salle: 'Salle 9',
+    lieu: 'Cineplex Odeon Quartier Latin, 350 rue Émery, Montréal',
+    type: 'cinema',
+    description:
+      'Salle stadium classique : trois blocs de sièges et rangs arrière premium.',
+
+    grid: buildLayout(11, 17, {
+      aisles: [4, 12],
+
+      trim: row =>
+        row === 0 ? 2 : 0,
+
+      zone: row =>
+        row < 2
+          ? 'economique'
+          : row >= 9
+          ? 'vip'
+          : 'standard'
+    })
+  },
+
+  {
+    id: 'cinema-beaubien',
+    nom: 'Cinéma Beaubien',
+    salle: 'Salle 1',
+    lieu: 'Cinéma Beaubien, 2396 rue Beaubien E, Montréal',
+    type: 'cinema',
+    description:
+      'Cinéma de quartier intime : allée centrale unique et dernier rang premium.',
+
+    grid: buildLayout(8, 11, {
+      aisles: [5],
+
+      zone: row =>
+        row === 0
+          ? 'economique'
+          : row >= 6
+          ? 'vip'
+          : 'standard'
+    })
+  },
+
+  {
+    id: 'cinema-du-parc',
+    nom: 'Cinéma du Parc',
+    salle: 'Salle 2',
+    lieu: 'Cinéma du Parc, 3575 avenue du Parc, Montréal',
+    type: 'cinema',
+    description:
+      'Salle de répertoire : blocs latéraux étroits et premier rang raccourci.',
+
+    grid: buildLayout(10, 13, {
+      aisles: [3, 9],
+
+      trim: row =>
+        row === 0 ? 1 : 0,
+
+      zone: row =>
+        row < 2
+          ? 'economique'
+          : row >= 8
+          ? 'vip'
+          : 'standard'
+    })
+  },
+
+  {
+    id: 'theatre-st-denis',
+    nom: 'Théâtre St-Denis',
+    salle: 'Parterre',
+    lieu: 'Théâtre St-Denis, 1594 rue Saint-Denis, Montréal',
+    type: 'theatre',
+    description:
+      'Parterre en éventail : rangs qui s’élargissent vers l’arrière, centre VIP.',
+
+    grid: buildLayout(16, 23, {
+      aisles: [6, 16],
+
+      trim: row =>
+        Math.max(
+          0,
+          4 - Math.floor(row / 2)
+        ),
+
+      zone: (row, column) =>
+        row < 5 &&
+        column >= 7 &&
+        column <= 15
+          ? 'vip'
+          : row >= 12
+          ? 'economique'
+          : 'standard'
+    })
+  },
+
+  {
+    id: 'wilfrid-pelletier',
+    nom: 'Place des Arts',
+    salle: 'Salle Wilfrid-Pelletier',
+    lieu: 'Place des Arts, 175 rue Sainte-Catherine O, Montréal',
+    type: 'theatre',
+    description:
+      'Grande salle en éventail : large parterre, centre premium, fond économique.',
+
+    grid: buildLayout(18, 24, {
+      aisles: [7, 16],
+
+      trim: row =>
+        Math.max(
+          0,
+          5 - Math.floor(row / 2)
+        ),
+
+      zone: (row, column) =>
+        row < 6 &&
+        column >= 8 &&
+        column <= 15
+          ? 'vip'
+          : row >= 13
+          ? 'economique'
+          : 'standard'
+    })
+  }
+
+];
+
+
+function templateCapacity(
+  grid: Zone[][]
+): number {
+
+  return grid
+    .flat()
+    .filter(
+      zone =>
+        zone !== 'vide' &&
+        zone !== 'bloque'
+    )
+    .length;
+
+}
+
+
 export default function CreateSessionPage({
   user,
   notify
@@ -100,6 +334,9 @@ export default function CreateSessionPage({
 
   const [brush, setBrush] =
     useState<Zone>('standard');
+
+  const [templateId, setTemplateId] =
+    useState<string | null>(null);
 
   const [seats, setSeats] =
     useState<Zone[][]>(
@@ -162,7 +399,8 @@ export default function CreateSessionPage({
           vip: 0,
           standard: 0,
           economique: 0,
-          bloque: 0
+          bloque: 0,
+          vide: 0
         } as Record<Zone, number>
       );
 
@@ -197,6 +435,34 @@ export default function CreateSessionPage({
     setForm(old => ({
       ...old,
       [key]: value
+    }));
+
+  }
+
+
+  function applyTemplate(
+    template: RoomTemplate
+  ) {
+
+    setTemplateId(template.id);
+
+    setRows(template.grid.length);
+
+    setPerRow(
+      template.grid[0].length
+    );
+
+    setSeats(
+      template.grid.map(
+        row => [...row]
+      )
+    );
+
+    setForm(old => ({
+      ...old,
+      type: template.type,
+      salle: template.salle,
+      lieu: template.lieu
     }));
 
   }
@@ -731,23 +997,127 @@ export default function CreateSessionPage({
           </p>
 
 
+          {/* GABARITS DE SALLES DE MONTRÉAL */}
+
+          <div className="template-pick">
+
+            <h2>
+              Salles de Montréal
+            </h2>
+
+            <p className="wizard-muted">
+              Partez du plan d’une vraie salle
+              montréalaise — la forme, les allées
+              et les zones sont déjà en place —
+              puis ajustez-le à votre goût.
+            </p>
+
+
+            <div className="room-templates">
+
+              {roomTemplates.map(template => (
+
+                <button
+                  key={template.id}
+                  type="button"
+
+                  className={
+                    `room-template
+                    ${templateId === template.id
+                      ? 'selected'
+                      : ''}`
+                  }
+
+                  onClick={() =>
+                    applyTemplate(template)
+                  }
+                >
+
+                  <span
+                    className={
+                      `session-type
+                      ${template.type === 'theatre'
+                        ? 'theatre'
+                        : ''}`
+                    }
+                  >
+                    {template.type === 'theatre'
+                      ? 'THÉÂTRE'
+                      : 'CINÉMA'}
+                  </span>
+
+
+                  <b>{template.nom}</b>
+
+
+                  <small>
+                    {template.salle}
+                    {' · '}
+                    {templateCapacity(
+                      template.grid
+                    )} places
+                  </small>
+
+
+                  <small className="template-desc">
+                    {template.description}
+                  </small>
+
+
+                  <span
+                    className="template-mini"
+                    aria-hidden="true"
+                  >
+
+                    {template.grid.map(
+                      (row, rowIndex) => (
+
+                        <span key={rowIndex}>
+
+                          {row.map(
+                            (zone, columnIndex) => (
+                              <i
+                                key={columnIndex}
+                                className={zone}
+                              />
+                            )
+                          )}
+
+                        </span>
+
+                      )
+                    )}
+
+                  </span>
+
+                </button>
+
+              ))}
+
+            </div>
+
+          </div>
+
+
           <div className="seat-settings">
 
             <Counter
               label="RANGS"
               value={rows}
 
-              minus={() =>
+              minus={() => {
+                setTemplateId(null);
                 setRows(
                   Math.max(1, rows - 1)
-                )
-              }
+                );
+              }}
 
-              plus={() =>
+              plus={() => {
+                setTemplateId(null);
                 setRows(
                   Math.min(20, rows + 1)
-                )
-              }
+                );
+              }}
             />
 
 
@@ -755,23 +1125,25 @@ export default function CreateSessionPage({
               label="SIÈGES PAR RANG"
               value={perRow}
 
-              minus={() =>
+              minus={() => {
+                setTemplateId(null);
                 setPerRow(
                   Math.max(
                     1,
                     perRow - 1
                   )
-                )
-              }
+                );
+              }}
 
-              plus={() =>
+              plus={() => {
+                setTemplateId(null);
                 setPerRow(
                   Math.min(
                     24,
                     perRow + 1
                   )
-                )
-              }
+                );
+              }}
             />
 
 
@@ -793,7 +1165,8 @@ export default function CreateSessionPage({
                 'vip',
                 'standard',
                 'economique',
-                'bloque'
+                'bloque',
+                'vide'
               ] as Zone[]
             ).map(zone => (
 
@@ -821,7 +1194,10 @@ export default function CreateSessionPage({
                   : zone === 'economique'
                   ? 'Économique 12€'
 
-                  : 'Bloqué'
+                  : zone === 'bloque'
+                  ? 'Bloqué'
+
+                  : 'Allée / Vide'
                 }
 
               </button>
@@ -966,6 +1342,16 @@ export default function CreateSessionPage({
           </div>
 
 
+          {error && (
+
+            <p className="form-error">
+              <X size={15} />
+              {error}
+            </p>
+
+          )}
+
+
           <div className="wizard-actions">
 
             <button
@@ -980,9 +1366,19 @@ export default function CreateSessionPage({
 
             <button
               className="gold-action"
-              onClick={() =>
-                setStep(3)
-              }
+              onClick={() => {
+
+                if (!active) {
+                  setError(
+                    'Le plan doit contenir au moins une place.'
+                  );
+                  return;
+                }
+
+                setError('');
+                setStep(3);
+
+              }}
             >
               Continuer →
             </button>

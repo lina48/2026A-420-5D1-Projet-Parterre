@@ -1015,9 +1015,18 @@ app.post('/api/seances', requireAuth, requireManager, asyncRoute(async (request,
     const capacite = plan
       .flat()
       .filter(
-        (zone: string) => zone !== 'bloque'
+        (zone: string) =>
+          zone !== 'bloque' &&
+          zone !== 'vide'
       )
       .length;
+
+    if (capacite < 1) {
+      await client.query('ROLLBACK');
+      return response.status(400).json({
+        error: 'Le plan doit contenir au moins une place.'
+      });
+    }
 
     const room = await client.query(
       `INSERT INTO salle (
@@ -1056,6 +1065,13 @@ app.post('/api/seances', requireAuth, requireManager, asyncRoute(async (request,
         const zone =
           plan[rowIndex]?.[columnIndex] ??
           'standard';
+
+        // Les cellules « vide » sont des allées
+        // ou des espaces sans siège : on ne crée
+        // aucune place pour elles.
+        if (zone === 'vide') {
+          continue;
+        }
 
         const seat = await client.query(
           'INSERT INTO place (salle_id, rangee, numero, type) VALUES ($1, $2, $3, $4) RETURNING id',
