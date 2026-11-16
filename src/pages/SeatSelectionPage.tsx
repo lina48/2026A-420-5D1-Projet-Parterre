@@ -1,5 +1,5 @@
 
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { Armchair, ArrowLeft, ArrowRight, Clock3, Film, LockKeyhole, CreditCard, X } from 'lucide-react';
@@ -333,6 +333,25 @@ export default function SeatSelectionPage({ user, notify }: Props) {
     [seats]
   );
 
+  // Largeur réelle du plan : les numéros manquants dans un rang
+  // correspondent aux allées et aux espaces vides de la salle.
+  const maxColumns = useMemo(
+    () => seats.reduce((max, seat) => Math.max(max, seat.numero), 0),
+    [seats]
+  );
+
+  // Prix de chaque zone tarifaire présente dans la salle.
+  const zonePrices = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const seat of seats) {
+      const zone = seat.zone ?? 'standard';
+      if (zone !== 'bloque' && !map.has(zone)) {
+        map.set(zone, Number(seat.prix) || 0);
+      }
+    }
+    return map;
+  }, [seats]);
+
   if (loading) return <div className="loading-line">Ouverture de la salle…</div>;
 
   if (!session) {
@@ -346,7 +365,14 @@ export default function SeatSelectionPage({ user, notify }: Props) {
   }
 
   const chosenSeats = seats.filter((seat) => selected.includes(seat.id));
+  const total = chosenSeats.reduce((sum, seat) => sum + (Number(seat.prix) || 0), 0);
   const date = new Date(session.date_heure);
+
+  const zoneLabels: Record<string, string> = {
+    vip: 'VIP',
+    standard: 'Standard',
+    economique: 'Économique'
+  };
 
   return (
     <section className="booking-page">
@@ -402,35 +428,69 @@ export default function SeatSelectionPage({ user, notify }: Props) {
             <span>ÉCRAN</span>
           </div>
 
-          <div className="seat-grid" aria-label="Plan des places">
-            {grouped.map(({ row, seats: rowSeats }) => (
-              <div className="seat-row" key={row}>
-                <span className="row-label">{row}</span>
+          <div
+            className={`seat-grid ${maxColumns > 12 ? 'dense' : ''}`}
+            aria-label="Plan des places"
+            style={{
+              '--seat-cols': maxColumns || 9,
+              maxWidth: maxColumns > 9
+                ? `${Math.min(maxColumns * 38 + 26, 940)}px`
+                : undefined
+            } as CSSProperties}
+          >
+            {grouped.map(({ row, seats: rowSeats }) => {
+              const byNumber = new Map(rowSeats.map((seat) => [seat.numero, seat]));
 
-                {rowSeats.map((seat) => (
-                  <button
-                    key={seat.id}
-                    disabled={
-                      busy ||
-                      seat.etat === 'vendue' ||
-                      (seat.etat === 'bloquee' && !isManager) ||
-                      (seat.etat === 'retenue' && !selected.includes(seat.id))
+              return (
+                <div className="seat-row" key={row}>
+                  <span className="row-label">{row}</span>
+
+                  {Array.from({ length: maxColumns || 9 }, (_, index) => {
+                    const seat = byNumber.get(index + 1);
+
+                    if (!seat) {
+                      return <span className="seat-gap" key={`gap-${index}`} />;
                     }
-                    onClick={() => chooseSeat(seat)}
-                    className={`seat ${seat.etat} ${
-                      selected.includes(seat.id) ? 'selected' : ''
-                    } ${seat.type === 'accessible' ? 'accessible' : ''}`}
-                    title={`${row}${seat.numero} · ${seat.etat}`}
-                    aria-label={`Place ${row}${seat.numero}, ${seat.etat}`}
-                  >
-                    {seat.type === 'accessible'
-                      ? <Armchair size={12} />
-                      : seat.numero}
-                  </button>
-                ))}
-              </div>
-            ))}
+
+                    return (
+                      <button
+                        key={seat.id}
+                        disabled={
+                          busy ||
+                          seat.etat === 'vendue' ||
+                          (seat.etat === 'bloquee' && !isManager) ||
+                          (seat.etat === 'retenue' && !selected.includes(seat.id))
+                        }
+                        onClick={() => chooseSeat(seat)}
+                        className={`seat ${seat.etat} zone-${seat.zone ?? 'standard'} ${
+                          selected.includes(seat.id) ? 'selected' : ''
+                        } ${seat.type === 'accessible' ? 'accessible' : ''}`}
+                        title={`${row}${seat.numero} · ${zoneLabels[seat.zone ?? 'standard'] ?? seat.zone} · ${Number(seat.prix) || 0} $ · ${seat.etat}`}
+                        aria-label={`Place ${row}${seat.numero}, ${seat.etat}`}
+                      >
+                        {seat.type === 'accessible'
+                          ? <Armchair size={12} />
+                          : seat.numero}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
           </div>
+
+          {[...zonePrices.keys()].some((zone) => zone !== 'standard') && (
+            <div className="seat-legend zones">
+              {(['vip', 'standard', 'economique'] as const)
+                .filter((zone) => zonePrices.has(zone))
+                .map((zone) => (
+                  <span key={zone}>
+                    <i className={`legend-seat zone-${zone}`} />
+                    {zoneLabels[zone]} · {zonePrices.get(zone)} $
+                  </span>
+                ))}
+            </div>
+          )}
 
           <div className="seat-legend">
             <span><i className="legend-seat free" />Disponible</span>
@@ -483,7 +543,7 @@ export default function SeatSelectionPage({ user, notify }: Props) {
             {chosenSeats.length
               ? chosenSeats.map((seat) => (
                   <span className="chosen-pill" key={seat.id}>
-                    {seat.rangee}{seat.numero}
+                    {seat.rangee}{seat.numero} · {Number(seat.prix) || 0} $
                   </span>
                 ))
               : <span className="muted-copy">Choisissez vos sièges dans le plan</span>}
@@ -496,7 +556,7 @@ export default function SeatSelectionPage({ user, notify }: Props) {
               Total <small>· paiement fictif</small>
             </span>
             <strong>
-              {(selected.length * 14.5).toFixed(2).replace('.', ',')} $
+              {total.toFixed(2).replace('.', ',')} $
             </strong>
           </div>
 
@@ -549,7 +609,7 @@ export default function SeatSelectionPage({ user, notify }: Props) {
             <div className="payment-order">
               <span>{selected.length} place(s)</span>
               <strong>
-                {(selected.length * 14.5).toFixed(2).replace('.', ',')} $
+                {total.toFixed(2).replace('.', ',')} $
               </strong>
             </div>
 

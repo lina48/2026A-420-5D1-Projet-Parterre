@@ -19,6 +19,7 @@ export type Seat = {
   rangee: string;
   numero: number;
   type: string;
+  zone?: 'vip' | 'standard' | 'economique' | 'bloque';
   etat: 'libre' | 'retenue' | 'vendue' | 'bloquee';
   prix: number | string;
   retenue_active?: boolean;

@@ -165,10 +165,18 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
 .screen-line { position: relative; width: 71%; height: 2px; border-radius: 0 0 50% 50%; background: linear-gradient(90deg, transparent, #8a7cff 18%, #b8adff 50%, #8a7cff 82%, transparent); box-shadow: 0 4px 14px rgba(124, 106, 247, .26); }
 .screen-wrap > span { margin-top: 8px; color: var(--dim); font-family: var(--mono); font-size: 8px; letter-spacing: 0; }
 .seat-grid { display: flex; max-width: 430px; flex-direction: column; gap: 8px; margin: 1px auto 25px; }
-.seat-row { display: grid; grid-template-columns: 18px repeat(9, minmax(25px, 1fr)); align-items: center; gap: clamp(5px, 1.2vw, 11px); }
+.seat-row { display: grid; grid-template-columns: 18px repeat(var(--seat-cols, 9), minmax(0, 1fr)); align-items: center; gap: clamp(5px, 1.2vw, 11px); }
 .row-label { color: var(--dim); font-family: var(--mono); font-size: 9px; text-align: center; }
 .seat { display: grid; width: 100%; aspect-ratio: 1.12; min-width: 24px; place-items: center; padding: 0; border: 1px solid rgba(74, 222, 128, .28); border-radius: 5px 5px 3px 3px; color: var(--green); background: var(--green-wash); font-family: var(--mono); font-size: 9px; cursor: pointer; transition: transform .16s, background .16s, border-color .16s, color .16s; }
+.seat-gap { display: block; width: 100%; aspect-ratio: 1.12; }
+.seat-grid.dense { gap: 5px; }
+.seat-grid.dense .seat-row { gap: 3px; }
+.seat-grid.dense .seat { min-width: 0; border-radius: 4px 4px 2px 2px; font-size: 7px; }
 .seat:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--green); }
+.seat.zone-vip { border-color: rgba(232, 184, 75, .42); color: var(--gold); background: var(--gold-wash); }
+.seat.zone-vip:hover:not(:disabled) { border-color: var(--gold); }
+.seat.zone-economique { border-color: rgba(125, 211, 252, .35); color: #7dd3fc; background: rgba(125, 211, 252, .1); }
+.seat.zone-economique:hover:not(:disabled) { border-color: #7dd3fc; }
 .seat.retenue { border-color: rgba(251, 146, 60, .32); color: var(--amber); background: var(--amber-wash); cursor: not-allowed; }
 .seat.vendue { border-color: var(--line); color: var(--dim); background: var(--raised); cursor: not-allowed; }
 .seat.bloquee { border-style: dashed; border-color: var(--line-strong); color: var(--dim); background: var(--raised); cursor: not-allowed; }
@@ -180,6 +188,10 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
 .seat-legend span { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 9px; }
 .legend-seat { width: 10px; height: 10px; border: 1px solid; border-radius: 3px; }
 .legend-seat.free { border-color: rgba(74, 222, 128, .38); background: var(--green-wash); }
+.legend-seat.zone-vip { border-color: rgba(232, 184, 75, .55); background: var(--gold-wash); }
+.legend-seat.zone-standard { border-color: rgba(74, 222, 128, .38); background: var(--green-wash); }
+.legend-seat.zone-economique { border-color: rgba(125, 211, 252, .5); background: rgba(125, 211, 252, .1); }
+.seat-legend.zones { padding-top: 0; border-top: none; margin-bottom: 9px; }
 .legend-seat.chosen { border-color: var(--gold); background: var(--gold); }
 .legend-seat.held { border-color: rgba(251, 146, 60, .45); background: var(--amber-wash); }
 .legend-seat.sold { border-color: var(--line-strong); background: var(--raised); }
@@ -532,7 +544,7 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
   .booking-heading h1 { max-width: 245px; font-size: 30px; }
   .booking-heading p { max-width: 245px; font-size: 9px; line-height: 1.7; }
   .live-label { gap: 5px; margin-top: 23px; font-size: 7px; white-space: nowrap; }
-  .seat-row { grid-template-columns: 15px repeat(9, minmax(20px, 1fr)); gap: 4px; }
+  .seat-row { grid-template-columns: 15px repeat(var(--seat-cols, 9), minmax(0, 1fr)); gap: 4px; }
   .seat { min-width: 19px; border-radius: 4px 4px 2px 2px; font-size: 8px; }
   .seat-legend { gap: 9px; }
   .seat-legend span { gap: 4px; font-size: 8px; }
@@ -961,7 +973,9 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
 }
 
 .type-pick button.active,
-.brushes button.active {
+.type-pick button.selected,
+.brushes button.active,
+.brushes button.selected {
   border-color: var(--gold);
   background: var(--gold-wash);
   color: var(--gold);
@@ -1015,6 +1029,146 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
   display: inline-block;
   width: 22px;
   color: var(--muted);
+}
+
+
+/* ===== Gabarits de salles de Montréal ===== */
+
+.template-pick {
+  margin-top: 18px;
+}
+
+.room-templates {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+  margin: 14px 0 6px;
+}
+
+.room-template {
+  display: grid;
+  justify-items: start;
+  gap: 5px;
+  padding: 13px 15px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--raised);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .18s, background .18s, transform .18s;
+}
+
+.room-template:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.room-template.selected {
+  border-color: var(--gold);
+  background: var(--gold-wash);
+  box-shadow: 0 0 14px rgba(232, 184, 75, .12);
+}
+
+.room-template b {
+  font-size: 13px;
+}
+
+.room-template small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.room-template .template-desc {
+  color: var(--dim);
+  line-height: 1.4;
+}
+
+.template-mini {
+  display: grid;
+  justify-self: center;
+  gap: 2px;
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 2px solid var(--gold);
+}
+
+.template-mini > span {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+
+.template-mini i {
+  width: 6px;
+  height: 4px;
+  border-radius: 1px;
+  background: var(--dim);
+}
+
+.template-mini i.vip { background: var(--gold); }
+.template-mini i.standard { background: #44507a; }
+.template-mini i.economique { background: var(--violet); }
+.template-mini i.bloque { background: var(--line); }
+.template-mini i.vide { background: transparent; }
+
+
+/* ===== Éditeur de plan ===== */
+
+.editor-row {
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 5px;
+  width: max-content;
+  margin: 0 auto;
+}
+
+.editor-seat {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px 5px 3px 3px;
+  background: var(--raised);
+  font-size: 0;
+  cursor: pointer;
+  transition: filter .12s, border-color .12s;
+}
+
+.editor-seat:hover {
+  filter: brightness(1.45);
+}
+
+.editor-seat.vip {
+  border-color: rgba(232, 184, 75, .55);
+  background: var(--gold-wash);
+}
+
+.editor-seat.standard {
+  border-color: rgba(74, 222, 128, .4);
+  background: var(--green-wash);
+}
+
+.editor-seat.economique {
+  border-color: rgba(124, 106, 247, .5);
+  background: var(--violet-wash);
+}
+
+.editor-seat.bloque {
+  border-style: dashed;
+  background: transparent;
+  opacity: .6;
+}
+
+.editor-seat.vide {
+  border: 1px dashed transparent;
+  background: transparent;
+}
+
+.editor-seat.vide:hover {
+  border-color: var(--line-strong);
+  filter: none;
 }
 
 .zone-summary,
