@@ -35,6 +35,8 @@ Il peut :
 
 Son objectif principal est de gérer efficacement les séances et de suivre l'occupation des salles.
 
+Pour le sprint 3, l'équipe prévoit aussi l'export des ventes, le suivi du remplissage en direct, les tarifs réduits, des filtres supplémentaires, une aide à la sélection et un éditeur de plan. Ces fonctionnalités restent à réaliser et à préciser dans `04-sprints.md`.
+
 ## 3. Portée du projet
 
 Le système doit offrir les six fonctionnalités principales suivantes :
@@ -104,4 +106,4 @@ L'objectif du projet est de rendre la réservation de sièges plus simple, clair
 | 5 | Fonctionnalité temps réel multi-utilisateurs | Socket.IO | Le client rejoint une *room* Socket.IO propre à chaque séance (`/seances/:id`). Dès qu'une place change d'état, le serveur émet `place:etat_change` à toute la room — la carte se met à jour sans rechargement. `place:retenue_expiree` libère automatiquement une place dont la rétention expire. Le client n'émet jamais d'événement lui-même : les actions passent par l'API REST, Socket.IO ne sert qu'à diffuser |
 | 6 | Point de concurrence réel | Verrouillage pessimiste PostgreSQL | Deux spectateurs peuvent viser la même place au même instant. Le projet verrouille la ligne `PLACE_SEANCE` en base (`SELECT ... FOR UPDATE`) le temps de la transaction de rétention/confirmation — une seule transaction SQL garantit qu'une place n'est jamais retenue ou vendue deux fois. En cas de forte affluence sur une même place, les utilisateurs attendent en file plutôt qu'en parallèle |
 | 7 | Tests automatisés à chaque poussée | GitHub Actions | Chaîne CI exécutée à chaque push, verte avant chaque revue de sprint |
-| 8 | Déployé sur un serveur | À déterminer selon les modalités précisées en cours de session | Accessible autrement que depuis nos portables |
+| 8 | Déployé sur un serveur | Azure visé au sprint 3 | Déploiement prévu pour rendre l'application accessible autrement que depuis nos portables; environnement à préciser |
