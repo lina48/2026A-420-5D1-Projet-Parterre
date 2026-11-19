@@ -99,3 +99,12 @@ Aucun. Les risques 1 et 3, entiers à la fin du sprint 1, sont maintenant attén
 | Authentification écrite à la main : OAuth GitHub sans bibliothèque reconnue, et jeton JWT gardé dans `localStorage` plutôt que dans un cookie HttpOnly avec protection CSRF (D4 et D5 de `03-conception.md`). | Limites documentées; à défendre à la revue. Migrer vers une bibliothèque et des cookies si le temps le permet. |
 | Secrets : le `.env` voyage par MIO; la clé JWT par défaut et les comptes de démonstration restent publics dans le dépôt. | Secret OAuth et clé JWT remplacés avant l'envoi; remplacer les comptes de démonstration avant tout déploiement. |
 | Tableau de bord : la capacité compte encore les places bloquées (`etat = 'bloquee'`), contrairement à la liste des séances. | Ajouter le filtre dans la requête du tableau de bord et un test. |
+
+## Risques à suivre au sprint 3
+
+| Risque | Atténuation prévue |
+|---|---|
+| La charge augmente avec les nouveaux récits alors que la vélocité mesurée est limitée. | Estimer les travaux ajoutés, réviser l'engagement et appliquer l'ordre d'abandon de `04-sprints.md`. |
+| Une modification de séance vendue, de plan ou de tarif peut invalider des billets ou modifier un prix déjà payé. | Définir les règles avant réalisation et tester les conséquences sur les réservations existantes. |
+| Les données réelles ou les codes étudiants peuvent exposer des données personnelles ou être utilisés sans autorisation. | Vérifier les droits sur les sources, limiter la collecte et définir la validation et la protection des données. |
+| Le déploiement Azure ou la suppression du volume Docker peut entraîner une perte de données ou exposer des secrets. | Prévoir sauvegardes et restauration, stockage persistant et secrets d'environnement; ne pas utiliser les identifiants de démonstration en production. |
