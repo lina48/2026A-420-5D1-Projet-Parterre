@@ -111,7 +111,7 @@ docs/             # Conception et organisation de l’équipe
 | `GET` | `/api/auth/github` | Public |
 | `GET` | `/api/auth/github/callback` | Public |
 | `GET` | `/api/auth/me` | Connecté |
-| `GET` | `/api/seances` | Public |
+| `GET` | `/api/seances` (option `?jours=7` : seulement les 7 prochains jours) | Public |
 | `GET` | `/api/seances/:id/plan` | Public |
 | `POST` | `/api/seances/:id/places/:placeId/retenir` | Connecté |
 | `POST` | `/api/seances/:id/places/:placeId/bloquer` | Gestionnaire |

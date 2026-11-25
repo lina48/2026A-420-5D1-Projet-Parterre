@@ -304,7 +304,22 @@ async function seedDemoSpectator() {
 }
 
 
-app.get('/api/seances', asyncRoute(async (_request, response) => {
+// Programmation glissante, comme au cinéma : avec ?jours=7, on ne garde que les séances
+// d'aujourd'hui jusqu'à dans 7 jours (ce jour-là inclus), selon la date de Montréal.
+// La fenêtre avance toute seule chaque jour. Sans paramètre : toutes les séances à venir.
+const JOURS_MAX_PROGRAMMATION = 60;
+
+app.get('/api/seances', asyncRoute(async (request, response) => {
+
+  let jours: number | null = null;
+  if (request.query.jours !== undefined) {
+    jours = Number(request.query.jours);
+    if (!Number.isInteger(jours) || jours < 1 || jours > JOURS_MAX_PROGRAMMATION) {
+      return response.status(400).json({
+        error: `Le nombre de jours doit être un entier entre 1 et ${JOURS_MAX_PROGRAMMATION}.`
+      });
+    }
+  }
 
   const { rows } = await pool.query(
     `SELECT
@@ -327,8 +342,12 @@ app.get('/api/seances', asyncRoute(async (_request, response) => {
      JOIN film f ON f.id = s.film_id
      JOIN place_seance ps ON ps.seance_id = s.id
      WHERE s.date_heure > NOW() AND s.statut = 'ouverte'
+       AND ($1::int IS NULL OR s.date_heure < (
+         ((NOW() AT TIME ZONE 'America/Toronto')::date + $1::int + 1)::timestamp AT TIME ZONE 'America/Toronto'
+       ))
      GROUP BY s.id, sa.id, f.id
-     ORDER BY s.date_heure`
+     ORDER BY s.date_heure`,
+    [jours]
   );
 
   response.json({
