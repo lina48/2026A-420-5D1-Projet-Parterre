@@ -11,6 +11,7 @@ import SeatSelectionPage from './pages/SeatSelectionPage';
 import type { User } from './types';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import EditSessionPage from './pages/EditSessionPage';
 import TicketValidationPage from './pages/TicketValidationPage';
 
 const savedUser = localStorage.getItem('parterre-user');
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="/mes-reservations" element={<MyTicketsPage user={user} notify={setToast} />} />
           <Route path="/gestion/seances/nouvelle" element={<CreateSessionPage user={user} notify={setToast} />} />
           <Route path="/gestion" element={<DashboardPage user={user} />} />
+          <Route path="/gestion/seances/:id/modifier" element={<EditSessionPage user={user} />} />
           <Route path="/gestion/validation" element={<TicketValidationPage user={user} notify={setToast} />} />
           <Route path="/inscription" element={<RegisterPage onAuth={handleAuth} notify={setToast} />} />
           <Route path="*" element={<NotFoundPage />} />
