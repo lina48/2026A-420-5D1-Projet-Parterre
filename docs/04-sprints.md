@@ -42,11 +42,32 @@
 | #12 | Modifier ou annuler une séance déjà vendue | Programmation | 8 |
 | #13 | Suivre le remplissage d'une séance en direct | Exploitation | 5 |
 | #14 | Confier le rôle de gestionnaire à un membre du personnel | Comptes et rôles | 3 |
-| #15 | Tarifs réduits et catégories de prix | Réservation et billets | 5 |
-| #18 | Export CSV des ventes d'une séance | Exploitation | 3 |
-| | **Total** | | **24** |
+| #15 | Choisir un tarif réduit, par exemple étudiant | Réservation et billets | 5 |
+| #18 | Exporter en CSV les places vendues d'une séance | Exploitation | 3 |
+| #16 | Compléter les filtres par salle, ville et date | Programmation | À réestimer |
+| #69 | Préparer des données réelles et conserver les données dans Docker | Données et déploiement | À estimer |
+| #20 | Dessiner un plan de salle au glisser-déposer | Programmation | À estimer |
+| #70 | Assister le spectateur après une période d'inactivité | Sélection en direct | À estimer |
+| #71 | Rendre les séances découvrables par les IA et déployer sur Azure | Données et déploiement | À estimer |
+| #19 | Proposer les meilleures places libres pour un groupe | Sélection en direct | À estimer |
+| | **Sous-total des récits déjà estimés** | | **24** |
 
-**Incrément démontrable.** Application complète déployée en ligne. Le gérant modifie une séance existante, suit le taux d'occupation en temps réel, délègue le rôle de gestionnaire et exporte les rapports de ventes au format CSV.
+Les points des nouveaux travaux (#69, #70, #71) et du complément de #16 restent à estimer : 24 points ne représentent donc pas la charge totale du sprint. #16 était prévu au sprint 2, mais seul le filtre par genre était réalisé lors du bilan; son complément est repris ici.
+
+### Détails des travaux prévus
+
+- **#18 — Export des ventes.** Le gestionnaire exporte les places vendues d'une séance en CSV, lisible dans Excel ou LibreOffice. Chaque ligne contient la séance, le numéro de place, la référence de commande et le prix payé. Définir les règles pour les réservations annulées et les remboursements.
+- **#12 — Modification ou annulation d'une séance vendue.** Le gestionnaire peut modifier ou annuler une séance ayant déjà des réservations. Préciser avant réalisation le traitement des billets, des spectateurs concernés et des éventuels remboursements.
+- **#13 — Remplissage en direct.** Le gestionnaire voit les places vendues, la capacité et le pourcentage de remplissage; les changements sont actualisés sans recharger la page en réutilisant le canal temps réel de #6. Définir le traitement des places bloquées, retenues et annulées.
+- **#15 — Tarif réduit.** Le spectateur peut choisir un tarif réduit, notamment étudiant, avec la saisie éventuelle d'un code permanent. Définir les critères d'admissibilité, la méthode de vérification et la protection des données avant de retenir cette méthode.
+- **#16 — Filtres.** Compléter la recherche par salle de cinéma ou de théâtre, ville et date, en conservant les filtres existants. Préciser si le type de salle doit également être un filtre distinct.
+- **#69 — Données réelles et volume Docker.** Préparer des films, salles et séances réels à partir de sources autorisées, puis conserver les données dans le volume PostgreSQL de Docker entre les redémarrages. Prévoir une méthode de mise à jour qui ne remplace pas les réservations existantes; la suppression du volume reste destructive.
+- **#20 — Éditeur de salle.** Permettre au gestionnaire de dessiner un plan de salle par glisser-déposer, de l'enregistrer et de le réutiliser. Définir les règles de validation et l'effet des modifications sur les séances déjà vendues.
+- **#70 — Assistance sur hésitation.** Après cinq minutes d'inactivité, proposer à l'utilisateur une notification dans l'application pour vérifier s'il est toujours actif et suggérer des séances à venir. Préciser quelles actions réinitialisent le minuteur et comment éviter les notifications répétées.
+- **#71 — Visibilité pour l'IA et Azure.** Prévoir des données structurées JSON-LD pour les pages publiques de séances et une description ouverte de l'API des séances, puis héberger le site sur Azure. La découverte et l'indexation par les moteurs ou les IA ne sont pas garanties; préciser l'environnement, les secrets et la base de données du déploiement.
+- **#19 — Meilleures places pour un groupe.** Proposer à un groupe de taille donnée des places libres à l'aide d'un algorithme de placement. Définir les critères de classement, notamment la proximité des places, et le comportement lorsqu'il n'y a pas assez de places adjacentes; la disponibilité doit être vérifiée au moment de la réservation.
+
+**Incrément visé.** Application déployée sur Azure avec des séances découvrables et des données persistantes. Le gestionnaire modifie une séance vendue, suit son remplissage en direct et exporte ses ventes; le spectateur filtre les séances, choisit un tarif réduit et peut recevoir des suggestions. L'éditeur de salle et la proposition de places de groupe complètent la démonstration s'ils sont réalisés.
 
 ## Capacité
 
@@ -70,7 +91,7 @@ Si la capacité se révèle insuffisante, nous retirons les récits dans cet ord
 | 1 | #2, puis #1 | L'affiche peut être remplacée par un lien direct vers une séance de démonstration. L'authentification peut être réduite à une session simulée à deux comptes fixes. Les deux sont rattrapables au sprint 2 sans rien casser. |
 | 1 | Jamais : #3, #4, #5, #6, #7 | Ce sont les récits porteurs de risque et la chaîne minimale qui prouve que le produit fonctionne. |
 | 2 | #17, puis #16 | Ce sont des `should`, ajoutés pour lisser la charge. Ils sortent avant tout `must`. |
-| 3 | #18, puis #15 | Mêmes raisons. Le déploiement en ligne et #12 restent prioritaires. |
+| 3 | #20 et #19 d'abord, puis les autres ajouts selon leur priorité à raffiner; #18 et #15 avant les `must` | La charge ajoutée reste à estimer. Le déploiement en ligne et #12 restent prioritaires; l'équipe révisera l'engagement selon sa capacité. |
 
 ### Bilan du sprint 1
 

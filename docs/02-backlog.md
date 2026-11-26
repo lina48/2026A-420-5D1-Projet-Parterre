@@ -31,22 +31,23 @@ pour qu'un échec technique reste rattrapable).
 | #13 | Suivre le remplissage d'une séance en direct | Exploitation | 5 | 3 | Lina |
 | #14 | Confier le rôle de gestionnaire à un membre du personnel | Comptes et rôles | 3 | 3 | Alexander |
 
-Le reste du backlog, pour situer : 
- `should`  
-tarifs réduits et catégories de prix (#15),
-filtrer l'affiche par ville, date et genre (#16),  
-courriel de confirmation avec le billet(#17),  
-export CSV des ventes d'une séance (#18). 
-  `could`  
-suggestion automatique des
-meilleures places libres pour *n* spectateurs (#19),  
-éditeur de plan de salle par glisser-déposer (#20).  
-  `won't`   
-paiement réel par carte (#21, on simule l'étape de
-paiement),  
-application mobile native (#22),  
-salles à placement libre non numéroté (#23,
-elles n'ont aucun besoin d'un plan de salle et videraient le projet de son intérêt). 
+## Autres récits et travaux
+
+| Priorité | Récit ou travail | Sprint prévu | Points |
+|---|---|---|---|
+| `should` | #15 — Tarifs réduits, dont un tarif étudiant, et catégories de prix | 3 | 5 |
+| `should` | #16 — Compléter les filtres de l'affiche par salle, ville et date; le filtre par genre existe déjà | 3, complément du sprint 2 | À réestimer |
+| `should` | #17 — Courriel de confirmation avec le billet | Fait au sprint 2 | 3 |
+| `should` | #18 — Export CSV des places vendues d'une séance | 3 | 3 |
+| `could` | #19 — Suggestion des meilleures places libres pour un groupe | 3 | À estimer |
+| `could` | #20 — Éditeur de plan de salle par glisser-déposer | 3 | À estimer |
+| À préciser | #69 — Préparer des données réelles autorisées et conserver les données dans le volume Docker | 3 | À estimer |
+| À préciser | #70 — Assistance après cinq minutes d'inactivité et suggestions de séances | 3 | À estimer |
+| À préciser | #71 — Données structurées et schéma ouvert pour les séances; hébergement sur Azure | 3 | À estimer |
+
+Les priorités, estimations et critères détaillés des récits #69 à #71 restent à raffiner; voir `04-sprints.md` pour le périmètre prévu.
+
+**Hors portée (`won't`)** : paiement réel par carte (#21, l'étape de paiement est simulée), application mobile native (#22) et salles à placement libre non numéroté (#23).
 
 ## Notre démarche d'estimation : 
 
