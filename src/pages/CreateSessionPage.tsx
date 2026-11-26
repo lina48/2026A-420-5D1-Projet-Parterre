@@ -1,7 +1,9 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
+  type PointerEvent,
   type ReactNode
 } from 'react';
 
@@ -38,6 +40,15 @@ type Zone =
   | 'bloque'
   | 'vide';
 
+
+type FreeSeat = {
+  id: number;
+  rangee: string;
+  numero: number;
+  zone: Zone;
+  x: number;
+  y: number;
+};
 
 type Form = {
   titre: string;
@@ -338,6 +349,12 @@ export default function CreateSessionPage({
   const [templateId, setTemplateId] =
     useState<string | null>(null);
 
+  const [freeMode, setFreeMode] = useState(false);
+  const [freeSeats, setFreeSeats] = useState<FreeSeat[]>([]);
+  const [isPainting, setIsPainting] = useState(false);
+  const freeCanvasRef = useRef<HTMLDivElement>(null);
+  const nextFreeId = useRef(1);
+
   const [seats, setSeats] =
     useState<Zone[][]>(
       () => makeSeats(10, 16)
@@ -407,16 +424,22 @@ export default function CreateSessionPage({
   }, [seats]);
 
 
-  const active =
-    counts.vip +
-    counts.standard +
-    counts.economique;
+  const freeCounts = useMemo(() => freeSeats.reduce(
+    (acc, seat) => {
+      acc[seat.zone]++;
+      return acc;
+    },
+    { vip: 0, standard: 0, economique: 0, bloque: 0, vide: 0 } as Record<Zone, number>
+  ), [freeSeats]);
+
+  const active = freeMode
+    ? freeCounts.vip + freeCounts.standard + freeCounts.economique
+    : counts.vip + counts.standard + counts.economique;
 
 
-  const revenue =
-    counts.vip * prices.vip +
-    counts.standard * prices.standard +
-    counts.economique * prices.economique;
+  const revenue = freeMode
+    ? freeCounts.vip * prices.vip + freeCounts.standard * prices.standard + freeCounts.economique * prices.economique
+    : counts.vip * prices.vip + counts.standard * prices.standard + counts.economique * prices.economique;
 
 
   if (
@@ -507,6 +530,65 @@ export default function CreateSessionPage({
   }
 
 
+  function placeFreeSeat(clientX: number, clientY: number) {
+    const canvas = freeCanvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.max(3, Math.min(97, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(4, Math.min(96, ((clientY - rect.top) / rect.height) * 100));
+
+    if (brush === 'vide') {
+      setFreeSeats(old => old.filter(seat =>
+        Math.hypot(seat.x - x, seat.y - y) > 3
+      ));
+      return;
+    }
+
+    setFreeSeats(old => {
+      const close = old.find(seat =>
+        Math.hypot(seat.x - x, seat.y - y) <= 2.2
+      );
+
+      if (close) {
+        return old.map(seat => seat.id === close.id
+          ? { ...seat, zone: brush }
+          : seat
+        );
+      }
+
+      const sortedRows = [...old]
+        .filter(seat => Math.abs(seat.y - y) < 6)
+        .sort((a, b) => a.x - b.x);
+      const rowLetter = String.fromCharCode(65 + Math.max(0, Math.floor(y / 10)));
+      const rowSeats = sortedRows.filter(seat => Math.abs(seat.y - y) < 6);
+
+      return [...old, {
+        id: nextFreeId.current++,
+        rangee: rowLetter,
+        numero: rowSeats.length + 1,
+        zone: brush,
+        x,
+        y
+      }];
+    });
+  }
+
+  function handleFreePointerDown(event: PointerEvent<HTMLDivElement>) {
+    setIsPainting(true);
+    placeFreeSeat(event.clientX, event.clientY);
+  }
+
+  function handleFreePointerMove(event: PointerEvent<HTMLDivElement>) {
+    if (!isPainting) return;
+    placeFreeSeat(event.clientX, event.clientY);
+  }
+
+  function handleFreePointerUp() {
+    setIsPainting(false);
+  }
+
+
   function nextInfo() {
 
     if (
@@ -553,7 +635,9 @@ export default function CreateSessionPage({
             siegesParRangee:
               perRow,
 
-            plan: seats,
+            plan: freeMode ? [] : seats,
+
+            planLibre: freeMode ? freeSeats : null,
 
             tarifs: prices
 
@@ -1099,6 +1183,11 @@ export default function CreateSessionPage({
           </div>
 
 
+          <div className="layout-mode-switch" aria-label="Mode de dessin du plan">
+            <button type="button" className={!freeMode ? 'selected' : ''} onClick={() => setFreeMode(false)}>Grille régulière</button>
+            <button type="button" className={freeMode ? 'selected' : ''} onClick={() => { setFreeMode(true); setTemplateId(null); }}>Placement libre à la souris</button>
+          </div>
+
           <div className="seat-settings">
 
             <Counter
@@ -1214,7 +1303,55 @@ export default function CreateSessionPage({
 
           {/* PLAN */}
 
-          <div className="seat-editor">
+          {freeMode ? (
+            <div
+              ref={freeCanvasRef}
+              className="free-seat-canvas"
+              onPointerDown={handleFreePointerDown}
+              onPointerMove={handleFreePointerMove}
+              onPointerUp={handleFreePointerUp}
+              onPointerLeave={handleFreePointerUp}
+              onContextMenu={(event) => {
+                event.preventDefault();
+                const canvas = freeCanvasRef.current;
+                if (!canvas) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = ((event.clientX - rect.left) / rect.width) * 100;
+                const y = ((event.clientY - rect.top) / rect.height) * 100;
+                setFreeSeats(old => old.filter(seat => Math.hypot(seat.x - x, seat.y - y) > 3));
+              }}
+              aria-label="Canevas pour placer librement les sièges"
+            >
+              {freeSeats.map(seat => (
+                <button
+                  type="button"
+                  key={seat.id}
+                  className={`free-seat ${seat.zone}`}
+                  style={{ left: `${seat.x}%`, top: `${seat.y}%` }}
+                  title={`${seat.rangee}${seat.numero} · ${seat.zone}`}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (brush === 'vide') {
+                      setFreeSeats(old => old.filter(item => item.id !== seat.id));
+                    } else {
+                      setFreeSeats(old => old.map(item => item.id === seat.id ? { ...item, zone: brush } : item));
+                    }
+                  }}
+                >
+                  {seat.numero}
+                </button>
+              ))}
+              {freeSeats.length === 0 && (
+                <span className="free-seat-help">Cliquez ou glissez pour placer les sièges</span>
+              )}
+            </div>
+          ) : (
+          <div
+            className="seat-editor"
+            onPointerUp={() => setIsPainting(false)}
+            onPointerLeave={() => setIsPainting(false)}
+          >
 
             {seats.map(
               (row, rowIndex) => (
@@ -1254,6 +1391,16 @@ export default function CreateSessionPage({
                           `editor-seat ${zone}`
                         }
 
+                        onPointerDown={(event) => {
+                          event.preventDefault();
+                          setIsPainting(true);
+                          paint(rowIndex, columnIndex);
+                        }}
+
+                        onPointerEnter={() => {
+                          if (isPainting) paint(rowIndex, columnIndex);
+                        }}
+
                         onClick={() =>
                           paint(
                             rowIndex,
@@ -1273,6 +1420,7 @@ export default function CreateSessionPage({
             )}
 
           </div>
+          )}
 
 
           {/* RÉSUMÉ */}
@@ -1305,8 +1453,8 @@ export default function CreateSessionPage({
                 </span>
 
                 <b>
-                  {counts[zone]} siège
-                  {counts[zone] !== 1
+                  {(freeMode ? freeCounts[zone] : counts[zone])} siège
+                  {(freeMode ? freeCounts[zone] : counts[zone]) !== 1
                     ? 's'
                     : ''}
                 </b>

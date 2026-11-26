@@ -22,6 +22,8 @@ export type Seat = {
   zone?: 'vip' | 'standard' | 'economique' | 'bloque';
   etat: 'libre' | 'retenue' | 'vendue' | 'bloquee';
   prix: number | string;
+  position_x?: number | null;
+  position_y?: number | null;
   retenue_active?: boolean;
   retenue_expire_a?: string | null;
 };

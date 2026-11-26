@@ -46,6 +46,9 @@ CREATE TABLE IF NOT EXISTS place (
   type VARCHAR(20) NOT NULL DEFAULT 'standard'
     CHECK (type IN ('standard', 'accessible')),
 
+  position_x NUMERIC(6,3),
+  position_y NUMERIC(6,3),
+
   UNIQUE (salle_id, rangee, numero),
   UNIQUE (id, salle_id)
 );
@@ -207,6 +210,13 @@ ALTER TABLE reservation
   ADD COLUMN IF NOT EXISTS valide_par_utilisateur_id BIGINT
     REFERENCES utilisateur(id)
     ON DELETE SET NULL;
+
+
+ALTER TABLE place
+  ADD COLUMN IF NOT EXISTS position_x NUMERIC(6,3);
+
+ALTER TABLE place
+  ADD COLUMN IF NOT EXISTS position_y NUMERIC(6,3);
 
 
 ALTER TABLE salle

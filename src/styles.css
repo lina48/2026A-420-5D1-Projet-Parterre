@@ -1113,7 +1113,86 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
 .template-mini i.vide { background: transparent; }
 
 
-/* ===== Éditeur de plan ===== */
+/* ===== Placement libre et éditeur de plan ===== */
+
+.layout-mode-switch {
+  display: flex;
+  width: fit-content;
+  margin: 4px 0 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.layout-mode-switch button {
+  padding: 9px 13px;
+  border: 0;
+  border-right: 1px solid var(--line-strong);
+  background: var(--raised);
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.layout-mode-switch button:last-child { border-right: 0; }
+.layout-mode-switch button.selected { color: var(--bg); background: var(--gold); }
+
+.free-seat-canvas,
+.free-seat-view {
+  position: relative;
+  width: 100%;
+  min-height: 430px;
+  margin: 18px auto;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  background:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+    var(--bg);
+  background-size: 20px 20px;
+  touch-action: none;
+  user-select: none;
+}
+
+.free-seat-canvas { cursor: crosshair; }
+
+.free-seat-help {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--dim);
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.free-seat,
+.free-view-seat {
+  position: absolute;
+  width: 28px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px 5px 3px 3px;
+  background: var(--raised);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 8px;
+}
+
+.free-seat.vip,
+.free-view-seat.zone-vip { border-color: var(--gold); color: var(--gold); background: var(--gold-wash); }
+.free-seat.standard,
+.free-view-seat.zone-standard { border-color: rgba(74, 222, 128, .45); color: var(--green); background: var(--green-wash); }
+.free-seat.economique,
+.free-view-seat.zone-economique { border-color: rgba(124, 106, 247, .55); color: #b4a9ff; background: var(--violet-wash); }
+.free-seat.bloque,
+.free-view-seat.bloquee { border-style: dashed; color: var(--dim); background: transparent; }
+.free-view-seat.retenue { color: var(--amber); border-color: var(--amber); background: var(--amber-wash); }
+.free-view-seat.vendue { color: var(--dim); border-color: var(--line); background: var(--raised); }
+.free-view-seat.selected { color: #17130b; border-color: var(--gold); background: var(--gold); }
+
 
 .editor-row {
   justify-content: center;

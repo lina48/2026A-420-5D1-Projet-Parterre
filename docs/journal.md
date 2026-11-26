@@ -51,14 +51,14 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - **Blocage** : Aucun noté.
 - **Décisions** : Engagement du sprint 1 fixé à 15 points, après correction du biais d'optimisme (-30 % sur une première estimation de 20 points). Rôle de Scrum Master fixé en rotation — Alexander au sprint 1,  Karel au sprint 2, Lina au sprint 3.
 
---- 
+---
 
 ## 17 septembre 2026
 
 - **Présences** : Alexander, Lina, Hsiao Shan, Karel
-- **Avancement** : 
+- **Avancement** :
 - **Blocage** : Aucun noté.
-- **Décisions** : 
+- **Décisions** :
 
 
 
@@ -73,12 +73,12 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
   - Ajout de la cohérence salle/place/séance via les clés composites et les contraintes de relation.
   - Vérification stricte du statut de retenue avec `CHECK` pour empêcher les états incohérents.
   - Revue de la structure finale de la base avec PostgreSQL pour aligner le design avec les exigences de concurrence, d’annulation et de temps réel.
-    
+
 ## 28 septembre 2026
 
 - **Présences** : Lina, Alexander, Karel, Hsiao Shan
 - **Avancement** : la migration vers le nouveau stack React/TypeScript et Express, à la séparation des pages et services, à la page de programmation et au nettoyage de l’ancienne structure. Ces changements soutiennent les récits de consultation, création et réservation (#2, #3, #4, #5 et #7), et aussi lier les pages de connexion avec le plan des salles
-- 
+-
 - **Blocage** : L’ancienne structure séparait le backend et les pages statiques d’authentification du nouveau stack.
 - **Décision** : Regrouper le fonctionnement autour du stack utilisé par l’application afin que les pages et l’API travaillent avec la même base et le même serveur.
 
@@ -186,3 +186,10 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - **Planification du sprint 3 (en cours)** : revue des récits restants (#12 modifier/annuler une séance vendue, #13 remplissage en direct, #14 confier le rôle de gestionnaire, #15 tarifs réduits, #18 export CSV). Discussion amorcée sur les récits à enlever ou à prioriser selon la vélocité mesurée; l'ordre d'abandon prévu (#18, puis #15) reste le point de départ. **À valider en équipe** à la prochaine séance, puisque je suis seule aujourd'hui.
 - **Pistes d'amélioration (flow utilisateur)** : à revoir en équipe : le parcours d'un spectateur non connecté qui choisit une place (redirection connexion puis retour à la séance), la clarté du récapitulatif avant paiement maintenant que les prix varient par zone, et la découverte des séances (filtres de l'affiche).
 - **Pistes d'amélioration (sécurité)** : à revoir en équipe : le `JWT_SECRET` par défaut (« changez-cette-cle ») et les comptes de démonstration publics dans `docker-compose.yml` déjà notés au sprint 1, l'absence de limite de tentatives de connexion, et la validation des entrées côté serveur (notamment le plan de salle reçu par `POST /api/seances`).
+
+## Mardi 25 novembre 2026
+
+- **Présences** : Lina
+- **Avancement (Lina)** : ajout d'un mode de placement libre dans l'assistant de création de séance. Le gestionnaire peut désormais cliquer ou glisser la souris sur un canevas pour placer chaque siège à une position arbitraire, puis choisir sa zone tarifaire ou l'effacer. La peinture par glissement est aussi disponible dans le mode grille, afin d'accélérer la construction de plans réguliers ou irréguliers. Les positions normalisées sont enregistrées avec chaque place et reproduites sur le plan de réservation du spectateur.
+- **Blocage (Lina)** : les placements libres doivent rester simples à sauvegarder tout en étant compatibles avec les plans encore stockés sous forme de grille.
+- **Décision (Lina)** : conserver le format de grille existant pour les salles actuelles et ajouter un tableau optionnel `planLibre` lors de la création. Les coordonnées en pourcentage sont enregistrées dans `place.position_x` et `place.position_y`, ce qui permet un affichage libre sans modifier les routes de réservation existantes.

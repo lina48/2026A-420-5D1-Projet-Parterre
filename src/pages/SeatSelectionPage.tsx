@@ -366,6 +366,7 @@ export default function SeatSelectionPage({ user, notify }: Props) {
 
   const chosenSeats = seats.filter((seat) => selected.includes(seat.id));
   const total = chosenSeats.reduce((sum, seat) => sum + (Number(seat.prix) || 0), 0);
+  const hasFreePlan = seats.some((seat) => seat.position_x != null && seat.position_y != null);
   const date = new Date(session.date_heure);
 
   const zoneLabels: Record<string, string> = {
@@ -428,6 +429,23 @@ export default function SeatSelectionPage({ user, notify }: Props) {
             <span>ÉCRAN</span>
           </div>
 
+          {hasFreePlan ? (
+            <div className="free-seat-view" aria-label="Plan libre des places">
+              {seats.map((seat) => (
+                <button
+                  key={seat.id}
+                  disabled={busy || seat.etat === 'vendue' || (seat.etat === 'bloquee' && !isManager) || (seat.etat === 'retenue' && !selected.includes(seat.id))}
+                  onClick={() => chooseSeat(seat)}
+                  className={`free-view-seat ${seat.etat} zone-${seat.zone ?? 'standard'} ${selected.includes(seat.id) ? 'selected' : ''} ${seat.type === 'accessible' ? 'accessible' : ''}`}
+                  style={{ left: `${seat.position_x}%`, top: `${seat.position_y}%` }}
+                  title={`${seat.rangee}${seat.numero} · ${zoneLabels[seat.zone ?? 'standard'] ?? seat.zone} · ${Number(seat.prix) || 0} $ · ${seat.etat}`}
+                  aria-label={`Place ${seat.rangee}${seat.numero}, ${seat.etat}`}
+                >
+                  {seat.type === 'accessible' ? <Armchair size={12} /> : seat.numero}
+                </button>
+              ))}
+            </div>
+          ) : (
           <div
             className={`seat-grid ${maxColumns > 12 ? 'dense' : ''}`}
             aria-label="Plan des places"
@@ -478,6 +496,7 @@ export default function SeatSelectionPage({ user, notify }: Props) {
               );
             })}
           </div>
+          )}
 
           {[...zonePrices.keys()].some((zone) => zone !== 'standard') && (
             <div className="seat-legend zones">

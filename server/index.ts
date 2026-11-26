@@ -346,6 +346,8 @@ app.get('/api/seances/:id/plan', asyncRoute(async (request, response) => {
        p.rangee,
        p.numero,
        p.type,
+       p.position_x,
+       p.position_y,
        ps.etat,
        ps.zone,
        ps.prix,
@@ -959,6 +961,7 @@ app.post('/api/seances', requireAuth, requireManager, asyncRoute(async (request,
     rangees,
     siegesParRangee,
     plan,
+    planLibre,
     tarifs
   } = request.body;
 
@@ -970,14 +973,15 @@ app.post('/api/seances', requireAuth, requireManager, asyncRoute(async (request,
     });
   }
 
-  if (!Array.isArray(plan) || !plan.length) {
+  const freePlan = Array.isArray(planLibre) ? planLibre : null;
+  if ((!Array.isArray(plan) || !plan.length) && (!freePlan || !freePlan.length)) {
     return response.status(400).json({
       error: 'Le plan de salle est requis.'
     });
   }
 
-  const totalRows = Number(rangees) || plan.length;
-  const totalColumns = Number(siegesParRangee) || plan[0]?.length || 0;
+  const totalRows = freePlan ? 1 : (Number(rangees) || plan.length);
+  const totalColumns = freePlan ? 1 : (Number(siegesParRangee) || plan[0]?.length || 0);
 
   if (totalRows < 1 || totalColumns < 1) {
     return response.status(400).json({
@@ -1012,14 +1016,16 @@ app.post('/api/seances', requireAuth, requireManager, asyncRoute(async (request,
       ]
     );
 
-    const capacite = plan
-      .flat()
-      .filter(
-        (zone: string) =>
-          zone !== 'bloque' &&
-          zone !== 'vide'
-      )
-      .length;
+    const capacite = freePlan
+      ? freePlan.filter((seat: { zone?: string }) => seat.zone !== 'bloque').length
+      : plan
+          .flat()
+          .filter(
+            (zone: string) =>
+              zone !== 'bloque' &&
+              zone !== 'vide'
+          )
+          .length;
 
     if (capacite < 1) {
       await client.query('ROLLBACK');
@@ -1052,73 +1058,65 @@ app.post('/api/seances', requireAuth, requireManager, asyncRoute(async (request,
       ]
     );
 
-    for (let rowIndex = 0; rowIndex < totalRows; rowIndex += 1) {
+    if (freePlan) {
+      for (const [index, freeSeat] of freePlan.entries()) {
+        const zone = ['vip', 'standard', 'economique', 'bloque'].includes(freeSeat.zone)
+          ? freeSeat.zone
+          : 'standard';
+        if (!Number.isFinite(Number(freeSeat.x)) || !Number.isFinite(Number(freeSeat.y))) continue;
 
-      const row = String.fromCharCode(
-        65 + rowIndex
-      );
-
-      for (let columnIndex = 0; columnIndex < totalColumns; columnIndex += 1) {
-
-        const number = columnIndex + 1;
-
-        const zone =
-          plan[rowIndex]?.[columnIndex] ??
-          'standard';
-
-        // Les cellules « vide » sont des allées
-        // ou des espaces sans siège : on ne crée
-        // aucune place pour elles.
-        if (zone === 'vide') {
-          continue;
-        }
-
+        const row = String(freeSeat.rangee || String.fromCharCode(65 + Math.floor(index / 12)));
+        const number = Number(freeSeat.numero) || (index % 12) + 1;
         const seat = await client.query(
-          'INSERT INTO place (salle_id, rangee, numero, type) VALUES ($1, $2, $3, $4) RETURNING id',
-          [
-            room.rows[0].id,
-            row,
-            number,
-            'standard'
-          ]
+          'INSERT INTO place (salle_id, rangee, numero, type, position_x, position_y) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+          [room.rows[0].id, row, number, 'standard', Number(freeSeat.x), Number(freeSeat.y)]
         );
 
-        let prix = 0;
-
-        if (zone === 'vip') {
-          prix = Number(tarifs?.vip) || 45;
-        }
-
-        if (zone === 'standard') {
-          prix = Number(tarifs?.standard) || 22;
-        }
-
-        if (zone === 'economique') {
-          prix = Number(tarifs?.economique) || 12;
-        }
+        const prix = zone === 'vip'
+          ? Number(tarifs?.vip) || 45
+          : zone === 'economique'
+            ? Number(tarifs?.economique) || 12
+            : zone === 'bloque'
+              ? 0
+              : Number(tarifs?.standard) || 22;
 
         await client.query(
-          `INSERT INTO place_seance (
-            place_id,
-            salle_id,
-            seance_id,
-            etat,
-            zone,
-            prix
-          )
-          VALUES ($1, $2, $3, $4, $5, $6)`,
-          [
-            seat.rows[0].id,
-            room.rows[0].id,
-            show.rows[0].id,
-            zone === 'bloque' ? 'bloquee' : 'libre',
-            zone,
-            prix
-          ]
+          `INSERT INTO place_seance (place_id, salle_id, seance_id, etat, zone, prix)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [seat.rows[0].id, room.rows[0].id, show.rows[0].id,
+            zone === 'bloque' ? 'bloquee' : 'libre', zone, prix]
         );
-
       }
+    } else {
+      for (let rowIndex = 0; rowIndex < totalRows; rowIndex += 1) {
+        const row = String.fromCharCode(65 + rowIndex);
 
+        for (let columnIndex = 0; columnIndex < totalColumns; columnIndex += 1) {
+          const number = columnIndex + 1;
+          const zone = plan[rowIndex]?.[columnIndex] ?? 'standard';
+          if (zone === 'vide') continue;
+
+          const seat = await client.query(
+            'INSERT INTO place (salle_id, rangee, numero, type) VALUES ($1, $2, $3, $4) RETURNING id',
+            [room.rows[0].id, row, number, 'standard']
+          );
+
+          const prix = zone === 'vip'
+            ? Number(tarifs?.vip) || 45
+            : zone === 'economique'
+              ? Number(tarifs?.economique) || 12
+              : zone === 'bloque'
+                ? 0
+                : Number(tarifs?.standard) || 22;
+
+          await client.query(
+            `INSERT INTO place_seance (place_id, salle_id, seance_id, etat, zone, prix)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [seat.rows[0].id, room.rows[0].id, show.rows[0].id,
+              zone === 'bloque' ? 'bloquee' : 'libre', zone, prix]
+          );
+        }
+      }
     }
 
     await client.query('COMMIT');
