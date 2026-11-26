@@ -11,7 +11,7 @@ import { pool } from './pool';
  */
 
 const FUSEAU = 'America/Toronto';
-const FIN_PROGRAMMATION = '2026-12-23';
+const FIN_PROGRAMMATION = '2027-01-05';
 
 const TARIFS = { vip: 45, standard: 22, economique: 12 } as const;
 
