@@ -27,7 +27,7 @@
 | #9 | Annuler sa réservation avant la séance | Réservation et billets | 3 |
 | #10 | Bloquer des places pour raison technique ou d'accessibilité | Programmation | 3 |
 | #11 | Valider un billet à l'entrée de la salle | Exploitation | 5 |
-| #16 | Filtrer l'affiche par ville, date et genre | Programmation | 3 |
+| #16 | Filtrer l'affiche par salle, date et genre | Programmation | 3 |
 | #17 | Courriel de confirmation avec le billet | Réservation et billets | 3 |
 | | **Total** | | **27** |
 
@@ -35,24 +35,23 @@
 
 ## Sprint 3 : Version finale (environ 5 semaines)
 
-**Objectif.** Gérer les imprévus de programmation, le suivi global des salles et intégrer les fonctionnalités à valeur ajoutée avant le déploiement en ligne.
+**Objectif.** Livrer une version déployable et exploitable de Parterre, avec des données de programmation persistantes et des outils utiles au gestionnaire et au spectateur. Prioriser les travaux selon les estimations et la capacité mesurée plutôt que de promettre tout le périmètre.
 
-| # | Récit | Épique | Points |
-|---|---|---|---|
-| #12 | Modifier ou annuler une séance déjà vendue | Programmation | 8 |
-| #13 | Suivre le remplissage d'une séance en direct | Exploitation | 5 |
-| #14 | Confier le rôle de gestionnaire à un membre du personnel | Comptes et rôles | 3 |
-| #15 | Choisir un tarif réduit, par exemple étudiant | Réservation et billets | 5 |
-| #18 | Exporter en CSV les places vendues d'une séance | Exploitation | 3 |
-| #16 | Compléter les filtres par salle, ville et date | Programmation | À réestimer |
-| #69 | Préparer des données réelles et conserver les données dans Docker | Données et déploiement | À estimer |
-| #20 | Dessiner un plan de salle au glisser-déposer | Programmation | À estimer |
-| #70 | Assister le spectateur après une période d'inactivité | Sélection en direct | À estimer |
-| #71 | Rendre les séances découvrables par les IA et déployer sur Azure | Données et déploiement | À estimer |
-| #19 | Proposer les meilleures places libres pour un groupe | Sélection en direct | À estimer |
-| | **Sous-total des récits déjà estimés** | | **24** |
+| # | Récit | Épique | Points | Responsable |
+|---|---|---|---|---|
+| #12 | Modifier ou annuler une séance déjà vendue | Programmation | 8 | Karel |
+| #13 | Suivre le remplissage d'une séance en direct | Exploitation | 5 | Lina |
+| #15 | Choisir un tarif réduit, par exemple étudiant | Réservation et billets | 5 | Lina |
+| #18 | Exporter en CSV les places vendues d'une séance | Exploitation | 3 | Karel |
+| #16 | Compléter les filtres par salle et date; le filtre par genre existe déjà | Programmation | À réestimer | Lina |
+| #69 | Préparer des données réelles et conserver les données dans Docker | Données et déploiement | À estimer | Alexander |
+| #20 | Dessiner un plan de salle au glisser-déposer | Programmation | À estimer | Hsiao Shan |
+| #70 | Assister le spectateur après une période d'inactivité | Sélection en direct | À estimer | À confirmer |
+| #71 | Rendre les séances découvrables par les IA et déployer sur Azure | Données et déploiement | À estimer | Alexander |
+| #19 | Proposer les meilleures places libres pour un groupe | Sélection en direct | À estimer | Hsiao Shan |
+| | **Sous-total des récits déjà estimés** | | **24** | |
 
-Les points des nouveaux travaux (#69, #70, #71) et du complément de #16 restent à estimer : 24 points ne représentent donc pas la charge totale du sprint. #16 était prévu au sprint 2, mais seul le filtre par genre était réalisé lors du bilan; son complément est repris ici.
+Les 24 points couvrent les récits #12, #13, #14, #15 et #18. Les six récits #16, #19, #20, #69, #70 et #71 restent à estimer; le total du sprint et sa faisabilité ne sont donc pas encore établis. Le responsable de #70 reste à confirmer par l'équipe. #16 était prévu au sprint 2, mais seul le filtre par genre était réalisé lors du bilan; son complément par salle et date est repris ici.
 
 ### Détails des travaux prévus
 
@@ -60,7 +59,7 @@ Les points des nouveaux travaux (#69, #70, #71) et du complément de #16 restent
 - **#12 — Modification ou annulation d'une séance vendue.** Le gestionnaire peut modifier ou annuler une séance ayant déjà des réservations. Préciser avant réalisation le traitement des billets, des spectateurs concernés et des éventuels remboursements.
 - **#13 — Remplissage en direct.** Le gestionnaire voit les places vendues, la capacité et le pourcentage de remplissage; les changements sont actualisés sans recharger la page en réutilisant le canal temps réel de #6. Définir le traitement des places bloquées, retenues et annulées.
 - **#15 — Tarif réduit.** Le spectateur peut choisir un tarif réduit, notamment étudiant, avec la saisie éventuelle d'un code permanent. Définir les critères d'admissibilité, la méthode de vérification et la protection des données avant de retenir cette méthode.
-- **#16 — Filtres.** Compléter la recherche par salle de cinéma ou de théâtre, ville et date, en conservant les filtres existants. Préciser si le type de salle doit également être un filtre distinct.
+- **#16 — Filtres.** Compléter la recherche par salle de cinéma ou de théâtre et par date, en conservant le filtre par genre existant.
 - **#69 — Données réelles et volume Docker.** Préparer des films, salles et séances réels à partir de sources autorisées, puis conserver les données dans le volume PostgreSQL de Docker entre les redémarrages. Prévoir une méthode de mise à jour qui ne remplace pas les réservations existantes; la suppression du volume reste destructive.
 - **#20 — Éditeur de salle.** Permettre au gestionnaire de dessiner un plan de salle par glisser-déposer, de l'enregistrer et de le réutiliser. Définir les règles de validation et l'effet des modifications sur les séances déjà vendues.
 - **#70 — Assistance sur hésitation.** Après cinq minutes d'inactivité, proposer à l'utilisateur une notification dans l'application pour vérifier s'il est toujours actif et suggérer des séances à venir. Préciser quelles actions réinitialisent le minuteur et comment éviter les notifications répétées.
@@ -80,7 +79,7 @@ Les points des nouveaux travaux (#69, #70, #71) et du complément de #16 restent
 | Équipe de 4 | 108 h-personne | 108 h-personne | 180 h-personne |
 | Moins rituels, coordination, revues (20 %) | **86 h** | **86 h** | **144 h** |
 
-Nous ne connaissons pas encore notre vélocité. Les 86 heures de développement du sprint 1 rapportées aux 34 points engagés impliquent une productivité d'environ 2,2 heures par point, ce que nous considérons comme optimiste pour un premier sprint sur une pile que l'équipe découvre. Après application du correctif de prudence de 30 % recommandé dans les notes de cours, notre capacité réaliste se situe plutôt autour de **27 points**. Nous conservons néanmoins les 34 points au sprint 1, parce que les récits #3 à #6 forment un bloc indissociable : livrer la rétention sans la diffusion temps réel ne démontre rien. Nous absorbons l'écart par l'ordre d'abandon ci dessous plutôt qu'en repoussant le risque technique au sprint 2. La vélocité réellement mesurée au sprint 1 servira à réviser les engagements des sprints suivants.
+La vélocité mesurée était de 5 points au sprint 1 et de 17 points au sprint 2. En utilisant à titre indicatif les 17 points livrés pour les 86 heures de capacité du sprint 2, les 144 heures prévues au sprint 3 correspondent à environ **28 points** (17 × 144 ÷ 86). Cette projection repose sur un seul sprint de référence et n'est pas une garantie. Le sprint 3 compte actuellement 24 points estimés et six récits non estimés; il reste donc environ 4 points de marge indicative avant estimation de ces récits. L'équipe doit estimer les travaux manquants et ajuster son engagement et son ordre d'abandon avant de considérer le plan comme faisable.
 
 ## Ordre d'abandon
 
