@@ -41,7 +41,6 @@
 |---|---|---|---|---|
 | #12 | Modifier ou annuler une séance déjà vendue | Programmation | 8 | Karel |
 | #13 | Suivre le remplissage d'une séance en direct | Exploitation | 5 | Lina |
-| #14 | Confier le rôle de gestionnaire à un membre du personnel | Comptes et rôles | 3 | Alexander |
 | #15 | Choisir un tarif réduit, par exemple étudiant | Réservation et billets | 5 | Lina |
 | #18 | Exporter en CSV les places vendues d'une séance | Exploitation | 3 | Karel |
 | #16 | Compléter les filtres par salle et date; le filtre par genre existe déjà | Programmation | À réestimer | Lina |
