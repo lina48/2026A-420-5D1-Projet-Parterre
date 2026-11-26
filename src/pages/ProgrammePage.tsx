@@ -40,7 +40,7 @@ export default function ProgrammePage() {
     </section>}
     <section className="programme-section">
       <div className="section-heading"><div><div className="eyebrow"><span className="eyebrow-line" />LE PROGRAMME</div><h2>Les prochaines séances</h2></div><span className="results-count">{sessions.length.toString().padStart(2, '0')} SÉANCES</span></div>
-      <p className="muted-copy"><span className="tag tag-gold">DONNÉES DE DÉMONSTRATION</span> Films, affiches et séances d'exemple. Tarif fixe, aucun paiement en ligne.</p>
+      <p className="muted-copy"><span className="tag tag-gold">SÉANCES FICTIVES</span> Films et salles réels, horaires inventés. Paiement simulé, aucune transaction réelle.</p>
       <div className="filter-toolbar">
         <div className="filter-row" role="group" aria-label="Filtrer par genre">{genres.map((genre) => <button key={genre} className={`filter-chip ${filter === genre ? 'active' : ''}`} onClick={() => setFilter(genre)}>{genre}</button>)}</div>
         <div className="filter-selects">

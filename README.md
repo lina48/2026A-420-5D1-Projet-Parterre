@@ -4,7 +4,7 @@ Plateforme de réservation de places numérotées pour cinéma et théâtre. App
 
 ## Lancement avec Docker
 
-Docker Compose démarre PostgreSQL, crée les tables, prépare une programmation de démonstration et sert l'application sur le port 3000 :
+Docker Compose démarre PostgreSQL, crée les tables, prépare la programmation (films réels, salles de Montréal, séances inventées jusqu'au 5 janvier) et sert l'application sur le port 3000 :
 
 ```sh
 docker compose up --build
@@ -134,8 +134,8 @@ La documentation détaillée du projet et les décisions techniques restent disp
 | Paiement | Formulaire de carte fictif : le navigateur vérifie seulement le format des champs; rien n'est envoyé au serveur ni conservé, et rien n'est débité | Rien, le paiement réel est hors portée du projet (#21) | — |
 | Billet par courriel | Les billets sont envoyés à Mailpit (http://localhost:8025), une boîte de test locale : aucun courriel n'atteint une vraie adresse | Un vrai serveur SMTP, configuré avec les variables `SMTP_*` | À décider |
 | Tarif | Le prix est défini par place dans la base de données et le total est calculé selon les sièges choisis | Tarifs réduits et catégories de prix (#15) | 3 |
-| Films et séances | 3 films de démonstration et des séances de démo recréées au démarrage de l'application, seulement s'il n'en reste aucune à venir | Séances créées par le gestionnaire (#3) | 1 |
-| Affiches | Images chargées depuis Unsplash (site externe) | Images hébergées dans le projet | À décider (aucun récit au backlog) |
+| Films et séances | Les films et les salles sont réels (Montréal), mais les séances sont inventées : le démarrage ajoute, sans doublon, deux séances par jour et par salle jusqu'au 5 janvier | Séances créées par le gestionnaire (#3) | 3 |
+| Affiches | Images génériques chargées depuis Unsplash (ce ne sont pas les vraies affiches) | Images hébergées dans le projet | À décider (aucun récit au backlog) |
 
 ## Documentation
 
