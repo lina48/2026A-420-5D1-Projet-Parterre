@@ -36,7 +36,7 @@ pour qu'un échec technique reste rattrapable).
 | Priorité | Récit ou travail | Sprint prévu | Points |
 |---|---|---|---|
 | `should` | #15 — Tarifs réduits, dont un tarif étudiant, et catégories de prix | 3 | 5 |
-| `should` | #16 — Compléter les filtres de l'affiche par salle, ville et date; le filtre par genre existe déjà | 3, complément du sprint 2 | À réestimer |
+| `should` | #16 — Compléter les filtres de l'affiche par salle et date; le filtre par genre existe déjà | 3, complément du sprint 2 | À réestimer |
 | `should` | #17 — Courriel de confirmation avec le billet | Fait au sprint 2 | 3 |
 | `should` | #18 — Export CSV des places vendues d'une séance | 3 | 3 |
 | `could` | #19 — Suggestion des meilleures places libres pour un groupe | 3 | À estimer |
