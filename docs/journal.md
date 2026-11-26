@@ -176,3 +176,30 @@ Journal tenu par l'équipe, une entrée par bloc de cours, rédigée à la fin d
 - **Avancement (Alexander)** : `.env` complet envoyé au prof sur MIO, avec un `JWT_SECRET` neuf et un secret OAuth régénéré.
 - **Blocage (Alexander)** : la #11 est arrivée directement sur `main` (4 commits, sans PR ni revue) et la route `validation-billet` n'a aucun test automatisé dans `server/test/`.
 - **Décisions (Alexander)** : la #11 est revue par un test manuel sur clone neuf, faute de PR. Elle respecte la définition de terminé seulement quand la route aura son test.
+
+## Mercredi 5 novembre 2026
+
+- **Présences** : Lina
+- **Avancement (Lina)** : PR #67 : gabarits de plans de salle inspirés de vraies salles de Montréal (Banque Scotia IMAX, Quartier Latin, Beaubien, Cinéma du Parc, Théâtre St-Denis, Wilfrid-Pelletier) dans l'assistant de création de séance. Nouvelle zone `vide` pour les allées et les rangs incurvés : contrairement à `bloque`, aucune place n'est créée en base et la forme réelle de la salle est reconstituée côté client à partir des numéros de sièges manquants. Le plan de réservation affiche maintenant les zones tarifaires (VIP, standard, économique) avec une légende des prix.
+- **Blocage (Lina)** : le total affiché au client était codé en dur à 14,50 $ par place alors que le serveur facturait déjà le vrai prix de chaque place (`place_seance.prix`), donc le montant du billet ne correspondait pas à ce que l'utilisateur voyait avant de payer.
+- **Résolution (Lina)** : le total, les pastilles de sièges choisis et le modal de paiement utilisent maintenant le prix réel de chaque place. Les 23 tests serveur passent; vérifié aussi qu'un plan entièrement vide est refusé (400) et que la capacité exclut les cellules vides.
+- **Planification du sprint 3 (en cours)** : revue des récits restants (#12 modifier/annuler une séance vendue, #13 remplissage en direct, #14 confier le rôle de gestionnaire, #15 tarifs réduits, #18 export CSV). Discussion amorcée sur les récits à enlever ou à prioriser selon la vélocité mesurée; l'ordre d'abandon prévu (#18, puis #15) reste le point de départ. **À valider en équipe** à la prochaine séance, puisque je suis seule aujourd'hui.
+- **Pistes d'amélioration (flow utilisateur)** : à revoir en équipe : le parcours d'un spectateur non connecté qui choisit une place (redirection connexion puis retour à la séance), la clarté du récapitulatif avant paiement maintenant que les prix varient par zone, et la découverte des séances (filtres de l'affiche).
+- **Pistes d'amélioration (sécurité)** : à revoir en équipe : le `JWT_SECRET` par défaut (« changez-cette-cle ») et les comptes de démonstration publics dans `docker-compose.yml` déjà notés au sprint 1, l'absence de limite de tentatives de connexion, et la validation des entrées côté serveur (notamment le plan de salle reçu par `POST /api/seances`).
+
+## Lundi 16 novembre 2026
+
+- **Présences** : Lina, Alexander
+- **Avancement** :
+  - Fusion de la PR #67 : gabarits de plans de salle, avec affichage des zones et des prix au moment de la réservation.
+  - Tri des issues pour le sprint 3. Trois nouvelles issues créées : #69 (données réelles autorisées et conservation des données dans le volume Docker), #70 (assistance après cinq minutes d'inactivité et suggestions de séances) et #71 (données structurées JSON-LD, description ouverte de l'API des séances et hébergement sur Azure). Les issues qui n'étaient plus pertinentes ont été supprimées.
+  - `02-backlog.md` : la liste en texte libre du reste du backlog devient un tableau « Autres récits et travaux » avec la priorité, le sprint prévu et les points. #17 (courriel avec le billet) est marqué fait au sprint 2. #15 précise le tarif étudiant et #18 l'export des places vendues. Les éléments `won't` (#21, #22, #23) sont regroupés sous « Hors portée ».
+  - `04-sprints.md` : le sprint 3 reprend #16, #19, #20, #69, #70 et #71, en plus de #12, #13, #14, #15 et #18. Ajout d'une section « Détails des travaux prévus » pour chaque récit et réécriture de l'incrément visé (application déployée sur Azure, séances découvrables, données persistantes).
+  - `01-vision.md` : ajout des fonctionnalités prévues au sprint 3 pour le gestionnaire. Azure est désormais la cible de déploiement, au lieu de « à déterminer ».
+  - `03-conception.md` : précisions sur l'assistance après cinq minutes d'inactivité et sur l'interopérabilité (JSON-LD, API ouverte), qui restent à concevoir.
+  - `06-risques.md` : nouvelle section « Risques à suivre au sprint 3 » (charge accrue par rapport à la vélocité, modification d'une séance déjà vendue ou d'un tarif, données personnelles et codes étudiants, perte de données ou fuite de secrets lors du déploiement Azure).
+- **Blocage** : #16 était prévu au sprint 2, mais seul le filtre par genre a été réalisé. Les nouveaux travaux (#19, #20, #69, #70, #71) et le complément de #16 ne sont pas encore estimés : les 24 points du sprint 3 ne représentent donc pas toute la charge.
+- **Décisions** :
+  - Le complément de #16 (filtres par salle, ville et date) est reporté au sprint 3.
+  - Si la capacité manque au sprint 3, on abandonne d'abord #20 et #19, puis les autres ajouts selon leur priorité. #18 et #15 sont retirés avant tout `must`. Le déploiement en ligne et #12 restent prioritaires.
+  - Estimer les nouvelles issues et réviser l'engagement du sprint 3 en fonction de la vélocité mesurée.

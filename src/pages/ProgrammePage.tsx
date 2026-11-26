@@ -10,6 +10,8 @@ export default function ProgrammePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('Tout');
+  const [dateFilter, setDateFilter] = useState('');
+  const [salleFilter, setSalleFilter] = useState('');
 
   useEffect(() => {
     api<{ seances: Session[] }>('/api/seances')
@@ -19,7 +21,12 @@ export default function ProgrammePage() {
   }, []);
 
   const genres = ['Tout', ...new Set(sessions.map(({ genre }) => genre).filter(Boolean))];
-  const visibleSessions = sessions.filter(({ genre }) => filter === 'Tout' || genre === filter);
+  const dates = [...new Set(sessions.map(({ date_heure }) => dateKey(date_heure)))].sort();
+  const salles = [...new Set(sessions.map(({ salle }) => salle).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
+  const visibleSessions = sessions.filter(({ genre, date_heure, salle }) =>
+    (filter === 'Tout' || genre === filter)
+    && (dateFilter === '' || dateKey(date_heure) === dateFilter)
+    && (salleFilter === '' || salle === salleFilter));
   const featured = sessions[0];
 
   return <>
@@ -34,8 +41,32 @@ export default function ProgrammePage() {
     <section className="programme-section">
       <div className="section-heading"><div><div className="eyebrow"><span className="eyebrow-line" />LE PROGRAMME</div><h2>Les prochaines séances</h2></div><span className="results-count">{sessions.length.toString().padStart(2, '0')} SÉANCES</span></div>
       <p className="muted-copy"><span className="tag tag-gold">SÉANCES FICTIVES</span> Films et salles réels, horaires inventés. Paiement simulé, aucune transaction réelle.</p>
-      <div className="filter-row" role="group" aria-label="Filtrer par genre">{genres.map((genre) => <button key={genre} className={`filter-chip ${filter === genre ? 'active' : ''}`} onClick={() => setFilter(genre)}>{genre}</button>)}</div>
-      {loading ? <div className="loading-line">La programmation arrive…</div> : error ? <div className="empty-state"><Film /><p>{error}</p><small>Vérifiez que l’API et PostgreSQL sont démarrés.</small></div> : visibleSessions.length ? <div className="session-list">{visibleSessions.map((session, index) => <SessionRow key={session.id} session={session} index={index} />)}</div> : <div className="empty-state"><Film /><p>Aucune séance dans cette catégorie.</p></div>}
+      <div className="filter-toolbar">
+        <div className="filter-row" role="group" aria-label="Filtrer par genre">{genres.map((genre) => <button key={genre} className={`filter-chip ${filter === genre ? 'active' : ''}`} onClick={() => setFilter(genre)}>{genre}</button>)}</div>
+        <div className="filter-selects">
+          <select className={`filter-select ${dateFilter ? 'active' : ''}`} aria-label="Filtrer par date" value={dateFilter} onChange={(event) => setDateFilter(event.target.value)}>
+            <option value="">Toutes les dates</option>
+            {dates.map((date) => <option key={date} value={date}>{formatDate(date)}</option>)}
+          </select>
+          <select className={`filter-select ${salleFilter ? 'active' : ''}`} aria-label="Filtrer par salle" value={salleFilter} onChange={(event) => setSalleFilter(event.target.value)}>
+            <option value="">Toutes les salles</option>
+            {salles.map((salle) => <option key={salle} value={salle}>{salle}</option>)}
+          </select>
+        </div>
+      </div>
+      {loading ? <div className="loading-line">La programmation arrive…</div> : error ? <div className="empty-state"><Film /><p>{error}</p><small>Vérifiez que l’API et PostgreSQL sont démarrés.</small></div> : visibleSessions.length ? <div className="session-list">{visibleSessions.map((session, index) => <SessionRow key={session.id} session={session} index={index} />)}</div> : <div className="empty-state"><Film /><p>Aucune séance ne correspond à ces filtres.</p></div>}
     </section>
   </>;
+}
+
+function dateKey(value: string) {
+  const date = new Date(value);
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function formatDate(key: string) {
+  const [year, month, day] = key.split('-').map(Number);
+  const label = new Date(year, month - 1, day).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' });
+  return label.charAt(0).toUpperCase() + label.slice(1);
 }

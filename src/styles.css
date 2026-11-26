@@ -127,6 +127,13 @@ h1, .intro-row h1, .booking-heading h1, .auth-form-side h1, .tickets-page h1, .a
 .filter-chip { padding: 7px 11px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); background: transparent; font-size: 10px; cursor: pointer; transition: color .18s, background .18s, border-color .18s; }
 .filter-chip:hover { border-color: var(--line-strong); color: var(--text); }
 .filter-chip.active { border-color: rgba(232, 184, 75, .35); color: var(--gold); background: var(--gold-wash); }
+.filter-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 18px 0 13px; }
+.filter-toolbar .filter-row { margin: 0; }
+.filter-selects { display: flex; flex-wrap: wrap; gap: 7px; }
+.filter-select { padding: 7px 28px 7px 11px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23999' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 10px center; font-size: 10px; cursor: pointer; appearance: none; transition: color .18s, background-color .18s, border-color .18s; }
+.filter-select:hover { border-color: var(--line-strong); color: var(--text); }
+.filter-select.active { border-color: rgba(232, 184, 75, .35); color: var(--gold); background-color: var(--gold-wash); }
+.filter-select option { color: var(--text); background: var(--panel); }
 .session-list { border-top: 1px solid var(--line); }
 .session-row { display: grid; grid-template-columns: 68px minmax(180px, 1fr) 155px 42px; min-height: 107px; align-items: center; gap: 17px; padding: 14px 6px; border-bottom: 1px solid var(--line); animation: arrive .38s ease both; transition: background .18s; }
 .session-row:hover { background: rgba(20, 25, 41, .48); }
