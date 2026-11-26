@@ -14,7 +14,7 @@ export default function ProgrammePage() {
   const [salleFilter, setSalleFilter] = useState('');
 
   useEffect(() => {
-    api<{ seances: Session[] }>('/api/seances')
+    api<{ seances: Session[] }>('/api/seances?jours=7')
       .then(({ seances }) => setSessions(seances))
       .catch((reason: Error) => setError(reason.message))
       .finally(() => setLoading(false));
